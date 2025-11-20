@@ -1,0 +1,146 @@
+// Prisma schema for EduTracker backend
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  passwordHash  String
+  fullName      String
+  role          Role
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model StudentProfile {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique
+  user            User      @relation(fields: [userId], references: [id])
+  admissionNumber String    @unique
+  classroomId     Int
+  classroom       Classroom @relation(fields: [classroomId], references: [id])
+  scores          Score[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model TeacherProfile {
+  id         Int                @id @default(autoincrement())
+  userId     Int                @unique
+  user       User               @relation(fields: [userId], references: [id])
+  assignments TeacherAssignment[]
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+}
+
+model Classroom {
+  id           Int                @id @default(autoincrement())
+  name         String             @unique
+  students     StudentProfile[]
+  assignments  TeacherAssignment[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model Subject {
+  id           Int                @id @default(autoincrement())
+  name         String
+  code         String             @unique
+  assignments  TeacherAssignment[]
+  scores       Score[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model AssessmentCategory {
+  id        Int       @id @default(autoincrement())
+  name      String
+  weight    Int
+  scores    Score[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Term {
+  id              Int       @id @default(autoincrement())
+  name            String
+  academicSession String
+  isCurrent       Boolean   @default(false)
+  scores          Score[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model TeacherAssignment {
+  id          Int         @id @default(autoincrement())
+  teacherId   Int
+  subjectId   Int
+  classroomId Int
+
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  subject     Subject        @relation(fields: [subjectId], references: [id])
+  classroom   Classroom      @relation(fields: [classroomId], references: [id])
+
+  createdAt   DateTime     @default(now())
+
+  @@unique([teacherId, subjectId, classroomId])
+  @@index([teacherId])
+  @@index([subjectId])
+  @@index([classroomId])
+}
+
+model Score {
+  id         Int                 @id @default(autoincrement())
+  studentId  Int
+  subjectId  Int
+  termId     Int
+  categoryId Int
+  score      Float
+
+  student    StudentProfile      @relation(fields: [studentId], references: [id])
+  subject    Subject             @relation(fields: [subjectId], references: [id])
+  term       Term                @relation(fields: [termId], references: [id])
+  category   AssessmentCategory  @relation(fields: [categoryId], references: [id])
+
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@unique([studentId, subjectId, termId, categoryId])
+  @@index([studentId])
+  @@index([subjectId])
+  @@index([termId])
+  @@index([categoryId])
+}
+
+// Students enroll to specific subjects (optionally tied to a classroom context)
+model StudentSubjectEnrollment {
+  id          Int             @id @default(autoincrement())
+  studentId   Int
+  subjectId   Int
+  classroomId Int?
+
+  student     StudentProfile  @relation(fields: [studentId], references: [id])
+  subject     Subject         @relation(fields: [subjectId], references: [id])
+  classroom   Classroom?      @relation(fields: [classroomId], references: [id])
+
+  createdAt   DateTime        @default(now())
+
+  @@unique([studentId, subjectId])
+  @@index([studentId])
+  @@index([subjectId])
+}
