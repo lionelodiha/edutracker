@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Edu Tracker
 
-# Run and deploy your AI Studio app
+A web application built with **ASP.NET Core** for the backend API and **React** for the frontend UI.
 
-This contains everything you need to run your app locally.
+## Requirements
 
-View your app in AI Studio: https://ai.studio/apps/drive/1r1pI2HW3CbSRS3UQ8tcKdhO4p45d99n4
+* .NET 10 SDK
+* Node.js (LTS version recommended)
+* npm
 
-## Run Locally
+## Getting Started
 
-**Prerequisites:**  Node.js
+### Backend Setup
 
+```bash
+cd backend
+dotnet restore
+dotnet run
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+The API will start on the configured port (default: `https://localhost:5001` or `http://localhost:5000`).
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The React app will run on `http://localhost:3000`.
