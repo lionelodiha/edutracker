@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EduTracker.Endpoints.Users.RegisterUser;
 using EduTracker.Entities;
 using EduTracker.Interfaces.Services;
@@ -7,25 +8,22 @@ namespace EduTracker.Endpoints.Users;
 
 public class UserFactory
 {
-    public static User Create(
-        RegisterUserRequest request,
-        string normalizedEmail,
-        string passwordHash,
-        string emailHash,
-        IDataEncryptionService dataEncryptionService)
+    public static User Create(RegisterUserRequest request, string normalizedEmail, string emailHash, string passwordHash, IDataEncryptionService dataEncryptionService)
     {
         User user = new(request.UserName.Trim(), emailHash, passwordHash);
 
-        UserSensitive sensitive = new()
+        UserSensitive sensitiveData = new()
         {
-            FirstName = request.FirstName,
-            MiddleName = request.MiddleName,
-            LastName = request.LastName,
-            Email = request.Email
+            FirstName = request.FirstName.Trim(),
+            MiddleName = request.MiddleName.Trim(),
+            LastName = request.LastName.Trim(),
+            Email = normalizedEmail
         };
 
-        byte[] dataBlob = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(sensitive);
+        byte[] dataBlob = JsonSerializer.SerializeToUtf8Bytes(sensitiveData);
         byte[] encryptedData = dataEncryptionService.EncryptData(dataBlob);
+
+        user.SetSensitiveData(sensitiveData);
         user.SetEncryptedData(encryptedData);
 
         return user;

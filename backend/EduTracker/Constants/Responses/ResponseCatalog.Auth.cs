@@ -30,5 +30,17 @@ public static partial class ResponseCatalog
                 )
             ]
         );
+
+        public static readonly OperationFailureResponse UsernameAlreadyTaken = new(
+            Id: "AUTH_USERNAME_ALREADY_TAKEN",
+            StatusCode: 409,
+            Title: "Username already in use.",
+            Details: [
+                new ResponseDetail(
+                    "The username you chose is already taken. Try a different username.",
+                    ResponseSeverity.Warning
+                )
+            ]
+        );
     }
 }

@@ -20,24 +20,15 @@ public static class ValidationExtensions
 
     extension<T>(IValidator<T> validator)
     {
-        public async Task<(bool IsValid, List<ResponseDetail>? Errors)>
-        ValidateDomainAsync(
-            T instance,
-            CancellationToken ct = default)
+        public async Task<List<ResponseDetail>> ValidateRequestAsync(T instance, CancellationToken ct = default)
         {
             ValidationResult validation = await validator.ValidateAsync(instance, ct);
 
             if (validation.IsValid)
-                return (true, null);
+                return [];
 
-            var errors = validation.Errors
-                .Select(e => new ResponseDetail(
-                    Message: $"{e.PropertyName}: {e.ErrorMessage}",
-                    Severity: ResponseSeverity.Error
-                ))
-                .ToList();
-
-            return (false, errors);
+            return [.. validation.Errors
+                .Select(e => new ResponseDetail($"{e.PropertyName}: {e.ErrorMessage}", ResponseSeverity.Error))];
         }
     }
 }
