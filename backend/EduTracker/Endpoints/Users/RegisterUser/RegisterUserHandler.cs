@@ -3,6 +3,7 @@ using EduTracker.Constants.Routes;
 using EduTracker.Data;
 using EduTracker.Entities;
 using EduTracker.Extensions;
+using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Interfaces.Services;
 using EduTracker.Models;
@@ -50,18 +51,9 @@ public static class RegisterUserHandler
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
 
-        UserResponse data = new(
-            Id: user.Id,
-            FirstName: user.SensitiveData?.FirstName ?? "******",
-            MiddleName: user.SensitiveData?.MiddleName ?? "******",
-            LastName: user.SensitiveData?.LastName ?? "******",
-            UserName: user.UserName,
-            Email: user.SensitiveData?.Email ?? "******"
-        );
-
         ApiResponse<UserResponse> response = ResponseCatalog.Auth.RegisterSuccessful
             .As<UserResponse>()
-            .WithData(data)
+            .WithData(user.ToUserResponse())
             .ToOperationResult()
             .ToApiResponse();
 

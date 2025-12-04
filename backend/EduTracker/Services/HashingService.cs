@@ -23,9 +23,6 @@ public class HashingService : IHashingService
         _passwordWorkFactor = opts.PasswordWorkFactor;
     }
 
-    private static string NormalizeEmail(string email)
-        => email.Trim().ToLowerInvariant();
-
     public string HashPassword(string password)
         => BCryption.HashPassword(password, _passwordWorkFactor);
 
@@ -34,9 +31,8 @@ public class HashingService : IHashingService
 
     public string HashEmail(string email)
     {
-        string normalized = NormalizeEmail(email);
         using HMACSHA256 hmac = new(_emailHmacKey);
-        byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(normalized));
+        byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(email));
 
         return Convert.ToHexString(hash).ToLowerInvariant();
     }

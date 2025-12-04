@@ -34,13 +34,11 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             httpContext.Response.StatusCode = appEx.StatusCode;
             response = appEx.ToApiResponse<object>(httpContext);
 
-            // Structured warn log
             if (_logger.IsEnabled(LogLevel.Warning))
                 _logger.LogWarning(
-                    "Handled application error | TraceId: {TraceId} | MessageId: {MessageId} | Message: {Message}",
+                    "Handled application error | TraceId: {TraceId} | MessageId: {MessageId}",
                     response.TraceId,
-                    response.MessageId,
-                    response.Message
+                    response.MessageId
                 );
         }
         else
@@ -48,20 +46,16 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             httpContext.Response.StatusCode = 500;
             response = ex.ToApiResponse<object>(httpContext);
 
-            // Structured error log
             if (_logger.IsEnabled(LogLevel.Error))
                 _logger.LogError(
                     ex,
-                    "Unhandled server exception | TraceId: {TraceId} | MessageId: {MessageId} | Message: {Message}",
+                    "Unhandled server exception | TraceId: {TraceId} | MessageId: {MessageId}",
                     response.TraceId,
-                    response.MessageId,
-                    response.Message
+                    response.MessageId
                 );
         }
 
         httpContext.Response.ContentType = "application/json; charset=utf-8";
-        // Optional: clear existing response
-        httpContext.Response.ContentLength = null;
         string json = JsonSerializer.Serialize(response, _jsonOptions);
         await httpContext.Response.WriteAsync(json);
     }
