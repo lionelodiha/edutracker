@@ -19,8 +19,10 @@ function generateRandomString(length = 64) {
 
 const emailHmacKey = generateRandomString();
 const dataEncryptionKey = generateBase64Key();
+const jwtSecret = generateBase64Key();
 
 console.log(JSON.stringify({
     "Hashing:EmailHmacKey": emailHmacKey,
     "DataEncryption:Key": dataEncryptionKey,
+    "Jwt:Secret": jwtSecret,
 }, null, 2));
