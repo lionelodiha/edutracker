@@ -1,41 +1,140 @@
+using EduTracker.Data;
+using EduTracker.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using EduTracker.Extensions;
+using EduTracker.Interfaces.Services;
+using EduTracker.Middleware;
+using EduTracker.Services;
+using FluentValidation;
+
+using EduTracker.Configurations.Security;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Database
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=app.db"));
+
+// Services
+builder.Services.Configure<HashingOptions>(builder.Configuration.GetSection("Hashing"));
+builder.Services.AddSingleton<IHashingService, HashingService>();
+builder.Services.AddSingleton<IDataEncryptionService, AesDataEncryptionService>();
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>(); 
 
-app.MapGet("/weatherforecast", () =>
+app.UseAuthorization();
+
+app.MapControllers();
+
+// Seed Default Admin
+using (var scope = app.Services.CreateScope())
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.EnsureCreated();
+
+    // Seed Default Organization and Admin
+    if (!context.Organizations.Any())
+    {
+        var defaultOrg = new Organization
+        {
+            Id = "org-default",
+            Name = "EduTracker Default School",
+            SubscriptionStatus = "active"
+        };
+        context.Organizations.Add(defaultOrg);
+        
+        if (!context.Users.Any(u => u.Email == "admin@edutracker.com"))
+        {
+            context.Users.Add(new User
+            {
+                Id = "admin-1",
+                Email = "admin@edutracker.com",
+                FirstName = "System",
+                LastName = "Administrator",
+                Role = "admin",
+                Status = "active",
+                Password = "admin123",
+                AvatarUrl = "https://ui-avatars.com/api/?name=System+Admin",
+                OrganizationId = defaultOrg.Id
+            });
+        }
+        context.SaveChanges();
+    }
+    else if (!context.Users.Any(u => u.Email == "admin@edutracker.com"))
+    {
+        // Fallback if org exists but admin doesn't
+        var defaultOrgId = context.Organizations.First().Id;
+        context.Users.Add(new User
+        {
+            Id = "admin-1",
+            Email = "admin@edutracker.com",
+            FirstName = "System",
+            LastName = "Administrator",
+            Role = "admin",
+            Status = "active",
+            Password = "admin123",
+            AvatarUrl = "https://ui-avatars.com/api/?name=System+Admin",
+            OrganizationId = defaultOrgId
+        });
+        context.SaveChanges();
+    }
+
+    // Seed Master Admin
+    if (!context.Users.Any(u => u.Role == "master_admin"))
+    {
+        context.Users.Add(new User
+        {
+            Id = "master-admin-1",
+            Email = "master@edutracker.com",
+            FirstName = "Master",
+            LastName = "Admin",
+            Role = "master_admin",
+            Status = "active",
+            Password = "master123",
+            AvatarUrl = "https://ui-avatars.com/api/?name=Master+Admin",
+            OrganizationId = null 
+        });
+        context.SaveChanges();
+    }
+}
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
