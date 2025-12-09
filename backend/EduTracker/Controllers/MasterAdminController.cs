@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EduTracker.Data;
-using EduTracker.Models;
 
 namespace EduTracker.Controllers;
 
@@ -20,7 +19,7 @@ public class MasterAdminController : ControllerBase
     public async Task<IActionResult> GetAllOrganizations()
     {
         var orgs = await _context.Organizations
-            .Select(o => new 
+            .Select(o => new
             {
                 o.Id,
                 o.Name,

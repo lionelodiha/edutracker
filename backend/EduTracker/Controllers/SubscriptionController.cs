@@ -4,7 +4,6 @@ using Stripe.Checkout;
 using EduTracker.Data;
 using EduTracker.Models;
 using EduTracker.DTOs;
-using System.IO;
 using EduTracker.Interfaces.Services;
 using EduTracker.Endpoints.Users;
 using EduTracker.Endpoints.Users.RegisterUser;
@@ -100,17 +99,17 @@ public class SubscriptionController : ControllerBase
         StripeConfiguration.ApiKey = stripeKey;
 
         var service = new SessionService();
-        try 
+        try
         {
             var session = await service.GetAsync(sessionId);
-            
+
             // Ensure user exists (in case webhook failed or hasn't fired yet)
             var adminEmail = session.Metadata["adminEmail"];
             string normalizedEmail = adminEmail.Trim().ToLowerInvariant();
             string emailHash = _hashingService.HashEmail(normalizedEmail);
 
             var user = _context.Users.FirstOrDefault(u => u.EmailHash == emailHash);
-            
+
             if (user == null && session.PaymentStatus == "paid")
             {
                 // Force create user if missing (Webhook backup)
@@ -140,8 +139,8 @@ public class SubscriptionController : ControllerBase
                 };
             }
 
-            return Ok(new 
-            { 
+            return Ok(new
+            {
                 customerEmail = session.CustomerEmail,
                 amountTotal = session.AmountTotal,
                 currency = session.Currency,
@@ -169,7 +168,7 @@ public class SubscriptionController : ControllerBase
             if (stripeEvent.Type == "checkout.session.completed")
             {
                 var session = stripeEvent.Data.Object as Session;
-                if (session != null) 
+                if (session != null)
                 {
                     await HandleCheckoutSessionCompleted(session);
                 }
@@ -208,7 +207,7 @@ public class SubscriptionController : ControllerBase
             Console.WriteLine($"Skipping user creation for {adminEmail} - already exists.");
             return;
         }
-        
+
         // Create Organization
         var organization = new Organization
         {
@@ -217,20 +216,20 @@ public class SubscriptionController : ControllerBase
             StripeCustomerId = session.CustomerId,
             StripeSubscriptionId = session.SubscriptionId
         };
-        
+
         _context.Organizations.Add(organization);
-        
+
         // Generate unique username
         string baseUsername = (adminFirstName.ToLower() + "." + adminLastName.ToLower()).Trim();
         string finalUsername = baseUsername;
         int counter = 1;
-        
+
         while (_context.Users.Any(u => u.UserName == finalUsername))
         {
             finalUsername = $"{baseUsername}{counter}";
             counter++;
         }
-        
+
         // Create Admin User
         var registerRequest = new RegisterUserRequest(
             adminFirstName,
@@ -257,7 +256,7 @@ public class SubscriptionController : ControllerBase
         adminUser.SetOrganizationId(organization.Id);
 
         _context.Users.Add(adminUser);
-        
+
         await _context.SaveChangesAsync();
     }
 }

@@ -1,6 +1,5 @@
 using EduTracker.Data;
 using EduTracker.DTOs;
-using EduTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EduTracker.Interfaces.Services;
@@ -29,7 +28,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> SignupInvite([FromBody] InvitationSignupDto dto)
     {
         var invitation = await _context.Invitations.FirstOrDefaultAsync(i => i.Id == dto.Token);
-        
+
         if (invitation == null || invitation.Status != "pending")
         {
             return BadRequest(new { message = "Invalid or expired invitation." });
@@ -83,9 +82,9 @@ public class AuthController : ControllerBase
         _context.Users.Add(newUser);
         invitation.Status = "used";
         await _context.SaveChangesAsync();
-        
+
         // Constructing response DTO manually to avoid sending hashes
-        var responseUser = new 
+        var responseUser = new
         {
             Id = newUser.Id,
             Email = invitation.Email,
@@ -98,9 +97,9 @@ public class AuthController : ControllerBase
             OrganizationId = newUser.OrganizationId
         };
 
-        return Ok(new 
-        { 
-            message = "Signup successful.", 
+        return Ok(new
+        {
+            message = "Signup successful.",
             user = responseUser,
             token = "mock-jwt-token-" + Guid.NewGuid().ToString()
         });
@@ -112,7 +111,7 @@ public class AuthController : ControllerBase
         // Login can be by email or username.
         EntityUser? user = null;
         bool isEmail = loginDto.EmailOrUsername.Contains("@");
-        
+
         if (isEmail)
         {
             string normalizedEmail = loginDto.EmailOrUsername.Trim().ToLowerInvariant();

@@ -1,6 +1,5 @@
 using EduTracker.Configurations.Security;
 using EduTracker.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Extensions;
 

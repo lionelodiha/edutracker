@@ -1,9 +1,7 @@
 using EduTracker.Data;
 using EduTracker.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using EduTracker.Extensions;
 using EduTracker.Interfaces.Services;
 using EduTracker.Middleware;
 using EduTracker.Services;
@@ -64,7 +62,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend");
 
 // Middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>(); 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthorization();
 
@@ -123,7 +121,7 @@ using (var scope = app.Services.CreateScope())
         }
         context.SaveChanges();
     }
-    
+
     // Seed Master Admin
     string masterEmail = "master@edutracker.com";
     string masterEmailHash = hashingService.HashEmail(masterEmail);

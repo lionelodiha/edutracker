@@ -1,7 +1,6 @@
 using EduTracker.Data;
 using EduTracker.DTOs;
 using EduTracker.Interfaces.Services;
-using EduTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EntityUser = EduTracker.Entities.User;
@@ -36,7 +35,7 @@ public class UsersController : ControllerBase
             .Where(u => u.OrganizationId == organizationId)
             .Where(u => u.Role != "admin")
             .ToListAsync();
-            
+
         // Note: For now, we are returning EntityUser directly, but we should probably map it to a DTO and decrypt sensitive data.
         // However, EntityUser properties like EmailHash are not useful for frontend.
         // We'll leave it as is for now to fix build, but this needs refactoring to decrypt data if needed.
@@ -76,7 +75,7 @@ public class UsersController : ControllerBase
         }
 
         string passwordHash = _hashingService.HashPassword(signupDto.Password);
-        
+
         // Use a temporary request object to reuse UserFactory
         var registerRequest = new EduTracker.Endpoints.Users.RegisterUser.RegisterUserRequest(
             signupDto.Email,

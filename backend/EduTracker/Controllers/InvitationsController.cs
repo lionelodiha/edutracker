@@ -4,7 +4,6 @@ using EduTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EduTracker.Interfaces.Services;
-using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Controllers;
 
@@ -65,14 +64,14 @@ public class InvitationsController : ControllerBase
         // For local dev we assume localhost:5173 (Vite default) or whatever the origin is.
         // We'll return the token and let frontend construct the full link, or construct it here.
         // Better to return the token and a relative path.
-        
+
         return Ok(new InvitationResponseDto(
-            invitation.Id, 
-            invitation.Email, 
-            invitation.Role, 
+            invitation.Id,
+            invitation.Email,
+            invitation.Role,
             invitation.OrganizationId,
             org?.Name ?? "Unknown Organization",
-            $"/auth?token={invitation.Id}" 
+            $"/auth?token={invitation.Id}"
         ));
     }
 
@@ -98,7 +97,7 @@ public class InvitationsController : ControllerBase
             await _context.SaveChangesAsync();
             return BadRequest(new { message = "Invitation has expired" });
         }
-        
+
         // Fetch Organization Name
         var org = await _context.Organizations.FindAsync(invitation.OrganizationId);
 
