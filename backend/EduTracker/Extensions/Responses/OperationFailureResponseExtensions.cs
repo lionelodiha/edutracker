@@ -5,5 +5,8 @@ namespace EduTracker.Extensions.Responses;
 
 public static class OperationFailureResponseExtensions
 {
-    public static AppException ToException(this OperationFailureResponse response) => new(response);
+    extension(OperationFailureResponse response)
+    {
+        public AppException ToException() => new(response);
+    }
 }

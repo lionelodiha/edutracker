@@ -5,24 +5,30 @@ namespace EduTracker.Extensions.Responses;
 
 public static class OperationOutcomeResponseExtensions
 {
-    public static OperationResult<T> ToOperationResult<T>(this OperationOutcomeResponse<T> response)
+    extension<T>(OperationOutcomeResponse<T> response)
     {
-        NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
-        return new OperationResult<T>(messageId, message, details, response.Data);
+        public OperationResult<T> ToOperationResult()
+        {
+            NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
+            return new OperationResult<T>(messageId, message, details, response.Data);
+        }
     }
 
-    public static OperationResult<T> ToOperationResult<T>(this OperationOutcomeResponse response)
+    extension(OperationOutcomeResponse response)
     {
-        if (response.Data is not null && response.Data is not T)
+        public OperationResult<T> ToOperationResult<T>()
         {
-            throw new InvalidCastException(
-                $"Cannot convert response data from type '{response.Data.GetType().FullName}' to '{typeof(T).FullName}'. " +
-                $"Ensure the response was created with the correct payload or call As<{typeof(T).Name}>() before conversion."
-            );
-        }
+            if (response.Data is not null && response.Data is not T)
+            {
+                throw new InvalidCastException(
+                    $"Cannot convert response data from type '{response.Data.GetType().FullName}' to '{typeof(T).FullName}'. " +
+                    $"Ensure the response was created with the correct payload or call As<{typeof(T).Name}>() before conversion."
+                );
+            }
 
-        NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
-        return new OperationResult<T>(messageId, message, details, (T?)response.Data);
+            NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
+            return new OperationResult<T>(messageId, message, details, (T?)response.Data);
+        }
     }
 
     private static void NormalizeResponse(IOperationResponse response, out string messageId, out string message, out List<ResponseDetail>? details)

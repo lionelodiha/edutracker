@@ -9,38 +9,41 @@ namespace EduTracker.Extensions;
 
 public static class AppConfigurationExtensions
 {
-    public static WebApplicationBuilder LoadApplicationConfiguration(this WebApplicationBuilder builder)
+    extension(WebApplicationBuilder builder)
     {
-        ConfigurationManager config = builder.Configuration;
-        IServiceCollection services = builder.Services;
-
-        // Configure Db Connection from appsettings
-        services.AddDbContext<AppDbContext>(options =>
+        public WebApplicationBuilder LoadApplicationConfiguration()
         {
-            options.UseSqlServer(config.GetConnectionString("Database"));
-        });
+            ConfigurationManager config = builder.Configuration;
+            IServiceCollection services = builder.Services;
 
-        // Configure Redis from appsettings
-        services.Configure<RedisOptions>(
-            config.GetSection("Redis")
-        );
+            // Configure Db Connection from appsettings
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(config.GetConnectionString("Database"));
+            });
 
-        // TODO: add redis service layer here with abstraction
+            // Configure Redis from appsettings
+            services.Configure<RedisOptions>(
+                config.GetSection("Redis")
+            );
 
-        // Configure Hashing options from appsettings
-        services.Configure<HashingOptions>(
-            config.GetSection("Hashing")
-        );
+            // TODO: add redis service layer here with abstraction
 
-        services.AddSingleton<IHashingService, HashingService>();
+            // Configure Hashing options from appsettings
+            services.Configure<HashingOptions>(
+                config.GetSection("Hashing")
+            );
 
-        // Configure DataEncryption options from appsettings
-        services.Configure<DataEncryptionOptions>(
-            config.GetSection("DataEncryption")
-        );
+            services.AddSingleton<IHashingService, HashingService>();
 
-        services.AddSingleton<IDataEncryptionService, AesDataEncryptionService>();
+            // Configure DataEncryption options from appsettings
+            services.Configure<DataEncryptionOptions>(
+                config.GetSection("DataEncryption")
+            );
 
-        return builder;
+            services.AddSingleton<IDataEncryptionService, AesDataEncryptionService>();
+
+            return builder;
+        }
     }
 }
