@@ -1,11 +1,11 @@
 using System.Text.Json;
 using EduTracker.Constants.Responses;
 using EduTracker.Data;
-using EduTracker.Entities;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Interfaces.Services;
 using EduTracker.Models;
+using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Endpoints.Users.GetUser;
 
@@ -13,7 +13,7 @@ public static class GetUserHandler
 {
     public static async Task<IResult> Handle(Guid id, AppDbContext db, IDataEncryptionService dataEncryptionService, CancellationToken ct)
     {
-        User user = await db.Users.FindAsync([id], cancellationToken: ct)
+        EntityUser user = await db.Users.FindAsync([id], cancellationToken: ct)
             ?? throw ResponseCatalog.User.NotFound.ToException();
 
         byte[] dataBlob = dataEncryptionService.DecryptData(user.EncryptedData);

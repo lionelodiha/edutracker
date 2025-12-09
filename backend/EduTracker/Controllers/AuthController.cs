@@ -3,6 +3,10 @@ using EduTracker.DTOs;
 using EduTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EduTracker.Interfaces.Services;
+using EduTracker.Endpoints.Users;
+using EduTracker.Endpoints.Users.RegisterUser;
+using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Controllers;
 
@@ -11,10 +15,14 @@ namespace EduTracker.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IHashingService _hashingService;
+    private readonly IDataEncryptionService _dataEncryptionService;
 
-    public AuthController(AppDbContext context)
+    public AuthController(AppDbContext context, IHashingService hashingService, IDataEncryptionService dataEncryptionService)
     {
         _context = context;
+        _hashingService = hashingService;
+        _dataEncryptionService = dataEncryptionService;
     }
 
     [HttpPost("signup-invite")]
@@ -34,48 +42,89 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Invitation has expired." });
         }
 
-        if (await _context.Users.AnyAsync(u => u.Email == invitation.Email))
+        string normalizedEmail = invitation.Email.Trim().ToLowerInvariant();
+        string emailHash = _hashingService.HashEmail(normalizedEmail);
+
+        if (await _context.Users.AnyAsync(u => u.EmailHash == emailHash))
         {
              return BadRequest(new { message = "User with this email already exists." });
         }
 
-        if (!string.IsNullOrEmpty(dto.Username) && await _context.Users.AnyAsync(u => u.Username == dto.Username))
+        if (!string.IsNullOrEmpty(dto.Username) && await _context.Users.AnyAsync(u => u.UserName == dto.Username))
         {
             return BadRequest(new { message = "Username is already taken." });
         }
 
-        var newUser = new User
+        // Create Request
+        var registerRequest = new RegisterUserRequest(
+            dto.FirstName,
+            dto.MiddleName ?? "",
+            dto.LastName,
+            dto.Username ?? (dto.FirstName.ToLower() + "." + dto.LastName.ToLower()),
+            invitation.Email,
+            dto.Password
+        );
+
+        string passwordHash = _hashingService.HashPassword(dto.Password);
+
+        EntityUser newUser = UserFactory.Create(
+            registerRequest,
+            normalizedEmail,
+            emailHash,
+            passwordHash,
+            _dataEncryptionService
+        );
+
+        newUser.SetRole(invitation.Role);
+        newUser.SetStatus("active"); // Auto-activate invited users
+        newUser.SetAvatarUrl($"https://ui-avatars.com/api/?name={Uri.EscapeDataString(dto.FirstName + "+" + dto.LastName)}");
+        newUser.SetOrganizationId(invitation.OrganizationId);
+
+        _context.Users.Add(newUser);
+        invitation.Status = "used";
+        await _context.SaveChangesAsync();
+        
+        // Constructing response DTO manually to avoid sending hashes
+        var responseUser = new 
         {
+            Id = newUser.Id,
             Email = invitation.Email,
             FirstName = dto.FirstName,
             LastName = dto.LastName,
-            MiddleName = dto.MiddleName,
             Username = dto.Username,
-            Password = dto.Password,
-            Role = invitation.Role,
-            Status = "active", // Auto-activate invited users
-            AvatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(dto.FirstName + "+" + dto.LastName)}",
-            OrganizationId = invitation.OrganizationId
+            Role = newUser.Role,
+            Status = newUser.Status,
+            AvatarUrl = newUser.AvatarUrl,
+            OrganizationId = newUser.OrganizationId
         };
 
-        _context.Users.Add(newUser);
-            invitation.Status = "used";
-            await _context.SaveChangesAsync();
-
-            return Ok(new 
-            { 
-                message = "Signup successful.", 
-                user = newUser,
-                token = "mock-jwt-token-" + Guid.NewGuid().ToString()
-            });
+        return Ok(new 
+        { 
+            message = "Signup successful.", 
+            user = responseUser,
+            token = "mock-jwt-token-" + Guid.NewGuid().ToString()
+        });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.EmailOrUsername || u.Username == loginDto.EmailOrUsername);
+        // Login can be by email or username.
+        EntityUser? user = null;
+        bool isEmail = loginDto.EmailOrUsername.Contains("@");
+        
+        if (isEmail)
+        {
+            string normalizedEmail = loginDto.EmailOrUsername.Trim().ToLowerInvariant();
+            string emailHash = _hashingService.HashEmail(normalizedEmail);
+            user = await _context.Users.FirstOrDefaultAsync(u => u.EmailHash == emailHash);
+        }
+        else
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == loginDto.EmailOrUsername);
+        }
 
-        if (user == null || user.Password != loginDto.Password)
+        if (user == null || !_hashingService.VerifyPassword(loginDto.Password, user.PasswordHash))
         {
             return Unauthorized(new { message = "Invalid email or password" });
         }
@@ -85,7 +134,7 @@ public class AuthController : ControllerBase
         {
              return Ok(new
             {
-                user,
+                user, // TODO: Return DTO
                 token = "mock-jwt-token-" + Guid.NewGuid().ToString(),
                 organizationName = "EduTracker Global"
             });
@@ -111,7 +160,7 @@ public class AuthController : ControllerBase
 
         return Ok(new
         {
-            user,
+            user, // TODO: Return DTO
             token = "mock-jwt-token-" + Guid.NewGuid().ToString(),
             organizationName
         });
@@ -120,12 +169,15 @@ public class AuthController : ControllerBase
     [HttpPost("signup")]
     public async Task<IActionResult> Signup([FromBody] SignupDto signupDto)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == signupDto.Email))
+        string normalizedEmail = signupDto.Email.Trim().ToLowerInvariant();
+        string emailHash = _hashingService.HashEmail(normalizedEmail);
+
+        if (await _context.Users.AnyAsync(u => u.EmailHash == emailHash))
         {
             return BadRequest(new { message = "User with this email already exists" });
         }
 
-        if (!string.IsNullOrEmpty(signupDto.Username) && await _context.Users.AnyAsync(u => u.Username == signupDto.Username))
+        if (!string.IsNullOrEmpty(signupDto.Username) && await _context.Users.AnyAsync(u => u.UserName == signupDto.Username))
         {
             return BadRequest(new { message = "Username is already taken" });
         }
@@ -153,19 +205,29 @@ public class AuthController : ControllerBase
             }
         }
 
-        var newUser = new User
-        {
-            Email = signupDto.Email,
-            FirstName = signupDto.FirstName,
-            LastName = signupDto.LastName,
-            MiddleName = signupDto.MiddleName,
-            Username = signupDto.Username,
-            Password = signupDto.Password,
-            Role = signupDto.Role,
-            Status = signupDto.Role == "admin" && string.IsNullOrEmpty(signupDto.OrganizationId) ? "active" : "pending",
-            AvatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(signupDto.FirstName + "+" + signupDto.LastName)}",
-            OrganizationId = organizationId
-        };
+        var registerRequest = new RegisterUserRequest(
+            signupDto.FirstName,
+            signupDto.MiddleName ?? "",
+            signupDto.LastName,
+            signupDto.Username ?? (signupDto.FirstName.ToLower() + "." + signupDto.LastName.ToLower()),
+            signupDto.Email,
+            signupDto.Password
+        );
+
+        string passwordHash = _hashingService.HashPassword(signupDto.Password);
+
+        EntityUser newUser = UserFactory.Create(
+            registerRequest,
+            normalizedEmail,
+            emailHash,
+            passwordHash,
+            _dataEncryptionService
+        );
+
+        newUser.SetRole(signupDto.Role);
+        newUser.SetStatus(signupDto.Role == "admin" && string.IsNullOrEmpty(signupDto.OrganizationId) ? "active" : "pending");
+        newUser.SetAvatarUrl($"https://ui-avatars.com/api/?name={Uri.EscapeDataString(signupDto.FirstName + "+" + signupDto.LastName)}");
+        newUser.SetOrganizationId(organizationId);
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();

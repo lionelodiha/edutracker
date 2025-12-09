@@ -3,6 +3,8 @@ using EduTracker.DTOs;
 using EduTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EduTracker.Interfaces.Services;
+using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Controllers;
 
@@ -11,10 +13,12 @@ namespace EduTracker.Controllers;
 public class InvitationsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IHashingService _hashingService;
 
-    public InvitationsController(AppDbContext context)
+    public InvitationsController(AppDbContext context, IHashingService hashingService)
     {
         _context = context;
+        _hashingService = hashingService;
     }
 
     [HttpPost]
@@ -26,7 +30,10 @@ public class InvitationsController : ControllerBase
         }
 
         // Check if user already exists
-        if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+        string normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+        string emailHash = _hashingService.HashEmail(normalizedEmail);
+
+        if (await _context.Users.AnyAsync(u => u.EmailHash == emailHash))
         {
             return BadRequest(new { message = "User with this email already exists" });
         }

@@ -27,11 +27,23 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
     public string EmailHash { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
 
+    // Added properties to match existing logic
+    public string Role { get; private set; } = "student";
+    public string Status { get; private set; } = "pending";
+    public string? AvatarUrl { get; private set; }
+    public string? OrganizationId { get; private set; }
+
     public DateTimeOffset CreatedAt => _audit.CreatedAt;
     public DateTimeOffset UpdatedAt => _audit.UpdatedAt;
 
     public byte[] EncryptedData => _sensitive.EncryptedData;
     public UserSensitive? SensitiveData => _sensitive.SensitiveData;
+
+    public void SetRole(string role) => Role = role;
+    public void SetStatus(string status) => Status = status;
+    public void SetAvatarUrl(string? url) => AvatarUrl = url;
+    public void SetOrganizationId(string? orgId) => OrganizationId = orgId;
+
 
     public void UpdateUserName(string newUserName)
     {

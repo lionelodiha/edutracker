@@ -6,18 +6,15 @@ namespace EduTracker.Endpoints.Users;
 
 public static class UserEndpoints
 {
-    extension(IEndpointRouteBuilder routes)
+    public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder routes)
     {
-        public IEndpointRouteBuilder MapUserEndpoints()
-        {
-            RouteGroupBuilder group = routes
-                .MapGroup(ApiRoutes.User.Base)
-                .WithTags("Users");
+        RouteGroupBuilder group = routes
+            .MapGroup(ApiRoutes.User.Base)
+            .WithTags("Users");
 
-            group.MapPost(ApiRoutes.User.CreateUser, RegisterUserHandler.Handle);
-            group.MapGet(ApiRoutes.User.GetUserById, GetUserHandler.Handle);
+        group.MapPost(ApiRoutes.User.CreateUser, RegisterUserHandler.Handle);
+        group.MapGet(ApiRoutes.User.GetUserById, GetUserHandler.Handle);
 
-            return routes;
-        }
+        return routes;
     }
 }

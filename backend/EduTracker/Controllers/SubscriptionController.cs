@@ -5,6 +5,10 @@ using EduTracker.Data;
 using EduTracker.Models;
 using EduTracker.DTOs;
 using System.IO;
+using EduTracker.Interfaces.Services;
+using EduTracker.Endpoints.Users;
+using EduTracker.Endpoints.Users.RegisterUser;
+using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Controllers;
 
@@ -14,11 +18,15 @@ public class SubscriptionController : ControllerBase
 {
     private readonly IConfiguration _configuration;
     private readonly AppDbContext _context;
+    private readonly IHashingService _hashingService;
+    private readonly IDataEncryptionService _dataEncryptionService;
 
-    public SubscriptionController(IConfiguration configuration, AppDbContext context)
+    public SubscriptionController(IConfiguration configuration, AppDbContext context, IHashingService hashingService, IDataEncryptionService dataEncryptionService)
     {
         _configuration = configuration;
         _context = context;
+        _hashingService = hashingService;
+        _dataEncryptionService = dataEncryptionService;
     }
 
     [HttpPost("create-checkout-session")]
@@ -32,7 +40,10 @@ public class SubscriptionController : ControllerBase
         }
 
         // Check if user already exists
-        if (_context.Users.Any(u => u.Email == request.AdminEmail))
+        string normalizedEmail = request.AdminEmail.Trim().ToLowerInvariant();
+        string emailHash = _hashingService.HashEmail(normalizedEmail);
+
+        if (_context.Users.Any(u => u.EmailHash == emailHash))
         {
             return BadRequest(new { message = "User with this email already exists" });
         }
@@ -95,13 +106,16 @@ public class SubscriptionController : ControllerBase
             
             // Ensure user exists (in case webhook failed or hasn't fired yet)
             var adminEmail = session.Metadata["adminEmail"];
-            var user = _context.Users.FirstOrDefault(u => u.Email == adminEmail);
+            string normalizedEmail = adminEmail.Trim().ToLowerInvariant();
+            string emailHash = _hashingService.HashEmail(normalizedEmail);
+
+            var user = _context.Users.FirstOrDefault(u => u.EmailHash == emailHash);
             
             if (user == null && session.PaymentStatus == "paid")
             {
                 // Force create user if missing (Webhook backup)
                 await HandleCheckoutSessionCompleted(session);
-                user = _context.Users.FirstOrDefault(u => u.Email == adminEmail);
+                user = _context.Users.FirstOrDefault(u => u.EmailHash == emailHash);
             }
 
             // Mock sending an email receipt from our system
@@ -110,13 +124,29 @@ public class SubscriptionController : ControllerBase
                  Console.WriteLine($"[Email Service] Sending receipt to {session.CustomerEmail} for amount {session.AmountTotal}");
             }
 
+            object? userDto = null;
+            if (user != null)
+            {
+                userDto = new
+                {
+                    Id = user.Id,
+                    Email = adminEmail,
+                    FirstName = session.Metadata["adminFirstName"], // Fallback to metadata as we can't easily decrypt without logic
+                    LastName = session.Metadata["adminLastName"],
+                    Role = user.Role,
+                    Status = user.Status,
+                    AvatarUrl = user.AvatarUrl,
+                    OrganizationId = user.OrganizationId
+                };
+            }
+
             return Ok(new 
             { 
                 customerEmail = session.CustomerEmail,
                 amountTotal = session.AmountTotal,
                 currency = session.Currency,
                 paymentStatus = session.PaymentStatus,
-                user = user,
+                user = userDto,
                 token = user != null ? "mock-jwt-token-" + Guid.NewGuid().ToString() : null
             });
         }
@@ -162,8 +192,18 @@ public class SubscriptionController : ControllerBase
         var adminLastName = session.Metadata["adminLastName"];
         var adminPassword = session.Metadata["adminPassword"];
 
+        if (string.IsNullOrWhiteSpace(adminPassword))
+        {
+            Console.WriteLine($"Error: Password for {adminEmail} is empty in metadata.");
+            return;
+        }
+
+        string normalizedEmail = adminEmail.Trim().ToLowerInvariant();
+        string emailHash = _hashingService.HashEmail(normalizedEmail);
+        string normalizedPassword = adminPassword.Trim(); // Ensure password is trimmed
+
         // Check if user already exists (idempotency)
-        if (_context.Users.Any(u => u.Email == adminEmail))
+        if (_context.Users.Any(u => u.EmailHash == emailHash))
         {
             Console.WriteLine($"Skipping user creation for {adminEmail} - already exists.");
             return;
@@ -180,18 +220,41 @@ public class SubscriptionController : ControllerBase
         
         _context.Organizations.Add(organization);
         
-        // Create Admin User
-        var adminUser = new User
+        // Generate unique username
+        string baseUsername = (adminFirstName.ToLower() + "." + adminLastName.ToLower()).Trim();
+        string finalUsername = baseUsername;
+        int counter = 1;
+        
+        while (_context.Users.Any(u => u.UserName == finalUsername))
         {
-            Email = adminEmail,
-            FirstName = adminFirstName,
-            LastName = adminLastName,
-            Role = "admin",
-            Status = "active",
-            Password = adminPassword,
-            AvatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(adminFirstName + "+" + adminLastName)}",
-            OrganizationId = organization.Id
-        };
+            finalUsername = $"{baseUsername}{counter}";
+            counter++;
+        }
+        
+        // Create Admin User
+        var registerRequest = new RegisterUserRequest(
+            adminFirstName,
+            "", // MiddleName
+            adminLastName,
+            finalUsername,
+            adminEmail,
+            normalizedPassword
+        );
+
+        string passwordHash = _hashingService.HashPassword(normalizedPassword);
+
+        EntityUser adminUser = UserFactory.Create(
+            registerRequest,
+            normalizedEmail,
+            emailHash,
+            passwordHash,
+            _dataEncryptionService
+        );
+
+        adminUser.SetRole("admin");
+        adminUser.SetStatus("active");
+        adminUser.SetAvatarUrl($"https://ui-avatars.com/api/?name={Uri.EscapeDataString(adminFirstName + "+" + adminLastName)}");
+        adminUser.SetOrganizationId(organization.Id);
 
         _context.Users.Add(adminUser);
         

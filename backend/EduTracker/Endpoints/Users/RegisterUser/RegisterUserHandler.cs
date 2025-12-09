@@ -1,7 +1,6 @@
 using EduTracker.Constants.Responses;
 using EduTracker.Constants.Routes;
 using EduTracker.Data;
-using EduTracker.Entities;
 using EduTracker.Extensions;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
@@ -10,6 +9,7 @@ using EduTracker.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Endpoints.Users.RegisterUser;
 
@@ -40,7 +40,7 @@ public static class RegisterUserHandler
 
         string passwordHash = hashingService.HashPassword(request.Password);
 
-        User user = UserFactory.Create(
+        EntityUser user = UserFactory.Create(
             request,
             normalizedEmail,
             emailHash,

@@ -11,6 +11,10 @@ using FluentValidation;
 
 using EduTracker.Configurations.Security;
 
+using EduTracker.Endpoints.Users;
+using EduTracker.Endpoints.Users.RegisterUser;
+using EntityUser = EduTracker.Entities.User;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -31,6 +35,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Services
 builder.Services.Configure<HashingOptions>(builder.Configuration.GetSection("Hashing"));
+builder.Services.Configure<DataEncryptionOptions>(builder.Configuration.GetSection("DataEncryption"));
 builder.Services.AddSingleton<IHashingService, HashingService>();
 builder.Services.AddSingleton<IDataEncryptionService, AesDataEncryptionService>();
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
@@ -71,6 +76,9 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
 
+    var hashingService = scope.ServiceProvider.GetRequiredService<IHashingService>();
+    var encryptionService = scope.ServiceProvider.GetRequiredService<IDataEncryptionService>();
+
     // Seed Default Organization and Admin
     if (!context.Organizations.Any())
     {
@@ -81,58 +89,72 @@ using (var scope = app.Services.CreateScope())
             SubscriptionStatus = "active"
         };
         context.Organizations.Add(defaultOrg);
-        
-        if (!context.Users.Any(u => u.Email == "admin@edutracker.com"))
+
+        string adminEmail = "admin@edutracker.com";
+        string emailHash = hashingService.HashEmail(adminEmail);
+
+        if (!context.Users.Any(u => u.EmailHash == emailHash))
         {
-            context.Users.Add(new User
-            {
-                Id = "admin-1",
-                Email = "admin@edutracker.com",
-                FirstName = "System",
-                LastName = "Administrator",
-                Role = "admin",
-                Status = "active",
-                Password = "admin123",
-                AvatarUrl = "https://ui-avatars.com/api/?name=System+Admin",
-                OrganizationId = defaultOrg.Id
-            });
+            var registerRequest = new RegisterUserRequest(
+                "System",
+                "",
+                "Administrator",
+                "admin",
+                adminEmail,
+                "admin123"
+            );
+
+            string passwordHash = hashingService.HashPassword(registerRequest.Password);
+
+            EntityUser adminUser = UserFactory.Create(
+                registerRequest,
+                adminEmail,
+                emailHash,
+                passwordHash,
+                encryptionService
+            );
+
+            adminUser.SetRole("admin");
+            adminUser.SetStatus("active");
+            adminUser.SetAvatarUrl("https://ui-avatars.com/api/?name=System+Admin");
+            adminUser.SetOrganizationId(defaultOrg.Id);
+
+            context.Users.Add(adminUser);
         }
         context.SaveChanges();
     }
-    else if (!context.Users.Any(u => u.Email == "admin@edutracker.com"))
-    {
-        // Fallback if org exists but admin doesn't
-        var defaultOrgId = context.Organizations.First().Id;
-        context.Users.Add(new User
-        {
-            Id = "admin-1",
-            Email = "admin@edutracker.com",
-            FirstName = "System",
-            LastName = "Administrator",
-            Role = "admin",
-            Status = "active",
-            Password = "admin123",
-            AvatarUrl = "https://ui-avatars.com/api/?name=System+Admin",
-            OrganizationId = defaultOrgId
-        });
-        context.SaveChanges();
-    }
-
+    
     // Seed Master Admin
+    string masterEmail = "master@edutracker.com";
+    string masterEmailHash = hashingService.HashEmail(masterEmail);
+
     if (!context.Users.Any(u => u.Role == "master_admin"))
     {
-        context.Users.Add(new User
-        {
-            Id = "master-admin-1",
-            Email = "master@edutracker.com",
-            FirstName = "Master",
-            LastName = "Admin",
-            Role = "master_admin",
-            Status = "active",
-            Password = "master123",
-            AvatarUrl = "https://ui-avatars.com/api/?name=Master+Admin",
-            OrganizationId = null 
-        });
+        var registerRequest = new RegisterUserRequest(
+            "Master",
+            "",
+            "Admin",
+            "masteradmin",
+            masterEmail,
+            "master123"
+        );
+
+        string passwordHash = hashingService.HashPassword(registerRequest.Password);
+
+        EntityUser masterUser = UserFactory.Create(
+            registerRequest,
+            masterEmail,
+            masterEmailHash,
+            passwordHash,
+            encryptionService
+        );
+
+        masterUser.SetRole("master_admin");
+        masterUser.SetStatus("active");
+        masterUser.SetAvatarUrl("https://ui-avatars.com/api/?name=Master+Admin");
+        masterUser.SetOrganizationId(null);
+
+        context.Users.Add(masterUser);
         context.SaveChanges();
     }
 }

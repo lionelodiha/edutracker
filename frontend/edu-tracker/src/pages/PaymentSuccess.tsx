@@ -13,7 +13,6 @@ interface SessionDetails {
 export default function PaymentSuccess() {
   const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [redirecting, setRedirecting] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -33,19 +32,8 @@ export default function PaymentSuccess() {
           const data = await response.json();
           setSessionDetails(data);
           
-          // Auto-login if token is present
-          if (data.token && data.user) {
-              localStorage.setItem('edu_tracker_auth', JSON.stringify({
-                  user: data.user,
-                  token: data.token
-              }));
-              
-              // Prepare for redirect
-              setRedirecting(true);
-              setTimeout(() => {
-                  navigate(`/dashboard/${data.user.role}`);
-              }, 3000);
-          }
+          // Auto-login logic removed as per user request
+          // User must manually log in after payment
         }
       } catch (error) {
         console.error('Failed to fetch session details', error);
@@ -122,22 +110,17 @@ export default function PaymentSuccess() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-blue-700">
-                  A receipt has been sent to <strong>{sessionDetails.customerEmail}</strong>.
+                  A receipt has been sent to <strong>{sessionDetails.customerEmail}</strong>. (Note: In test mode, no real email is sent)
                 </p>
-                {redirecting && (
-                  <p className="text-sm text-blue-700 mt-2 font-medium">
-                    Redirecting to dashboard in 3 seconds...
-                  </p>
-                )}
               </div>
             </div>
           </div>
 
           <button
-            onClick={() => sessionDetails.user ? navigate(`/dashboard/${sessionDetails.user.role}`) : navigate('/login')}
+            onClick={() => navigate('/login')}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            {sessionDetails.user ? 'Go to Dashboard' : 'Go to Login'}
+            Go to Login
           </button>
         </div>
       </div>

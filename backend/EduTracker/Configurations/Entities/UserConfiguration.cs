@@ -1,14 +1,14 @@
 using EduTracker.Common.Entities;
-using EduTracker.Entities;
 using EduTracker.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Configurations.Entities;
 
-public class UserConfiguration : IEntityTypeConfiguration<User>
+public class UserConfiguration : IEntityTypeConfiguration<EntityUser>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<EntityUser> builder)
     {
         builder.HasKey(u => u.Id);
 
@@ -30,7 +30,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(60);
 
-        builder.OwnsOne<AuditableDataHandler>(User.Audit, audit =>
+        builder.OwnsOne<AuditableDataHandler>(EntityUser.Audit, audit =>
         {
             audit.Property(a => a.CreatedAt)
                 .HasColumnName("CreatedAt")
@@ -41,7 +41,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .IsRequired();
         });
 
-        builder.OwnsOne<SensitiveDataHandler<UserSensitive>>(User.Sensitive, sensitive =>
+        builder.OwnsOne<SensitiveDataHandler<UserSensitive>>(EntityUser.Sensitive, sensitive =>
         {
             sensitive.Property(s => s.EncryptedData)
                 .HasColumnName("Data")
