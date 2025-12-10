@@ -10,7 +10,7 @@ public static partial class ResponseCatalog
     {
         public static readonly OperationFailureResponse NotFound = new(
             Id: "USER_NOT_FOUND",
-            StatusCode: 404,
+            StatusCode: StatusCodes.Status404NotFound,
             Title: "User not found.",
             Details: [
                 new ResponseDetail(
@@ -27,6 +27,30 @@ public static partial class ResponseCatalog
                 new ResponseDetail(
                     Message: "The user's profile has been loaded and is ready for viewing.",
                     Severity: ResponseSeverity.Info
+                )
+            ]
+        );
+
+        public static readonly OperationFailureResponse EmailAlreadyTaken = new(
+            Id: "USER_EMAIL_ALREADY_TAKEN",
+            StatusCode: StatusCodes.Status409Conflict,
+            Title: "Email already in use.",
+            Details: [
+                new ResponseDetail(
+                    Message: "The email address you entered is already registered. Try logging in or use a different email address.",
+                    Severity: ResponseSeverity.Warning
+                )
+            ]
+        );
+
+        public static readonly OperationFailureResponse UsernameAlreadyTaken = new(
+            Id: "USER_USERNAME_ALREADY_TAKEN",
+            StatusCode: StatusCodes.Status409Conflict,
+            Title: "Username already in use.",
+            Details: [
+                new ResponseDetail(
+                    Message: "The username you chose is already taken. Try a different username.",
+                    Severity: ResponseSeverity.Warning
                 )
             ]
         );
