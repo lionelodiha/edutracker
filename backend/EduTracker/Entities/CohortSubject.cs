@@ -1,5 +1,3 @@
-using EduTracker.Common.Entities;
-
 namespace EduTracker.Entities;
 
 public class CohortSubject

@@ -1,4 +1,3 @@
-using EduTracker.Configurations.Entities;
 using EduTracker.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +27,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
     }
 }

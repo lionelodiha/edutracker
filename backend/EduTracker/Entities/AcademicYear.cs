@@ -13,6 +13,7 @@ public class AcademicYear : IEntity
 
     public School School { get; private set; } = null!;
     public ICollection<AcademicTerm> Terms { get; private set; } = new List<AcademicTerm>();
+    public ICollection<Cohort> Cohorts { get; private set; } = new List<Cohort>();
 
     private AcademicYear() { }
     public AcademicYear(Guid schoolId, string name, DateTime startsOn, DateTime endsOn)
