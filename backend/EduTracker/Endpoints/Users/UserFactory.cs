@@ -1,16 +1,16 @@
 using System.Text.Json;
 using EduTracker.Endpoints.Users.RegisterUser;
+using EduTracker.Entities;
 using EduTracker.Interfaces.Services;
 using EduTracker.Models;
-using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Endpoints.Users;
 
 public class UserFactory
 {
-    public static EntityUser Create(RegisterUserRequest request, string normalizedEmail, string emailHash, string passwordHash, IDataEncryptionService dataEncryptionService)
+    public static User Create(RegisterUserRequest request, string normalizedEmail, string emailHash, string passwordHash, IDataEncryptionService dataEncryptionService)
     {
-        EntityUser user = new(request.UserName.Trim(), emailHash, passwordHash);
+        User user = new(request.UserName.Trim(), emailHash, passwordHash);
 
         UserSensitive sensitiveData = new()
         {

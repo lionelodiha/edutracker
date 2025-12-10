@@ -1,6 +1,7 @@
 using EduTracker.Constants.Responses;
 using EduTracker.Constants.Routes;
 using EduTracker.Data;
+using EduTracker.Entities;
 using EduTracker.Extensions;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
@@ -9,7 +10,6 @@ using EduTracker.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using EntityUser = EduTracker.Entities.User;
 
 namespace EduTracker.Endpoints.Users.RegisterUser;
 
@@ -31,16 +31,16 @@ public static class RegisterUserHandler
             .AnyAsync(u => u.UserName == request.UserName, ct);
 
         if (userNameExists)
-            throw ResponseCatalog.Auth.UsernameAlreadyTaken.ToException();
+            throw ResponseCatalog.User.UsernameAlreadyTaken.ToException();
 
         bool emailExists = await db.Users.AnyAsync(u => u.EmailHash == emailHash, ct);
 
         if (emailExists)
-            throw ResponseCatalog.Auth.EmailAlreadyTaken.ToException();
+            throw ResponseCatalog.User.EmailAlreadyTaken.ToException();
 
         string passwordHash = hashingService.HashPassword(request.Password);
 
-        EntityUser user = UserFactory.Create(
+        User user = UserFactory.Create(
             request,
             normalizedEmail,
             emailHash,
