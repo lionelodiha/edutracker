@@ -13,12 +13,12 @@ A web application built with **ASP.NET Core** for the backend API and **React** 
 ### Backend Setup
 
 ```bash
-cd backend
+cd backend\EduTracker
 dotnet restore
 dotnet run
 ```
 
-The API will start on the configured port (default: `https://localhost:5001` or `http://localhost:5000`).
+The API will start on the configured port `https://localhost:5270`.
 
 ### Frontend Setup
 
