@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EduTracker.Endpoints.Users;
-using EduTracker.Extensions;
+using EduTracker.Extensions.Configurations;
 using EduTracker.Middleware;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.Json;

@@ -5,7 +5,7 @@ using EduTracker.Interfaces.Services;
 using EduTracker.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace EduTracker.Extensions;
+namespace EduTracker.Extensions.Configurations;
 
 public static class AppConfigurationExtensions
 {

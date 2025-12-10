@@ -6,6 +6,13 @@ namespace EduTracker.Extensions.Responses;
 
 public static class ExceptionExtensions
 {
+    private static readonly List<ResponseDetail> _contactDetail = [
+        new ResponseDetail(
+            Message: $"We encountered an unexpected error. If the issue persists, contact support with trace id.",
+            Severity: ResponseSeverity.Error
+        )
+    ];
+
     extension(AppException exception)
     {
         public ApiResponse<T> ToApiResponse<T>(HttpContext? httpContext = null)
@@ -27,20 +34,12 @@ public static class ExceptionExtensions
         {
             string traceId = GetTraceId(httpContext);
 
-            List<ResponseDetail> details =
-            [
-                new ResponseDetail(
-                Message: $"We encountered an unexpected error. If the issue persists, contact support with trace id {traceId}.",
-                Severity: ResponseSeverity.Error
-            )
-            ];
-
             return new ApiResponse<T>(
                 TraceId: traceId,
                 Success: false,
                 MessageId: "UNEXPECTED_ERROR",
                 Message: "Something went wrong on our side. Please try again later.",
-                Details: details,
+                Details: _contactDetail,
                 Data: default
             );
         }

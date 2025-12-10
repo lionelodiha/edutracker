@@ -1,5 +1,5 @@
 using EduTracker.Common.Entities;
-using EduTracker.Extensions;
+using EduTracker.Extensions.Validations;
 using EduTracker.Models;
 
 namespace EduTracker.Entities;
@@ -16,9 +16,9 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
 
     public User(string userName, string emailHash, string passwordHash)
     {
-        UserName = userName.ValidateAndTrim();
-        EmailHash = emailHash.ValidateAndTrim();
-        PasswordHash = passwordHash.ValidateAndTrim();
+        UserName = userName.EnsureNotEmptyAndTrim();
+        EmailHash = emailHash.EnsureNotEmptyAndTrim();
+        PasswordHash = passwordHash.EnsureNotEmptyAndTrim();
     }
 
     public Guid Id { get; private set; } = Guid.NewGuid();
@@ -47,19 +47,19 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
 
     public void UpdateUserName(string newUserName)
     {
-        UserName = newUserName.ValidateAndTrim();
+        UserName = newUserName.EnsureNotEmptyAndTrim();
         _audit.UpdateAudit();
     }
 
     public void UpdateEmailHash(string newEmailHash)
     {
-        EmailHash = newEmailHash.ValidateAndTrim();
+        EmailHash = newEmailHash.EnsureNotEmptyAndTrim();
         _audit.UpdateAudit();
     }
 
     public void UpdatePasswordHash(string newPasswordHash)
     {
-        PasswordHash = newPasswordHash.ValidateAndTrim();
+        PasswordHash = newPasswordHash.EnsureNotEmptyAndTrim();
         _audit.UpdateAudit();
     }
 
