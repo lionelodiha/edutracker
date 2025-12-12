@@ -19,16 +19,20 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.UserName)
             .IsUnique();
 
+        builder.HasIndex(u => u.EmailHash)
+            .IsUnique();
+
         builder.Property(u => u.EmailHash)
             .IsRequired()
             .HasMaxLength(64);
 
-        builder.HasIndex(u => u.EmailHash)
-            .IsUnique();
-
         builder.Property(u => u.PasswordHash)
             .IsRequired()
             .HasMaxLength(60);
+
+        builder.Property(u => u.Role)
+            .HasConversion<string>()
+            .IsRequired();
 
         builder.OwnsOne<AuditableDataHandler>(User.Audit, audit =>
         {
@@ -49,5 +53,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
             sensitive.Ignore(s => s.SensitiveData);
         });
+
+        builder.HasMany(u => u.Sessions)
+            .WithOne(us => us.User)
+            .HasForeignKey(us => us.UserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
