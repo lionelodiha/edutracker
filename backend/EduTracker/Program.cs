@@ -3,12 +3,14 @@ using System.Text.Json.Serialization;
 using EduTracker.Endpoints.Users;
 using EduTracker.Extensions.Configurations;
 using EduTracker.Middleware;
+using EduTracker.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
 builder.LoadApplicationConfiguration();
 
 builder.Services.Configure<JsonOptions>(opts =>
@@ -20,6 +22,7 @@ builder.Services.Configure<JsonOptions>(opts =>
 });
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddScoped<CookieService>();
 
 builder.Services.AddOpenApi();
 

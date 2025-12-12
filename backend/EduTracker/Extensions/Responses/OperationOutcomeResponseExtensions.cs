@@ -41,8 +41,8 @@ public static class OperationOutcomeResponseExtensions
             ? "No message provided."
             : response.Title;
 
-        details = response.Details is null || response.Details.Length == 0
+        details = response.Details is null || response.Details.Length is 0
             ? null
-            : response.Details.ToList();
+            : [.. response.Details];
     }
 }

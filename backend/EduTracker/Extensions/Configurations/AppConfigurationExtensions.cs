@@ -3,6 +3,7 @@ using EduTracker.Configurations.Settings;
 using EduTracker.Data;
 using EduTracker.Interfaces.Services;
 using EduTracker.Services;
+using EduTracker.Services.StartupChecks;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Extensions.Configurations;
@@ -27,7 +28,8 @@ public static class AppConfigurationExtensions
                 config.GetSection("Redis")
             );
 
-            // TODO: add redis service layer here with abstraction
+            services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddHostedService<RedisStartupCheck>();
 
             // Configure Hashing options from appsettings
             services.Configure<HashingOptions>(
