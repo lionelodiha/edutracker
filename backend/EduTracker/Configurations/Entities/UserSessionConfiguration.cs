@@ -45,7 +45,7 @@ public class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
                 .IsRequired();
         });
 
-        builder.OwnsOne<SensitiveDataHandler<UserSensitive>>(User.Sensitive, sensitive =>
+        builder.OwnsOne<SensitiveDataHandler<UserSessionSensitive>>(User.Sensitive, sensitive =>
         {
             sensitive.Property(s => s.EncryptedData)
                 .HasColumnName("Data")
