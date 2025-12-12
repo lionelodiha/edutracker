@@ -35,6 +35,8 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
     public byte[] EncryptedData => _sensitive.EncryptedData;
     public UserSensitive? SensitiveData => _sensitive.SensitiveData;
 
+    public ICollection<UserSession> Sessions { get; private set; } = [];
+
     public void SetRole(SystemRole role)
     {
         Role = role;

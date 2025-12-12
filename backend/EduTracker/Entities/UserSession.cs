@@ -24,6 +24,8 @@ public class UserSession : IEntity, IAuditableEntity, ISensitiveEntity<UserSessi
     public Guid Id { get; private set; } = Guid.CreateVersion7();
 
     public Guid UserId { get; private set; }
+    public User User { get; private set; } = null!;
+
     public DateTimeOffset ExpiresAt { get; private set; }
     public bool Revoked { get; private set; }
 
