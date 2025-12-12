@@ -6,7 +6,12 @@ public class SensitiveDataHandler<TSensitive> where TSensitive : ISensitiveData
     public TSensitive? SensitiveData { get; private set; }
 
     public void SetSensitiveData(TSensitive data) => SensitiveData = data;
-    public void SetEncryptedData(byte[] data) => EncryptedData = data;
+
+    public void SetEncryptedData(byte[] data, AuditableDataHandler? auditHandler = null)
+    {
+        EncryptedData = data;
+        auditHandler?.UpdateAudit();
+    }
 
     public void ClearDecryptedData() => SensitiveData = default;
     public void ClearEncryptedData() => EncryptedData = [];

@@ -22,14 +22,12 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
         PasswordHash = passwordHash.EnsureNotEmptyAndTrim();
     }
 
-    public Guid Id { get; private set; } = Guid.NewGuid();
+    public Guid Id { get; private set; } = Guid.CreateVersion7();
 
     public string UserName { get; private set; } = null!;
     public string EmailHash { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
-
     public SystemRole Role { get; private set; } = SystemRole.User;
-    public bool IsLocked { get; private set; } = false;
 
     public DateTimeOffset CreatedAt => _audit.CreatedAt;
     public DateTimeOffset UpdatedAt => _audit.UpdatedAt;
@@ -40,12 +38,6 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
     public void SetRole(SystemRole role)
     {
         Role = role;
-        _audit.UpdateAudit();
-    }
-
-    public void SetStatus(bool status)
-    {
-        IsLocked = status;
         _audit.UpdateAudit();
     }
 
@@ -68,7 +60,7 @@ public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
     }
 
     public void SetSensitiveData(UserSensitive data) => _sensitive.SetSensitiveData(data);
-    public void SetEncryptedData(byte[] data) => _sensitive.SetEncryptedData(data);
+    public void SetEncryptedData(byte[] data) => _sensitive.SetEncryptedData(data, _audit);
     public void ClearDecryptedData() => _sensitive.ClearDecryptedData();
     public void ClearEncryptedData() => _sensitive.ClearEncryptedData();
 

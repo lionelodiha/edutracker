@@ -9,5 +9,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserSession> UserSessions => Set<UserSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
+        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 }
