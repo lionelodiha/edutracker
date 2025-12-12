@@ -19,9 +19,10 @@ public static class ValidationExtensions
                 .Select(e =>
                     new ResponseDetail(
                         Message: $"{e.PropertyName}: {e.ErrorMessage}",
-                        Severity: ResponseSeverity.Error)
+                        Severity: ResponseSeverity.Error
                     )
-                ];
+                )
+            ];
         }
     }
 }

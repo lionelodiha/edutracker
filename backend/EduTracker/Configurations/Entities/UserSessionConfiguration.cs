@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EduTracker.Configurations.Entities;
 
-public class SessionConfiguration : IEntityTypeConfiguration<Session>
+public class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
 {
-    public void Configure(EntityTypeBuilder<Session> builder)
+    public void Configure(EntityTypeBuilder<UserSession> builder)
     {
         builder.HasKey(e => e.Id);
         // builder.Property(e => e.Topic).HasMaxLength(200);
