@@ -30,5 +30,28 @@ public static partial class ResponseCatalog
                 )
             ]
         );
+
+        public static readonly OperationFailureResponse InvalidCredentials = new(
+            Id: "AUTH_INVALID_CREDENTIALS",
+            StatusCode: StatusCodes.Status401Unauthorized,
+            Title: "Sign-in failed.",
+            Details: [
+                new ResponseDetail(
+                    Message: "The email/username or password you entered is incorrect. Please check your details and try again.",
+                    Severity: ResponseSeverity.Warning
+                )
+            ]
+        );
+
+        public static readonly OperationOutcomeResponse LoginSuccessful = new(
+            Id: "AUTH_LOGIN_SUCCESS",
+            Title: "Welcome back.",
+            Details: [
+                new ResponseDetail(
+                    Message: "You're now signed in and can continue using your account.",
+                    Severity: ResponseSeverity.Info
+                )
+            ]
+        );
     }
 }

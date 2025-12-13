@@ -24,7 +24,9 @@ public class RegisterUserRequestValidator : AbstractValidator<RegisterUserReques
         RuleFor(x => x.UserName)
             .NotEmpty()
             .MinimumLength(3)
-            .MaximumLength(30);
+            .MaximumLength(30)
+            .Matches("^[^@]+$")
+            .WithMessage("Username cannot contain '@'.");
 
         RuleFor(x => x.Email)
             .NotEmpty()

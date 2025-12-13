@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EduTracker.Endpoints.Auth;
 using EduTracker.Endpoints.Users;
 using EduTracker.Extensions.Configurations;
 using EduTracker.Middleware;
@@ -38,6 +39,7 @@ app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.MapAuthEndpoints();
 app.MapUserEndpoints();
 
 app.Run();
