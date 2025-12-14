@@ -35,9 +35,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseHttpsRedirection();
+app.UseMiddleware<SessionAuthenticationMiddleware>();
 
 app.MapAuthEndpoints();
 app.MapUserEndpoints();

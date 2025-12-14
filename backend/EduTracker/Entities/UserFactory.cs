@@ -1,10 +1,9 @@
 using System.Text.Json;
-using EduTracker.Endpoints.Users.RegisterUser;
-using EduTracker.Entities;
+using EduTracker.Endpoints.Auth.RegisterUser;
 using EduTracker.Interfaces.Services;
 using EduTracker.Models;
 
-namespace EduTracker.Endpoints.Users;
+namespace EduTracker.Entities;
 
 public class UserFactory
 {

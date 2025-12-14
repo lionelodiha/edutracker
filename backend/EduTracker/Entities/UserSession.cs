@@ -27,7 +27,7 @@ public class UserSession : IEntity, IAuditableEntity, ISensitiveEntity<UserSessi
     public User User { get; private set; } = null!;
 
     public DateTimeOffset ExpiresAt { get; private set; }
-    public bool Revoked { get; private set; }
+    public bool IsRevoked { get; private set; }
 
     public DeviceType DeviceType { get; private set; }
 
@@ -45,7 +45,7 @@ public class UserSession : IEntity, IAuditableEntity, ISensitiveEntity<UserSessi
 
     public void Revoke()
     {
-        Revoked = true;
+        IsRevoked = true;
         _audit.UpdateAudit();
     }
 

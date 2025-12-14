@@ -1,6 +1,7 @@
 using EduTracker.Constants.Responses;
 using EduTracker.Constants.Routes;
 using EduTracker.Data;
+using EduTracker.Endpoints.Users;
 using EduTracker.Entities;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
@@ -11,7 +12,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace EduTracker.Endpoints.Users.RegisterUser;
+namespace EduTracker.Endpoints.Auth.RegisterUser;
 
 public static class RegisterUserHandler
 {

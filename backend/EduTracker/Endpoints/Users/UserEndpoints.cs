@@ -1,6 +1,5 @@
 using EduTracker.Constants.Routes;
 using EduTracker.Endpoints.Users.GetUser;
-using EduTracker.Endpoints.Users.RegisterUser;
 
 namespace EduTracker.Endpoints.Users;
 
@@ -12,10 +11,10 @@ public static class UserEndpoints
         {
             RouteGroupBuilder group = routes
                 .MapGroup(ApiRoutes.User.Base)
-                .WithTags("Users");
+                .WithTags("Users").AddEndpointFilter<RequireAuthFilter>();
 
-            group.MapPost(ApiRoutes.User.CreateUser, RegisterUserHandler.Handle);
-            group.MapGet(ApiRoutes.User.GetUserById, GetUserHandler.Handle);
+            group.MapGet(ApiRoutes.User.GetUserById, GetUserHandler.Handle)
+                .AllowAnonymous();
 
             return routes;
         }

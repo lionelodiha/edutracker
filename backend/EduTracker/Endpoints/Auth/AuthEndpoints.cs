@@ -1,5 +1,6 @@
 using EduTracker.Constants.Routes;
 using EduTracker.Endpoints.Auth.LoginUser;
+using EduTracker.Endpoints.Auth.RegisterUser;
 
 namespace EduTracker.Endpoints.Auth;
 
@@ -13,6 +14,7 @@ public static class AuthEndpoints
                 .MapGroup(ApiRoutes.Auth.Base)
                 .WithTags("Auth");
 
+            group.MapPost(ApiRoutes.Auth.Register, RegisterUserHandler.Handle);
             group.MapPost(ApiRoutes.Auth.Login, LoginUserHandler.Handle);
 
             return routes;

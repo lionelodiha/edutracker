@@ -1,12 +1,12 @@
 using EduTracker.Constants.Responses;
 using EduTracker.Data;
-using EduTracker.Endpoints.Users;
 using EduTracker.Entities;
-using EduTracker.Extensions.Entities;
+using EduTracker.Enums;
 using EduTracker.Extensions.Responses;
 using EduTracker.Extensions.Validations;
 using EduTracker.Interfaces.Services;
 using EduTracker.Models;
+using EduTracker.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +18,8 @@ public static class LoginUserHandler
     public static async Task<IResult> Handle(
         [FromBody] LoginUserRequest request,
         IValidator<LoginUserRequest> validator,
-        IHashingService hashingService,
-        AppDbContext db,
+        IHashingService hashingService, CookieService cookieService,
+        AppDbContext db, HttpContext httpContext,
         CancellationToken ct)
     {
         List<ResponseDetail> errors = await validator.ValidateRequestAsync(request, ct);
@@ -59,10 +59,27 @@ public static class LoginUserHandler
         if (!passwordValid)
             throw ResponseCatalog.Auth.InvalidCredentials.ToException();
 
-        // TODO:
-        // - generate access token
-        // - generate refresh token (longer if RememberMe)
-        // - persist refresh token hash
+        TimeSpan sessionDuration = request.RememberMe
+            ? TimeSpan.FromDays(30)
+            : TimeSpan.FromHours(8);
+
+        var session = new UserSession(
+            userId: user.Id,
+            sessionDuration: sessionDuration,
+            deviceType: InferDeviceType(httpContext) // or infer from headers later
+        );
+
+
+        db.UserSessions.Add(session);
+        await db.SaveChangesAsync(ct);
+
+        cookieService.SetCookie(
+            key: "et:session",
+            value: session.Id.ToString(),
+            expires: sessionDuration,  // this makes the cookie last as long as session
+            httpOnly: true,
+            secure: true
+        );
 
         ApiResponse<object> response = ResponseCatalog.Auth.LoginSuccessful
             .WithData(new { user.Id, user.UserName, user.PasswordHash, user.CreatedAt })
@@ -70,5 +87,21 @@ public static class LoginUserHandler
             .ToApiResponse();
 
         return Results.Ok(response);
+    }
+
+    private static DeviceType InferDeviceType(HttpContext context)
+    {
+        var ua = context.Request.Headers.UserAgent.ToString().ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(ua))
+            return DeviceType.Unknown;
+
+        if (ua.Contains("mobile") || ua.Contains("android") || ua.Contains("iphone"))
+            return DeviceType.Mobile;
+
+        if (ua.Contains("ipad") || ua.Contains("tablet"))
+            return DeviceType.Tablet;
+
+        return DeviceType.Web; // default desktop/browser
     }
 }

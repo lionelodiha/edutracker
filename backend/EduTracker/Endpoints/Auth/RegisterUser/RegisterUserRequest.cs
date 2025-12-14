@@ -1,4 +1,4 @@
-namespace EduTracker.Endpoints.Users.RegisterUser;
+namespace EduTracker.Endpoints.Auth.RegisterUser;
 
 public record RegisterUserRequest(
     string FirstName,

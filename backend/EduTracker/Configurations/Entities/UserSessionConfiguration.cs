@@ -27,7 +27,7 @@ public class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
         builder.Property(us => us.ExpiresAt)
             .IsRequired();
 
-        builder.Property(us => us.Revoked)
+        builder.Property(us => us.IsRevoked)
             .IsRequired();
 
         builder.Property(us => us.DeviceType)

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace EduTracker.Endpoints.Users.RegisterUser;
+namespace EduTracker.Endpoints.Auth.RegisterUser;
 
 public class RegisterUserRequestValidator : AbstractValidator<RegisterUserRequest>
 {
