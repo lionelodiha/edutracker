@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EduTracker.Enums;
+namespace EduTracker.Domain.Enums;
 
 public enum SystemRole
 {

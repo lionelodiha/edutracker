@@ -1,6 +1,8 @@
-namespace EduTracker.Common.Entities;
+using EduTracker.Domain.Components.Security;
 
-public interface ISensitiveEntity<TSensitive> where TSensitive : ISensitiveData
+namespace EduTracker.Domain.Abstractions;
+
+public interface IHasSensitiveData<TSensitive> where TSensitive : ISensitiveData
 {
     byte[] EncryptedData { get; }
     TSensitive? SensitiveData { get; }

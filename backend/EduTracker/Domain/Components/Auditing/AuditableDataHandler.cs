@@ -1,6 +1,6 @@
-namespace EduTracker.Common.Entities;
+namespace EduTracker.Domain.Components.Auditing;
 
-public class AuditableDataHandler
+public class AuditState
 {
     public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; private set; } = DateTimeOffset.UtcNow;

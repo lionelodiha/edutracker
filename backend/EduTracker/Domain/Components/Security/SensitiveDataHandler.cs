@@ -1,13 +1,15 @@
-namespace EduTracker.Common.Entities;
+using EduTracker.Domain.Components.Auditing;
 
-public class SensitiveDataHandler<TSensitive> where TSensitive : ISensitiveData
+namespace EduTracker.Domain.Components.Security;
+
+public class SensitiveDataState<TSensitive> where TSensitive : ISensitiveData
 {
     public byte[] EncryptedData { get; private set; } = [];
     public TSensitive? SensitiveData { get; private set; }
 
     public void SetSensitiveData(TSensitive data) => SensitiveData = data;
 
-    public void SetEncryptedData(byte[] data, AuditableDataHandler? auditHandler = null)
+    public void SetEncryptedData(byte[] data, AuditState? auditHandler = null)
     {
         EncryptedData = data;
         auditHandler?.UpdateAudit();

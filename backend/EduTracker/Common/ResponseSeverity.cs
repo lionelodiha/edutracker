@@ -1,4 +1,4 @@
-namespace EduTracker.Enums;
+namespace EduTracker.Domain.Enums;
 
 public enum ResponseSeverity
 {

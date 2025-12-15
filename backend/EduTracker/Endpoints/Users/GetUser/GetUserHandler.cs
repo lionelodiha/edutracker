@@ -5,7 +5,6 @@ using EduTracker.Entities;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Interfaces.Services;
-using EduTracker.Models;
 
 namespace EduTracker.Endpoints.Users.GetUser;
 

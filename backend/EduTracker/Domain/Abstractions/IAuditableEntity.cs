@@ -1,6 +1,6 @@
-namespace EduTracker.Common.Entities;
+namespace EduTracker.Domain.Abstractions;
 
-public interface IAuditableEntity
+public interface IAuditable
 {
     DateTimeOffset CreatedAt { get; }
     DateTimeOffset UpdatedAt { get; }

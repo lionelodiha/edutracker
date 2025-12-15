@@ -1,6 +1,5 @@
 using EduTracker.Exceptions;
 using EduTracker.Models;
-using EduTracker.Enums;
 
 namespace EduTracker.Extensions.Responses;
 

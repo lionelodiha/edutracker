@@ -1,14 +1,16 @@
-using EduTracker.Common.Entities;
-using EduTracker.Enums;
+using EduTracker.Domain.Abstractions;
+using EduTracker.Domain.Components.Auditing;
+using EduTracker.Domain.Components.Security;
+using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Enums;
 using EduTracker.Extensions.Validations;
-using EduTracker.Models;
 
-namespace EduTracker.Entities;
+namespace EduTracker.Domain.Entities.Users;
 
-public class User : IEntity, IAuditableEntity, ISensitiveEntity<UserSensitive>
+public class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
 {
-    private readonly AuditableDataHandler _audit = new();
-    private readonly SensitiveDataHandler<UserSensitive> _sensitive = new();
+    private readonly AuditState _audit = new();
+    private readonly SensitiveDataState<UserSensitive> _sensitive = new();
 
     public static string Audit => nameof(_audit);
     public static string Sensitive => nameof(_sensitive);

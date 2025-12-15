@@ -1,6 +1,6 @@
-using EduTracker.Common.Entities;
+using EduTracker.Domain.Components.Security;
 
-namespace EduTracker.Models;
+namespace EduTracker.Domain.Entities.Users;
 
 public class UserSensitive : ISensitiveData
 {

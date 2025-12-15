@@ -1,5 +1,4 @@
 using EduTracker.Common.Responses;
-using EduTracker.Enums;
 using EduTracker.Models;
 
 namespace EduTracker.Constants.Responses;

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using EduTracker.Data;
-using EduTracker.Entities;
 using EduTracker.Interfaces.Services;
 using EduTracker.Models;
 using Microsoft.EntityFrameworkCore;
