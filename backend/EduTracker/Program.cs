@@ -44,3 +44,42 @@ app.MapAuthEndpoints();
 app.MapUserEndpoints();
 
 app.Run();
+
+
+
+// Program.cs (for .NET 6/7 minimal hosting)
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// EF Core
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    // Or UseNpgsql / UseSqlite etc.
+});
+
+// Core services
+builder.Services.AddScoped<ICookieService, CookieService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+
+// Cache service (redis implementation bound to ICacheService)
+builder.Services.AddSingleton<ICacheService, RedisCacheService>(); // Your implementation
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Session auth middleware before routing/authorization
+app.Use(async (ctx, next) =>
+{
+    // Resolve from DI
+    var cookieSvc = ctx.RequestServices.GetRequiredService<ICookieService>();
+    var sessionSvc = ctx.RequestServices.GetRequiredService<ISessionService>();
+    var middleware = new SessionAuthMiddleware(next, cookieSvc, sessionSvc);
+    await middleware.InvokeAsync(ctx);
+});
+
+app.MapControllers();
+
+app.Run();
