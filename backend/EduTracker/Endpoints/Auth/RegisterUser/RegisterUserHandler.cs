@@ -2,7 +2,6 @@ using EduTracker.Constants.Responses;
 using EduTracker.Constants.Routes;
 using EduTracker.Data;
 using EduTracker.Endpoints.Users;
-using EduTracker.Entities;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Extensions.Validations;

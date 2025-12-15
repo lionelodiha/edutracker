@@ -1,6 +1,5 @@
 using EduTracker.Constants.Responses;
 using EduTracker.Data;
-using EduTracker.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Extensions.Validations;
 using EduTracker.Interfaces.Services;

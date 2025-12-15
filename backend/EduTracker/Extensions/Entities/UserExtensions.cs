@@ -1,5 +1,4 @@
 using EduTracker.Endpoints.Users;
-using EduTracker.Entities;
 
 namespace EduTracker.Extensions.Entities;
 

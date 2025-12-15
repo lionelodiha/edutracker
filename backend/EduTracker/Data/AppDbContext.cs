@@ -1,4 +1,3 @@
-using EduTracker.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Data;
