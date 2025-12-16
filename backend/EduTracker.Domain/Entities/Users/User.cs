@@ -3,7 +3,7 @@ using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
 using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
-using EduTracker.Extensions.Validations;
+using EduTracker.Domain.Extensions.Validations;
 
 namespace EduTracker.Domain.Entities.Users;
 

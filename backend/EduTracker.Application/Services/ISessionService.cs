@@ -1,5 +1,3 @@
-using EduTracker.Models;
-
 namespace EduTracker.Application.Services;
 
 public interface ISessionService

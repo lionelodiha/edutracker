@@ -3,8 +3,6 @@ using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
 using EduTracker.Infrastructure.Persistence;
-using EduTracker.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Infrastructure.Services;
 

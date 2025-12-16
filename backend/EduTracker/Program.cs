@@ -5,10 +5,7 @@ using EduTracker.Endpoints.Users;
 using EduTracker.Extensions.Configurations;
 using EduTracker.Infrastructure.Services;
 using EduTracker.Middleware;
-using EduTracker.Services;
-using FluentValidation;
 using Microsoft.AspNetCore.Http.Json;
-using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

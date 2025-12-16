@@ -1,8 +1,4 @@
-using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Components.Security;
 using EduTracker.Domain.Entities.UserSessions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EduTracker.Infrastructure.Persistence.Configurations;
 

@@ -1,13 +1,13 @@
-namespace EduTracker.Extensions.Validations;
+namespace EduTracker.Domain.Extensions.Validations;
 
-public static class StringExtensions
+internal static class StringExtensions
 {
     extension(string value)
     {
         public string EnsureNotEmptyAndTrim()
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException($"{nameof(value)} cannot be empty.", nameof(value));
+                throw new ArgumentException($"value cannot be empty.");
 
             return value.Trim();
         }

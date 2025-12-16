@@ -4,7 +4,6 @@ namespace EduTracker.Domain.Enums;
 
 public enum SystemRole
 {
-
     [Display(Name = "User")]
     User,
 

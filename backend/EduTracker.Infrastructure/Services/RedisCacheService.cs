@@ -1,8 +1,5 @@
 using System.Text.Json;
 using EduTracker.Application.Services;
-using EduTracker.Configurations.Settings;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 
 namespace EduTracker.Infrastructure.Services;
 

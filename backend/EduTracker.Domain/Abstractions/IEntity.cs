@@ -1,6 +1,6 @@
 namespace EduTracker.Domain.Abstractions;
 
-public interface IEntity
+internal interface IEntity
 {
     Guid Id { get; }
 }

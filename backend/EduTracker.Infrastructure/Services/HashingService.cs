@@ -1,8 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Options;
 using BCryption = BCrypt.Net.BCrypt;
-using EduTracker.Configurations.Security;
 using EduTracker.Application.Services;
 
 namespace EduTracker.Infrastructure.Services;

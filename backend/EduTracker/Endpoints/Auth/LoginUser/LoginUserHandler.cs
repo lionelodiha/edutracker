@@ -2,10 +2,7 @@ using EduTracker.Constants.Responses;
 using EduTracker.Extensions.Responses;
 using EduTracker.Extensions.Validations;
 using EduTracker.Models;
-using EduTracker.Services;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Endpoints.Auth.LoginUser;
 

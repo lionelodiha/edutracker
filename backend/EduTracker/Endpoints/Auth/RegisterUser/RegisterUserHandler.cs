@@ -5,9 +5,7 @@ using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Extensions.Validations;
 using EduTracker.Models;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Endpoints.Auth.RegisterUser;
 

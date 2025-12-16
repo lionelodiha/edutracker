@@ -1,6 +1,4 @@
 using EduTracker.Models;
-using FluentValidation;
-using FluentValidation.Results;
 
 namespace EduTracker.Extensions.Validations;
 

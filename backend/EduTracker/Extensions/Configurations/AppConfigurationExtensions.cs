@@ -1,8 +1,5 @@
 using EduTracker.Configurations.Security;
 using EduTracker.Configurations.Settings;
-using EduTracker.Services;
-using EduTracker.Services.StartupChecks;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Extensions.Configurations;
 

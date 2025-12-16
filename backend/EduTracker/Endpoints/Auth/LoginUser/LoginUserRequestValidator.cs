@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace EduTracker.Endpoints.Auth.LoginUser;
 
 public class LoginUserRequestValidator : AbstractValidator<LoginUserRequest>

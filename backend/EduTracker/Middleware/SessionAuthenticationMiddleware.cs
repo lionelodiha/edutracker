@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace EduTracker.Middleware;
 
 public class SessionAuthenticationMiddleware(RequestDelegate next)
