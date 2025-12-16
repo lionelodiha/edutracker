@@ -7,7 +7,7 @@
     <UserSecretsId>032e429b-6e93-43f1-84bf-4be85ece223a</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,6 +20,6 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="FluentValidation" Version="12.1.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
-  </ItemGroup>
+  </ItemGroup> -->
 
 </Project>
