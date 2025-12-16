@@ -1,6 +1,6 @@
 using EduTracker.Models;
 
-namespace EduTracker.Interfaces.Services;
+namespace EduTracker.Application.Services;
 
 public interface ISessionService
 {

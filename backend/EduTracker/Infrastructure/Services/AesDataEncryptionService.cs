@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
+using EduTracker.Application.Services;
 using EduTracker.Configurations.Security;
-using EduTracker.Interfaces.Services;
 using Microsoft.Extensions.Options;
 
-namespace EduTracker.Services;
+namespace EduTracker.Infrastructure.Services;
 
 public class AesDataEncryptionService : IDataEncryptionService
 {

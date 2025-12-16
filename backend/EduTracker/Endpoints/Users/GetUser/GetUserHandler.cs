@@ -1,9 +1,7 @@
 using System.Text.Json;
 using EduTracker.Constants.Responses;
-using EduTracker.Data;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
-using EduTracker.Interfaces.Services;
 
 namespace EduTracker.Endpoints.Users.GetUser;
 

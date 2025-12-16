@@ -1,6 +1,8 @@
+using EduTracker.Domain.Entities.Users;
+using EduTracker.Domain.Entities.UserSessions;
 using Microsoft.EntityFrameworkCore;
 
-namespace EduTracker.Data;
+namespace EduTracker.Infrastructure.Persistence;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

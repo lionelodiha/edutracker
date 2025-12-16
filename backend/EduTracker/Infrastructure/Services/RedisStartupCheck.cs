@@ -1,4 +1,4 @@
-namespace EduTracker.Services.StartupChecks;
+namespace EduTracker.Infrastructure.Services;
 
 public class RedisStartupCheck() : IHostedService
 {

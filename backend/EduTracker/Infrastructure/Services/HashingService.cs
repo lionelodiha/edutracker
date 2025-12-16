@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
-using EduTracker.Interfaces.Services;
 using BCryption = BCrypt.Net.BCrypt;
 using EduTracker.Configurations.Security;
+using EduTracker.Application.Services;
 
-namespace EduTracker.Services;
+namespace EduTracker.Infrastructure.Services;
 
 public class HashingService : IHashingService
 {

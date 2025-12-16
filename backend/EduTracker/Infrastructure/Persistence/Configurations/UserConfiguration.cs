@@ -1,7 +1,10 @@
+using EduTracker.Domain.Components.Auditing;
+using EduTracker.Domain.Components.Security;
+using EduTracker.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EduTracker.Configurations.Entities;
+namespace EduTracker.Infrastructure.Persistence.Configurations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

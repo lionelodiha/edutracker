@@ -1,11 +1,9 @@
 using EduTracker.Constants.Responses;
 using EduTracker.Constants.Routes;
-using EduTracker.Data;
 using EduTracker.Endpoints.Users;
 using EduTracker.Extensions.Entities;
 using EduTracker.Extensions.Responses;
 using EduTracker.Extensions.Validations;
-using EduTracker.Interfaces.Services;
 using EduTracker.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;

@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using EduTracker.Endpoints.Auth;
 using EduTracker.Endpoints.Users;
 using EduTracker.Extensions.Configurations;
+using EduTracker.Infrastructure.Services;
 using EduTracker.Middleware;
 using EduTracker.Services;
 using FluentValidation;

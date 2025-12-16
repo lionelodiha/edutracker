@@ -1,10 +1,12 @@
 using System.Text.Json;
-using EduTracker.Data;
-using EduTracker.Interfaces.Services;
+using EduTracker.Application.Services;
+using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Enums;
+using EduTracker.Infrastructure.Persistence;
 using EduTracker.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EduTracker.Services;
+namespace EduTracker.Infrastructure.Services;
 
 public class SessionService(AppDbContext db, ICacheService cache) : ISessionService
 {
@@ -12,7 +14,7 @@ public class SessionService(AppDbContext db, ICacheService cache) : ISessionServ
     private readonly ICacheService _cache = cache;
     private const string CachePrefix = "sess:";
 
-    public async Task<SessionData> ValidateAsync(Guid sessionId)
+    public async Task<SessionData?> ValidateAsync(Guid sessionId)
     {
         var cacheKey = CachePrefix + sessionId.ToString("N");
 
@@ -55,8 +57,7 @@ public class SessionService(AppDbContext db, ICacheService cache) : ISessionServ
     {
         var now = DateTime.UtcNow;
 
-        var entity = new UserSession(userId, lifetime, Enums.DeviceType.Unknown);
-
+        var entity = new UserSession(userId, lifetime, DeviceType.Unknown);
 
         _db.UserSessions.Add(entity);
         await _db.SaveChangesAsync();

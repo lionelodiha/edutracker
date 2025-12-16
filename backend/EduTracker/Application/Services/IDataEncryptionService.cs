@@ -1,4 +1,4 @@
-namespace EduTracker.Interfaces.Services;
+namespace EduTracker.Application.Services;
 
 public interface IDataEncryptionService
 {
