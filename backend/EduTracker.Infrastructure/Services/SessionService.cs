@@ -2,7 +2,6 @@ using System.Text.Json;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
-using EduTracker.Infrastructure.Persistence;
 
 namespace EduTracker.Infrastructure.Services;
 

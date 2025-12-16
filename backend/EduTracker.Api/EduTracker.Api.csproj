@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EduTracker.Application\EduTracker.Application.csproj" />
+    <ProjectReference Include="..\EduTracker.Infrastructure\EduTracker.Infrastructure.csproj" />
+    <ProjectReference Include="..\EduTracker.Persistence\EduTracker.Persistence.csproj" />
     <ProjectReference Include="..\EduTracker.Shared\EduTracker.Shared.csproj" />
   </ItemGroup>
 

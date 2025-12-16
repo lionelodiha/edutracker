@@ -3,11 +3,10 @@
   <Folder Name="/config/">
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
-    <File Path="Directory.Build.targets" />
     <File Path="Directory.Packages.props" />
   </Folder>
 
-  <Folder Name="/helper/">
+  <Folder Name="/scripts/">
     <File Path="scripts/generate-keys.js" />
   </Folder>
 
@@ -16,8 +15,8 @@
     <Project Path="backend/EduTracker.Application/EduTracker.Application.csproj" />
     <Project Path="backend/EduTracker.Domain/EduTracker.Domain.csproj" />
     <Project Path="backend/EduTracker.Infrastructure/EduTracker.Infrastructure.csproj" />
+    <Project Path="backend/EduTracker.Persistence/EduTracker.Persistence.csproj" />
     <Project Path="backend/EduTracker.Shared/EduTracker.Shared.csproj" />
-    <Project Path="backend/EduTracker/EduTracker.csproj" />
   </Folder>
 
 </Solution>
