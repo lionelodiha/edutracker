@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using EduTracker.Application.Services;
+using EduTracker.Infrastructure.Configurations.Security;
 using Microsoft.Extensions.Options;
 
 namespace EduTracker.Infrastructure.Services;
