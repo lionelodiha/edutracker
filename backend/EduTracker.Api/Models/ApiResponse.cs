@@ -3,7 +3,6 @@ using EduTracker.Application.Models;
 namespace EduTracker.Api.Models;
 
 public record ApiResponse<T>(
-    string? TraceId,
     bool Success,
     string MessageId,
     string Message,
