@@ -5,11 +5,11 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Infrastructure.Services;
 
-public class AesDataEncryptionService : IDataEncryptionService
+internal class AesDataEncryptionService : IDataEncryptionService
 {
     private readonly byte[] _key;
 
-    public AesDataEncryptionService(IOptions<DataEncryptionOptions> options)
+    internal AesDataEncryptionService(IOptions<DataEncryptionOptions> options)
     {
         string base64Key = options.Value.Key;
 
