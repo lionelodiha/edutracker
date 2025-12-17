@@ -1,3 +1,5 @@
+using EduTracker.Application.CQRS.Messaging;
+
 namespace EduTracker.Application.Features.Auth.Register;
 
 public record RegisterUserCommand(
@@ -7,4 +9,4 @@ public record RegisterUserCommand(
     string UserName,
     string Email,
     string Password
-);
+) : IRequest<Guid>;

@@ -6,6 +6,7 @@ using EduTracker.Infrastructure;
 using EduTracker.Infrastructure.CQRS.Messaging;
 using EduTracker.Persistence;
 using EduTracker.Persistence.Context;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
@@ -49,9 +51,16 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-app.MapPost("/auth/register", async (RegisterUserCommand command, IHandler<RegisterUserCommand, Guid> handler, AppDbContext db, CancellationToken ct) =>
+app.MapPost("/auth/register1", async (RegisterUserCommand command, IHandler<RegisterUserCommand, Guid> handler, AppDbContext db, CancellationToken ct) =>
 {
     Guid userId = await handler.Handle(command, ct);
+    string locationUri = $"/users/{userId}";
+    return Results.Created(locationUri, new { Id = userId });
+});
+
+app.MapPost("/auth/register2", async (RegisterUserCommand command, IMediator mediator, AppDbContext db, CancellationToken ct) =>
+{
+    var userId = await mediator.Send(command, ct);
     string locationUri = $"/users/{userId}";
     return Results.Created(locationUri, new { Id = userId });
 });
@@ -64,9 +73,34 @@ app.MapPost("/auth/register", async (RegisterUserCommand command, IHandler<Regis
 
 app.MapGet("/test/helloworld", async (IMediator mediator, CancellationToken ct) =>
 {
-    var command = new HelloWorldCommand();
-    var result = await mediator.Send<HelloWorldCommand, string>(command, ct);
+    string result = await mediator.Send(new HelloWorldCommand(), ct);
     return Results.Ok(result);
+});
+
+app.MapPost("/test/add", async (
+    AddItemCommand command,
+    IMediator mediator,
+    CancellationToken ct) =>
+{
+    await mediator.Send(command, ct);
+    return Results.Ok(FakeStore.Items);
+});
+
+app.MapGet("/test/items", async (
+    IMediator mediator,
+    CancellationToken ct) =>
+{
+    var items = await mediator.Send(new GetItemsQuery(), ct);
+    return Results.Ok(items);
+});
+
+app.MapPost("/test/remove", async (
+    RemoveItemCommand command,
+    IMediator mediator,
+    CancellationToken ct) =>
+{
+    await mediator.Send(command, ct);
+    return Results.Ok(FakeStore.Items);
 });
 
 app.Run();
