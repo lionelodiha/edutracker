@@ -1,9 +1,6 @@
 namespace EduTracker.Application.CQRS.Messaging;
 
-public interface IHandler<in TMessage, TResult>
-    where TMessage : IRequest<TResult>
+public interface IHandler<in TMessage, TResult> where TMessage : IRequest<TResult>
 {
     Task<TResult> Handle(TMessage message, CancellationToken cancellationToken = default);
 }
-
-public interface IRequest<out TResult> { }

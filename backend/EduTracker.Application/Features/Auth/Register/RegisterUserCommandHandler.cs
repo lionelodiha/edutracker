@@ -9,10 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.Register;
 
-public class RegisterUserCommandHandler(
-    AppDbContext db,
-    IHashingService hashingService,
-    IDataEncryptionService dataEncryptionService) : IHandler<RegisterUserCommand, Guid>
+public class RegisterUserCommandHandler(AppDbContext db, IHashingService hashingService, IDataEncryptionService dataEncryptionService)
+    : IHandler<RegisterUserCommand, Guid>
 {
     private readonly AppDbContext _db = db;
     private readonly IHashingService _hashingService = hashingService;
@@ -20,22 +18,20 @@ public class RegisterUserCommandHandler(
 
     public async Task<Guid> Handle(RegisterUserCommand command, CancellationToken ct)
     {
-        // 2. Normalize & hash email
         string normalizedEmail = command.Email.Trim().ToLowerInvariant();
         string emailHash = _hashingService.HashEmail(normalizedEmail);
 
-        // 3. Check username uniqueness
-        if (await _db.Users.AnyAsync(u => u.UserName == command.UserName, ct))
+        bool userNameExists = await _db.Users.AnyAsync(u => u.UserName == command.UserName.Trim(), ct);
+
+        if (userNameExists)
             throw ResponseCatalog.User.UsernameAlreadyTaken.ToException();
 
-        // 4. Check email uniqueness
-        if (await _db.Users.AnyAsync(u => u.EmailHash == emailHash, ct))
+        bool emailExists = await _db.Users.AnyAsync(u => u.EmailHash == emailHash, ct);
+
+        if (emailExists)
             throw ResponseCatalog.User.EmailAlreadyTaken.ToException();
 
-        // 5. Hash password & create entity
         string passwordHash = _hashingService.HashPassword(command.Password);
-
-        // 5.1 User Factory
         User user = new(command.UserName.Trim(), emailHash, passwordHash);
 
         UserSensitive sensitiveData = new()
@@ -49,10 +45,8 @@ public class RegisterUserCommandHandler(
         byte[] dataBlob = JsonSerializer.SerializeToUtf8Bytes(sensitiveData);
         byte[] encryptedData = _dataEncryptionService.EncryptData(dataBlob);
 
-        user.SetSensitiveData(sensitiveData);
         user.SetEncryptedData(encryptedData);
 
-        // 6. Persist
         _db.Users.Add(user);
         await _db.SaveChangesAsync(ct);
 
