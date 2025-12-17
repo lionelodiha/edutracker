@@ -6,10 +6,6 @@
     <File Path="Directory.Packages.props" />
   </Folder>
 
-  <Folder Name="/scripts/">
-    <File Path="scripts/generate-keys.js" />
-  </Folder>
-
   <Folder Name="/src/">
     <Project Path="backend/EduTracker.Api/EduTracker.Api.csproj" />
     <Project Path="backend/EduTracker.Application/EduTracker.Application.csproj" />
