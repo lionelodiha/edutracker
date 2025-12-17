@@ -13,22 +13,15 @@ namespace EduTracker.Application.Features.Auth.Register;
 
 public class RegisterUserCommandHandler(
     AppDbContext db,
-    IValidator<RegisterUserCommand> validator,
     IHashingService hashingService,
     IDataEncryptionService dataEncryptionService) : IHandler<RegisterUserCommand, Guid>
 {
     private readonly AppDbContext _db = db;
-    private readonly IValidator<RegisterUserCommand> _validator = validator;
     private readonly IHashingService _hashingService = hashingService;
     private readonly IDataEncryptionService _dataEncryptionService = dataEncryptionService;
 
     public async Task<Guid> Handle(RegisterUserCommand command, CancellationToken ct)
     {
-        // 1. Validate
-        var validationResult = await _validator.ValidateAsync(command, ct);
-        if (!validationResult.IsValid)
-            throw new ValidationException(validationResult.Errors);
-
         // 2. Normalize & hash email
         string normalizedEmail = command.Email.Trim().ToLowerInvariant();
         string emailHash = _hashingService.HashEmail(normalizedEmail);

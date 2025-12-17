@@ -19,7 +19,7 @@ builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-builder.Services.AddCqrs(typeof(RegisterUserCommand).Assembly);
+builder.Services.AddCqrsWithValidation(typeof(RegisterUserCommand).Assembly);
 
 var app = builder.Build();
 
