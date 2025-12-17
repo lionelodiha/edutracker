@@ -7,12 +7,12 @@ using StackExchange.Redis;
 
 namespace EduTracker.Infrastructure.Services;
 
-internal class RedisCacheService : ICacheService
+public class RedisCacheService : ICacheService
 {
     private readonly IDatabase? _db;
     private readonly ILogger<RedisCacheService> _logger;
 
-    internal RedisCacheService(IOptions<RedisOptions> options, ILogger<RedisCacheService> logger)
+    public RedisCacheService(IOptions<RedisOptions> options, ILogger<RedisCacheService> logger)
     {
         _logger = logger;
         RedisOptions opts = options.Value;

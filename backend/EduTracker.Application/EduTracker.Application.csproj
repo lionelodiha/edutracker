@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EduTracker.Domain\EduTracker.Domain.csproj" />
     <ProjectReference Include="..\EduTracker.Persistence\EduTracker.Persistence.csproj" />
     <ProjectReference Include="..\EduTracker.Shared\EduTracker.Shared.csproj" />

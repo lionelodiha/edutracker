@@ -7,12 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Infrastructure.Services;
 
-internal class HashingService : IHashingService
+public class HashingService : IHashingService
 {
     private readonly byte[] _emailHmacKey;
     private readonly int _passwordWorkFactor;
 
-    internal HashingService(IOptions<HashingOptions> options)
+    public HashingService(IOptions<HashingOptions> options)
     {
         HashingOptions opts = options.Value;
 
