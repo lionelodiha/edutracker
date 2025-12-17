@@ -24,7 +24,7 @@ public class AppException : Exception
 			: null;
 	}
 
-	public AppException(string? id, int statusCode, string? title, params ResponseDetail[]? details)
+	public AppException(string? id, int statusCode, string? title, ResponseDetail[]? details = null)
 		: base(ResolveMessage(title))
 	{
 		Id = string.IsNullOrWhiteSpace(id)

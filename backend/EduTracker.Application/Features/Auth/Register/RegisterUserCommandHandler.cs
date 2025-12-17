@@ -1,12 +1,10 @@
 using System.Text.Json;
 using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Exceptions;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
 using EduTracker.Persistence.Context;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.Register;
