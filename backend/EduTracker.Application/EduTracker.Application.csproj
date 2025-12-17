@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EduTracker.Domain\EduTracker.Domain.csproj" />
+    <ProjectReference Include="..\EduTracker.Persistence\EduTracker.Persistence.csproj" />
     <ProjectReference Include="..\EduTracker.Shared\EduTracker.Shared.csproj" />
   </ItemGroup>
 
