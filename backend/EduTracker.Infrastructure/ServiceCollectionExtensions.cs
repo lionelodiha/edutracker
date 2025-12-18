@@ -5,7 +5,6 @@ using EduTracker.Infrastructure.Configurations.Security;
 using EduTracker.Infrastructure.Configurations.Settings;
 using EduTracker.Infrastructure.CQRS.Messaging;
 using EduTracker.Infrastructure.Services;
-using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,13 +39,6 @@ public static class ServiceCollectionExtensions
                 services.Scan(scan => scan
                     .FromAssemblies(assembly)
                     .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)))
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
-                );
-
-                services.Scan(scan => scan
-                    .FromAssemblies(assembly)
-                    .AddClasses(classes => classes.AssignableTo(typeof(IValidator<>)))
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()
                 );
