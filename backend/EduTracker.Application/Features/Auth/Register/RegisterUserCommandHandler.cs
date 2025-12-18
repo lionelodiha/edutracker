@@ -32,7 +32,7 @@ public class RegisterUserCommandHandler(AppDbContext db, IHashingService hashing
         if (emailExists)
             throw ResponseCatalog.User.EmailAlreadyTaken.ToException();
 
-        string passwordHash = _hashingService.HashPassword(message.Password);
+        string passwordHash = await _hashingService.HashPasswordAsync(message.Password);
         User user = new(message.UserName.Trim(), emailHash, passwordHash);
 
         UserSensitive sensitiveData = new()

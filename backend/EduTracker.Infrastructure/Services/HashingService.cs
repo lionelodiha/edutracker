@@ -23,11 +23,11 @@ public class HashingService : IHashingService
         _passwordWorkFactor = opts.PasswordWorkFactor;
     }
 
-    public string HashPassword(string password)
-        => BCryption.HashPassword(password, _passwordWorkFactor);
+    public async Task<string> HashPasswordAsync(string password)
+        => await Task.Run(() => BCryption.HashPassword(password, _passwordWorkFactor));
 
-    public bool VerifyPassword(string password, string hashedPassword)
-        => BCryption.Verify(password, hashedPassword);
+    public async Task<bool> VerifyPasswordAsync(string password, string hashedPassword)
+        => await Task.Run(() => BCryption.Verify(password, hashedPassword));
 
     public string HashEmail(string email)
     {

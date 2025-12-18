@@ -34,7 +34,7 @@ public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingSer
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw ResponseCatalog.Auth.InvalidCredentials.ToException();
 
-        bool passwordValid = _hashingService.VerifyPassword(message.Password, userData.PasswordHash);
+        bool passwordValid = await _hashingService.VerifyPasswordAsync(message.Password, userData.PasswordHash);
 
         if (!passwordValid)
             throw ResponseCatalog.Auth.InvalidCredentials.ToException();
