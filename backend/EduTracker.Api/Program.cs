@@ -56,7 +56,9 @@ app.MapPost("/auth/register", async (RegisterUserCommand command, IMediator medi
 app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, CancellationToken ct) =>
 {
     OperationResult<SessionData> response = await mediator.Send(command, ct);
-    cookieService.SetCookie(httpResponse, CookieKeys.Session, response.Data!.SessionId.ToString("N"));
+
+    DateTimeOffset expires = DateTimeOffset.UtcNow.AddDays(7);
+    cookieService.SetCookie(httpResponse, CookieKeys.Session, response.Data!.SessionId.ToString("N"), expires);
 
     return Results.Ok(response.WithoutData().ToApiResponse());
 });

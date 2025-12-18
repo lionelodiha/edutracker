@@ -7,7 +7,15 @@ public static class OperationResultExtension
 {
     extension<T>(OperationResult<T> result)
     {
-        public OperationResult<T> WithoutData() => result with { Data = default };
+        public OperationResult<object> WithoutData()
+        {
+            return new OperationResult<object>(
+                MessageId: result.MessageId,
+                Message: result.Message,
+                Details: result.Details,
+                Data: null
+            );
+        }
 
         public ApiResponse<T> ToApiResponse()
         {

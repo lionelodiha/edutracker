@@ -51,9 +51,9 @@ public class RegisterUserCommandHandler(AppDbContext db, IHashingService hashing
         _db.Users.Add(user);
         await _db.SaveChangesAsync(cancellationToken);
 
-        return ResponseCatalog.Auth.LoginSuccessful
+        return ResponseCatalog.Auth.RegisterSuccessful
             .As<Guid>()
-            .WithData(user.Id).
-            ToOperationResult();
+            .WithData(user.Id)
+            .ToOperationResult();
     }
 }
