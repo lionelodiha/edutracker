@@ -1,26 +1,22 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Components.Security;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.UserSessions;
 
-public class UserSession : IEntity, IAuditable, IHasSensitiveData<UserSessionSensitive>
+public class UserSession : IEntity, IAuditable
 {
     private readonly AuditState _audit = new();
-    private readonly SensitiveDataState<UserSessionSensitive> _sensitive = new();
 
     public static string Audit => nameof(_audit);
-    public static string Sensitive => nameof(_sensitive);
 
     private UserSession() { }
 
-    public UserSession(Guid userId, TimeSpan sessionDuration, DeviceType deviceType)
+    public UserSession(Guid userId, TimeSpan sessionDuration)
     {
         UserId = userId;
-        DeviceType = deviceType;
         ExpiresAt = DateTimeOffset.UtcNow.Add(sessionDuration);
+        LastActiveAt = DateTimeOffset.UtcNow;
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -28,20 +24,24 @@ public class UserSession : IEntity, IAuditable, IHasSensitiveData<UserSessionSen
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
-    public DateTimeOffset ExpiresAt { get; private set; }
     public bool IsRevoked { get; private set; }
-
-    public DeviceType DeviceType { get; private set; }
+    public DateTimeOffset ExpiresAt { get; private set; }
+    public DateTimeOffset LastActiveAt { get; private set; }
 
     public DateTimeOffset CreatedAt => _audit.CreatedAt;
     public DateTimeOffset UpdatedAt => _audit.UpdatedAt;
 
-    public byte[] EncryptedData => _sensitive.EncryptedData;
-    public UserSessionSensitive? SensitiveData => _sensitive.SensitiveData;
+    public bool IsActive => !IsRevoked && ExpiresAt > DateTimeOffset.UtcNow;
 
-    public void SetExpiry(DateTimeOffset expiresAt)
+    public void RefreshActivity()
     {
-        ExpiresAt = expiresAt;
+        LastActiveAt = DateTimeOffset.UtcNow;
+        _audit.UpdateAudit();
+    }
+
+    public void ExtendSession(TimeSpan duration)
+    {
+        ExpiresAt = ExpiresAt.Add(duration);
         _audit.UpdateAudit();
     }
 
@@ -50,11 +50,6 @@ public class UserSession : IEntity, IAuditable, IHasSensitiveData<UserSessionSen
         IsRevoked = true;
         _audit.UpdateAudit();
     }
-
-    public void SetSensitiveData(UserSessionSensitive data) => _sensitive.SetSensitiveData(data);
-    public void SetEncryptedData(byte[] data) => _sensitive.SetEncryptedData(data, _audit);
-    public void ClearDecryptedData() => _sensitive.ClearDecryptedData();
-    public void ClearEncryptedData() => _sensitive.ClearEncryptedData();
 
     public void UpdateAudit() => _audit.UpdateAudit();
 }

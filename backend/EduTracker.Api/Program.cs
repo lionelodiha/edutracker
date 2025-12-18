@@ -1,13 +1,16 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EduTracker.Api.Constants.Cookies;
+using EduTracker.Api.Extensions.Responses;
 using EduTracker.Api.Middleware;
 using EduTracker.Api.Services;
 using EduTracker.Application;
 using EduTracker.Application.CQRS.Messaging;
+using EduTracker.Application.Features.Auth.Login;
 using EduTracker.Application.Features.Auth.Register;
+using EduTracker.Application.Models;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
-using EduTracker.Persistence.Context;
 using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 
@@ -42,11 +45,20 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
-app.MapPost("/auth/register", async (RegisterUserCommand command, IMediator mediator, AppDbContext db, CancellationToken ct) =>
+app.MapPost("/auth/register", async (RegisterUserCommand command, IMediator mediator, CancellationToken ct) =>
 {
-    Guid userId = await mediator.Send(command, ct);
-    string locationUri = $"/users/{userId}";
-    return Results.Created(locationUri, new { Id = userId });
+    OperationResult<Guid> response = await mediator.Send(command, ct);
+
+    string locationUri = $"/users/{response.Data}";
+    return Results.Created(locationUri, response.WithoutData().ToApiResponse());
+});
+
+app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, CancellationToken ct) =>
+{
+    OperationResult<SessionData> response = await mediator.Send(command, ct);
+    cookieService.SetCookie(httpResponse, CookieKeys.Session, response.Data!.SessionId.ToString("N"));
+
+    return Results.Ok(response.WithoutData().ToApiResponse());
 });
 
 app.Run();

@@ -2,5 +2,5 @@ namespace EduTracker.Application.Constants.Cache;
 
 internal static class CacheKeys
 {
-    public const string Session = "et:session:user:{0}";
+    public const string Session = "et:session:user:";
 }

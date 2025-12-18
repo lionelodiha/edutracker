@@ -2,6 +2,7 @@ using System.Text.Json;
 using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
+using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
 using EduTracker.Persistence.Context;
@@ -10,35 +11,35 @@ using Microsoft.EntityFrameworkCore;
 namespace EduTracker.Application.Features.Auth.Register;
 
 public class RegisterUserCommandHandler(AppDbContext db, IHashingService hashingService, IDataEncryptionService dataEncryptionService)
-    : IHandler<RegisterUserCommand, Guid>
+    : IHandler<RegisterUserCommand, OperationResult<Guid>>
 {
     private readonly AppDbContext _db = db;
     private readonly IHashingService _hashingService = hashingService;
     private readonly IDataEncryptionService _dataEncryptionService = dataEncryptionService;
 
-    public async Task<Guid> Handle(RegisterUserCommand command, CancellationToken ct)
+    public async Task<OperationResult<Guid>> Handle(RegisterUserCommand message, CancellationToken cancellationToken)
     {
-        string normalizedEmail = command.Email.Trim().ToLowerInvariant();
+        string normalizedEmail = message.Email.Trim().ToLowerInvariant();
         string emailHash = _hashingService.HashEmail(normalizedEmail);
 
-        bool userNameExists = await _db.Users.AnyAsync(u => u.UserName == command.UserName.Trim(), ct);
+        bool userNameExists = await _db.Users.AnyAsync(u => u.UserName == message.UserName.Trim(), cancellationToken);
 
         if (userNameExists)
             throw ResponseCatalog.User.UsernameAlreadyTaken.ToException();
 
-        bool emailExists = await _db.Users.AnyAsync(u => u.EmailHash == emailHash, ct);
+        bool emailExists = await _db.Users.AnyAsync(u => u.EmailHash == emailHash, cancellationToken);
 
         if (emailExists)
             throw ResponseCatalog.User.EmailAlreadyTaken.ToException();
 
-        string passwordHash = _hashingService.HashPassword(command.Password);
-        User user = new(command.UserName.Trim(), emailHash, passwordHash);
+        string passwordHash = _hashingService.HashPassword(message.Password);
+        User user = new(message.UserName.Trim(), emailHash, passwordHash);
 
         UserSensitive sensitiveData = new()
         {
-            FirstName = command.FirstName.Trim(),
-            MiddleName = command.MiddleName.Trim(),
-            LastName = command.LastName.Trim(),
+            FirstName = message.FirstName.Trim(),
+            MiddleName = message.MiddleName.Trim(),
+            LastName = message.LastName.Trim(),
             Email = normalizedEmail,
         };
 
@@ -48,8 +49,11 @@ public class RegisterUserCommandHandler(AppDbContext db, IHashingService hashing
         user.SetEncryptedData(encryptedData);
 
         _db.Users.Add(user);
-        await _db.SaveChangesAsync(ct);
+        await _db.SaveChangesAsync(cancellationToken);
 
-        return user.Id;
+        return ResponseCatalog.Auth.LoginSuccessful
+            .As<Guid>()
+            .WithData(user.Id).
+            ToOperationResult();
     }
 }

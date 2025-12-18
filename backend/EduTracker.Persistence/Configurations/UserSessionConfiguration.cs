@@ -1,5 +1,4 @@
 using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Components.Security;
 using EduTracker.Domain.Entities.UserSessions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,16 +21,13 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
             .HasForeignKey(us => us.UserId)
             .IsRequired();
 
-        builder.HasIndex(us => us.ExpiresAt);
+        builder.Property(us => us.IsRevoked)
+            .IsRequired();
 
         builder.Property(us => us.ExpiresAt)
             .IsRequired();
 
-        builder.Property(us => us.IsRevoked)
-            .IsRequired();
-
-        builder.Property(us => us.DeviceType)
-            .HasConversion<string>()
+        builder.Property(us => us.LastActiveAt)
             .IsRequired();
 
         builder.OwnsOne<AuditState>(UserSession.Audit, audit =>
@@ -43,15 +39,6 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
             audit.Property(a => a.UpdatedAt)
                 .HasColumnName("UpdatedAt")
                 .IsRequired();
-        });
-
-        builder.OwnsOne<SensitiveDataState<UserSessionSensitive>>(UserSession.Sensitive, sensitive =>
-        {
-            sensitive.Property(s => s.EncryptedData)
-                .HasColumnName("Data")
-                .IsRequired();
-
-            sensitive.Ignore(s => s.SensitiveData);
         });
     }
 }
