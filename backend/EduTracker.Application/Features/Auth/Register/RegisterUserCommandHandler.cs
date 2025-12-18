@@ -39,7 +39,7 @@ public class RegisterUserCommandHandler(AppDbContext db, IHashingService hashing
             FirstName = command.FirstName.Trim(),
             MiddleName = command.MiddleName.Trim(),
             LastName = command.LastName.Trim(),
-            Email = normalizedEmail
+            Email = normalizedEmail,
         };
 
         byte[] dataBlob = JsonSerializer.SerializeToUtf8Bytes(sensitiveData);
