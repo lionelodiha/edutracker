@@ -6,36 +6,45 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
 {
     public RegisterUserCommandValidator()
     {
-        RuleFor(x => x.FirstName).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.FirstName)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .MinimumLength(1)
-            .MaximumLength(40);
+            .MaximumLength(40)
+            .Matches("^[a-zA-Z'-]+$").WithMessage("Names can only contain letters, hyphens, or apostrophes.");
 
-        RuleFor(x => x.MiddleName).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.MiddleName)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .MinimumLength(1)
-            .MaximumLength(40);
+            .MaximumLength(40)
+            .Matches("^[a-zA-Z'-]+$").WithMessage("Names can only contain letters, hyphens, or apostrophes.");
 
-        RuleFor(x => x.LastName).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.LastName)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .MinimumLength(1)
-            .MaximumLength(60);
+            .MaximumLength(60)
+            .Matches("^[a-zA-Z'-]+$").WithMessage("Names can only contain letters, hyphens, or apostrophes.");
 
-        RuleFor(x => x.UserName).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.UserName)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .MinimumLength(3)
             .MaximumLength(30)
-            .Matches("^[^@]+$")
-            .WithMessage("Username cannot contain '@'.");
+            .Matches("^[a-zA-Z0-9._]+$").WithMessage("Username can only contain letters, numbers, dots, or underscores.");
 
-        RuleFor(x => x.Email).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.Email)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .EmailAddress()
-            .MaximumLength(254);
+            .MaximumLength(254)
+            .Matches(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
 
-        RuleFor(x => x.Password).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.Password)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .MinimumLength(8);
+            .MinimumLength(8)
+            .Matches(@"^\S+$").WithMessage("Password cannot contain spaces.");
 
         When(x => !string.IsNullOrEmpty(x.Password), () =>
         {

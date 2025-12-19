@@ -9,7 +9,6 @@ internal record OperationOutcomeResponse(
 	object? Data = default
 ) : BaseOperationResponse<OperationOutcomeResponse>(Id, Title, Details)
 {
-	public OperationOutcomeResponse<T> WithData<T>(T data) => new(Id, Title, Details, data);
 	public OperationOutcomeResponse<T> As<T>() => new(Id, Title, Details, default);
 }
 
