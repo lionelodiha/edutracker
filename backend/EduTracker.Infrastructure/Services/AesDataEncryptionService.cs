@@ -14,7 +14,7 @@ public class AesDataEncryptionService : IDataEncryptionService
         string base64Key = options.Value.Key;
 
         if (string.IsNullOrWhiteSpace(base64Key))
-            throw new ArgumentException("DataEncryption:Key must be provided in configuration.");
+            throw new InvalidOperationException("DataEncryption:Key must be provided in configuration.");
 
         _key = Convert.FromBase64String(base64Key);
     }

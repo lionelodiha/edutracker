@@ -9,6 +9,7 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Features.Auth.Login;
 using EduTracker.Application.Features.Auth.Register;
 using EduTracker.Application.Models;
+using EduTracker.Application.Services;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
 using Microsoft.AspNetCore.Http.Json;
@@ -53,12 +54,18 @@ app.MapPost("/auth/register", async (RegisterUserCommand command, IMediator medi
     return Results.Created(locationUri, response.WithoutData().ToApiResponse());
 });
 
-app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, CancellationToken ct) =>
+app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, SessionLifetime sessionLifetime, CancellationToken ct) =>
 {
     OperationResult<SessionData> response = await mediator.Send(command, ct);
 
-    DateTime expires = DateTime.UtcNow.AddDays(7);
-    cookieService.SetCookie(httpResponse, CookieKeys.Session, response.Data!.SessionId.ToString("N"), expires);
+    var cookieExpires = response.Data!.ExpiresAt.Add(sessionLifetime.GracePeriod);
+
+    cookieService.SetCookie(
+        httpResponse,
+        CookieKeys.Session,
+        response.Data.SessionId.ToString("N"),
+        cookieExpires
+    );
 
     return Results.Ok(response.WithoutData().ToApiResponse());
 });

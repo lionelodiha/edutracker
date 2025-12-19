@@ -11,22 +11,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.Login;
 
-public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingService, ICacheService cacheService)
+public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingService, ICacheService cacheService, SessionLifetime sessionLifetime)
     : IHandler<LoginUserCommand, OperationResult<SessionData>>
 {
-    private readonly AppDbContext _db = db;
-    private readonly IHashingService _hashingService = hashingService;
-    private readonly ICacheService _cacheService = cacheService;
-
     public async Task<OperationResult<SessionData>> Handle(LoginUserCommand message, CancellationToken cancellationToken = default)
     {
         string identifier = message.Identifier.Trim();
         bool isEmail = identifier.Contains('@');
 
-        IQueryable<User> query = _db.Users.AsQueryable();
+        IQueryable<User> query = db.Users.AsQueryable();
 
         query = isEmail
-            ? query.Where(u => u.EmailHash == _hashingService.HashEmail(identifier.ToLowerInvariant()))
+            ? query.Where(u => u.EmailHash == hashingService.HashEmail(identifier.ToLowerInvariant()))
             : query.Where(u => u.UserName == identifier);
 
         var userData = await query
@@ -34,22 +30,18 @@ public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingSer
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw ResponseCatalog.Auth.InvalidCredentials.ToException();
 
-        bool passwordValid = await _hashingService.VerifyPasswordAsync(message.Password, userData.PasswordHash);
+        bool passwordValid = await hashingService.VerifyPasswordAsync(message.Password, userData.PasswordHash);
 
         if (!passwordValid)
             throw ResponseCatalog.Auth.InvalidCredentials.ToException();
 
-        TimeSpan sessionDuration = message.RememberMe
-            ? TimeSpan.FromDays(30)
-            : TimeSpan.FromHours(8);
-
         UserSession session = new(
             userId: userData.Id,
-            sessionDuration: sessionDuration
+            sessionDuration: sessionLifetime.ResolveSession(message.RememberMe)
         );
 
-        _db.UserSessions.Add(session);
-        await _db.SaveChangesAsync(cancellationToken);
+        db.UserSessions.Add(session);
+        await db.SaveChangesAsync(cancellationToken);
 
         SessionData data = new(
             SessionId: session.Id,
@@ -60,7 +52,8 @@ public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingSer
         );
 
         string cacheKey = $"{CacheKeys.Session}{session.UserId:N}";
-        await _cacheService.SetAsync(cacheKey, data, TimeSpan.FromMinutes(15));
+        TimeSpan cacheDuration = TimeSpan.FromDays(1);
+        await cacheService.SetAsync(cacheKey, data, cacheDuration);
 
         return ResponseCatalog.Auth.LoginSuccessful
             .As<SessionData>()

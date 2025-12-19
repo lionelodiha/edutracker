@@ -17,7 +17,10 @@ public class HashingService : IHashingService
         HashingOptions opts = options.Value;
 
         if (string.IsNullOrWhiteSpace(opts.EmailHmacKey))
-            throw new ArgumentException("Hashing:EmailHmacKey must be provided in configuration.");
+            throw new InvalidOperationException("Hashing:EmailHmacKey must be provided in configuration.");
+
+        if (opts.PasswordWorkFactor <= 0)
+            throw new InvalidOperationException("Hashing:PasswordWorkFactor must be greater than 0.");
 
         _emailHmacKey = Encoding.UTF8.GetBytes(opts.EmailHmacKey);
         _passwordWorkFactor = opts.PasswordWorkFactor;

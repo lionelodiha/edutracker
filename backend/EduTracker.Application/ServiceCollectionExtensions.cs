@@ -1,5 +1,5 @@
-using EduTracker.Application.Features.Auth.Register;
-using FluentValidation;
+using EduTracker.Application.Configurations.Security;
+using EduTracker.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +11,9 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddApplicationServices(IConfiguration configuration)
         {
-            services.AddValidatorsFromAssemblyContaining<RegisterUserCommandValidator>();
+            services.Configure<SessionLifetimeOptions>(configuration.GetSection("Session"));
+            services.AddSingleton<SessionLifetime>();
+
             return services;
         }
     }
