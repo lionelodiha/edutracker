@@ -2,7 +2,7 @@ namespace EduTracker.Api.Services;
 
 public class CookieService()
 {
-    public void SetCookie(HttpResponse response, string name, string value, DateTimeOffset? expiresUtc = null, bool httpOnly = true, bool secure = true, string path = "/", string? domain = null)
+    public void SetCookie(HttpResponse response, string name, string value, DateTime? expiresUtc = null, bool httpOnly = true, bool secure = true, string path = "/", string? domain = null)
     {
         CookieOptions options = new()
         {
@@ -27,7 +27,7 @@ public class CookieService()
         CookieOptions options = new()
         {
             Path = path,
-            Expires = DateTimeOffset.UnixEpoch,
+            Expires = DateTime.UnixEpoch,
             SameSite = SameSiteMode.Strict,
         };
 

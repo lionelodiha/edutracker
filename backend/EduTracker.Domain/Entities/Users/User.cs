@@ -31,8 +31,8 @@ public class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string PasswordHash { get; private set; } = null!;
     public SystemRole Role { get; private set; } = SystemRole.User;
 
-    public DateTimeOffset CreatedAt => _audit.CreatedAt;
-    public DateTimeOffset UpdatedAt => _audit.UpdatedAt;
+    public DateTime CreatedAt => _audit.CreatedAt;
+    public DateTime UpdatedAt => _audit.UpdatedAt;
 
     public byte[] EncryptedData => _sensitive.EncryptedData;
     public UserSensitive? SensitiveData => _sensitive.SensitiveData;

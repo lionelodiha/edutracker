@@ -57,7 +57,7 @@ app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, 
 {
     OperationResult<SessionData> response = await mediator.Send(command, ct);
 
-    DateTimeOffset expires = DateTimeOffset.UtcNow.AddDays(7);
+    DateTime expires = DateTime.UtcNow.AddDays(7);
     cookieService.SetCookie(httpResponse, CookieKeys.Session, response.Data!.SessionId.ToString("N"), expires);
 
     return Results.Ok(response.WithoutData().ToApiResponse());

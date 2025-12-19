@@ -6,10 +6,10 @@ public record SessionData
 (
     Guid SessionId,
     Guid UserId,
-    DateTimeOffset ExpiresAt,
+    DateTime ExpiresAt,
     bool IsRevoked,
     SystemRole Role
 )
 {
-    public bool IsActive => !IsRevoked && ExpiresAt > DateTimeOffset.UtcNow;
+    public bool IsActive => !IsRevoked && ExpiresAt > DateTime.UtcNow;
 }

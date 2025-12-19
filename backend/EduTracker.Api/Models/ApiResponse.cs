@@ -10,5 +10,5 @@ public record ApiResponse<T>(
     T? Data
 )
 {
-    public DateTimeOffset Timestamp { get; private init; } = DateTimeOffset.UtcNow;
+    public DateTime Timestamp { get; private init; } = DateTime.UtcNow;
 }

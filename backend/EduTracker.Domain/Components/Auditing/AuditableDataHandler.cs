@@ -2,8 +2,8 @@ namespace EduTracker.Domain.Components.Auditing;
 
 public class AuditState
 {
-    public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; private set; } = DateTimeOffset.UtcNow;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
-    public void UpdateAudit() => UpdatedAt = DateTimeOffset.UtcNow;
+    public void UpdateAudit() => UpdatedAt = DateTime.UtcNow;
 }

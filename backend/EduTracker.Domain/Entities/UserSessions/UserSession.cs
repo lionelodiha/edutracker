@@ -15,8 +15,8 @@ public class UserSession : IEntity, IAuditable
     public UserSession(Guid userId, TimeSpan sessionDuration)
     {
         UserId = userId;
-        ExpiresAt = DateTimeOffset.UtcNow.Add(sessionDuration);
-        LastActiveAt = DateTimeOffset.UtcNow;
+        ExpiresAt = DateTime.UtcNow.Add(sessionDuration);
+        LastActiveAt = DateTime.UtcNow;
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -25,17 +25,17 @@ public class UserSession : IEntity, IAuditable
     public User User { get; private set; } = null!;
 
     public bool IsRevoked { get; private set; }
-    public DateTimeOffset ExpiresAt { get; private set; }
-    public DateTimeOffset LastActiveAt { get; private set; }
+    public DateTime ExpiresAt { get; private set; }
+    public DateTime LastActiveAt { get; private set; }
 
-    public DateTimeOffset CreatedAt => _audit.CreatedAt;
-    public DateTimeOffset UpdatedAt => _audit.UpdatedAt;
+    public DateTime CreatedAt => _audit.CreatedAt;
+    public DateTime UpdatedAt => _audit.UpdatedAt;
 
-    public bool IsActive => !IsRevoked && ExpiresAt > DateTimeOffset.UtcNow;
+    public bool IsActive => !IsRevoked && ExpiresAt > DateTime.UtcNow;
 
     public void RefreshActivity()
     {
-        LastActiveAt = DateTimeOffset.UtcNow;
+        LastActiveAt = DateTime.UtcNow;
         _audit.UpdateAudit();
     }
 

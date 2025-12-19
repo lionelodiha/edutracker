@@ -2,8 +2,8 @@ namespace EduTracker.Domain.Abstractions;
 
 internal interface IAuditable
 {
-    DateTimeOffset CreatedAt { get; }
-    DateTimeOffset UpdatedAt { get; }
+    DateTime CreatedAt { get; }
+    DateTime UpdatedAt { get; }
 
     void UpdateAudit();
 }
