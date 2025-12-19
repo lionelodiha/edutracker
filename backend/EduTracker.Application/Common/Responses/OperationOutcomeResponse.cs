@@ -9,15 +9,8 @@ internal record OperationOutcomeResponse(
 	object? Data = default
 ) : BaseOperationResponse<OperationOutcomeResponse>(Id, Title, Details)
 {
-	public OperationOutcomeResponse WithData(object data) => this with { Data = data };
-
-	public OperationOutcomeResponse<T> As<T>()
-	{
-		if (Data is null && typeof(T).IsValueType)
-			return new OperationOutcomeResponse<T>(Id, Title, Details, default);
-
-		return new OperationOutcomeResponse<T>(Id, Title, Details, (T?)Data);
-	}
+	public OperationOutcomeResponse<T> WithData<T>(T data) => new(Id, Title, Details, data);
+	public OperationOutcomeResponse<T> As<T>() => new(Id, Title, Details, default);
 }
 
 internal record OperationOutcomeResponse<TData>(

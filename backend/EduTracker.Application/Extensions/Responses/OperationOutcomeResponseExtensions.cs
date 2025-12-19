@@ -5,7 +5,7 @@ namespace EduTracker.Application.Extensions.Responses;
 
 internal static class OperationOutcomeResponseExtensions
 {
-    private static void NormalizeResponse(this IOperationResponse response, out string messageId, out string message, out List<ResponseDetail>? details)
+    private static void NormalizeResponse(IOperationResponse response, out string messageId, out string message, out List<ResponseDetail>? details)
     {
         messageId = string.IsNullOrWhiteSpace(response.Id)
             ? "UNKNOWN_ID"
@@ -24,25 +24,17 @@ internal static class OperationOutcomeResponseExtensions
     {
         public OperationResult<T> ToOperationResult()
         {
-            response.NormalizeResponse(out string messageId, out string message, out List<ResponseDetail>? details);
+            NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
             return new OperationResult<T>(messageId, message, details, response.Data);
         }
     }
 
     extension(OperationOutcomeResponse response)
     {
-        public OperationResult<T> ToOperationResult<T>()
+        public OperationResult<object?> ToOperationResult()
         {
-            if (response.Data is not null && response.Data is not T)
-            {
-                throw new InvalidCastException(
-                    $"Cannot convert response data from type '{response.Data.GetType().FullName}' to '{typeof(T).FullName}'. " +
-                    $"Ensure the response was created with the correct payload or call As<{typeof(T).Name}>() before conversion."
-                );
-            }
-
-            response.NormalizeResponse(out string messageId, out string message, out List<ResponseDetail>? details);
-            return new OperationResult<T>(messageId, message, details, (T?)response.Data);
+            NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
+            return new OperationResult<object?>(messageId, message, details, response.Data);
         }
     }
 }

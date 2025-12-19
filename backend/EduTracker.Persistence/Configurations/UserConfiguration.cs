@@ -12,12 +12,12 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(u => u.Id);
 
+        builder.HasIndex(u => u.UserName)
+            .IsUnique();
+
         builder.Property(u => u.UserName)
             .IsRequired()
             .HasMaxLength(30);
-
-        builder.HasIndex(u => u.UserName)
-            .IsUnique();
 
         builder.HasIndex(u => u.EmailHash)
             .IsUnique();
