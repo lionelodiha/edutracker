@@ -2,7 +2,6 @@ using System.Reflection;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Services;
 using EduTracker.Infrastructure.Configurations.Security;
-using EduTracker.Infrastructure.Configurations.Settings;
 using EduTracker.Infrastructure.CQRS.Messaging;
 using EduTracker.Infrastructure.Services;
 using FluentValidation;
