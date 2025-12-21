@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace EduTracker.Infrastructure.Services;
 
-public class RedisCacheService : ICacheService
+internal class RedisCacheService : ICacheService
 {
     private readonly IDatabase? _db;
     private readonly ILogger<RedisCacheService> _logger;

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Infrastructure.Services;
 
-public class AesDataEncryptionService : IDataEncryptionService
+internal class AesDataEncryptionService : IDataEncryptionService
 {
     private readonly byte[] _key;
 

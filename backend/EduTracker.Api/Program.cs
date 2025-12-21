@@ -54,18 +54,18 @@ app.MapPost("/auth/register", async (RegisterUserCommand command, IMediator medi
     return Results.Created(locationUri, response.WithoutData().ToApiResponse());
 });
 
-app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, SessionLifetime sessionLifetime, CancellationToken ct) =>
+app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, SessionPolicy sessionLifetime, CancellationToken ct) =>
 {
     OperationResult<SessionData> response = await mediator.Send(command, ct);
 
-    var cookieExpires = response.Data!.ExpiresAt.Add(sessionLifetime.GracePeriod);
+    // var cookieExpires = response.Data!.ExpiresAt.Add(sessionLifetime.GracePeriod);
 
-    cookieService.SetCookie(
-        httpResponse,
-        CookieKeys.Session,
-        response.Data.SessionId.ToString("N"),
-        cookieExpires
-    );
+    // cookieService.SetCookie(
+    //     httpResponse,
+    //     CookieKeys.Session,
+    //     response.Data.SessionId.ToString("N"),
+    //     cookieExpires
+    // );
 
     return Results.Ok(response.WithoutData().ToApiResponse());
 });

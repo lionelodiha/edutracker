@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EduTracker.Infrastructure.CQRS.Messaging;
 
-public class Mediator(IServiceProvider serviceProvider) : IMediator
+internal class Mediator(IServiceProvider serviceProvider) : IMediator
 {
     public Task<TResult> Send<TResult>(IRequest<TResult> message, CancellationToken cancellationToken = default)
     {

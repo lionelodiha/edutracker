@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.Login;
 
-public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingService, ICacheService cacheService, SessionLifetime sessionLifetime)
+public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingService, ICacheService cacheService, SessionPolicy sessionLifetime)
     : IHandler<LoginUserCommand, OperationResult<SessionData>>
 {
     public async Task<OperationResult<SessionData>> Handle(LoginUserCommand message, CancellationToken cancellationToken = default)
@@ -37,7 +37,8 @@ public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingSer
 
         UserSession session = new(
             userId: userData.Id,
-            initialLifetime: sessionLifetime.ResolveSession(message.RememberMe),
+            // initialLifetime: sessionLifetime.ResolveSession(message.RememberMe),
+            initialLifetime: TimeSpan.FromDays(7),
             absoluteLifetime: TimeSpan.FromDays(90)
         );
 
