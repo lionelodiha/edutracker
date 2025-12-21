@@ -11,8 +11,8 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddApplicationServices(IConfiguration configuration)
         {
-            services.Configure<SessionLifetimeOptions>(configuration.GetSection("Session"));
-            services.AddSingleton<SessionLifetime>();
+            services.Configure<SessionManagementOptions>(configuration.GetSection("SessionManagement"));
+            services.AddSingleton<SessionPolicy>();
 
             return services;
         }

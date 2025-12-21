@@ -1,8 +1,11 @@
 namespace EduTracker.Application.Configurations.Security;
 
-public record SessionLifetimeOptions
+public record SessionManagementOptions
 {
-    public int DefaultSessionHours { get; init; }
-    public int RememberMeSessionDays { get; init; }
-    public int GracePeriodDays { get; init; }
+    public int StandardSessionDurationHours { get; init; }
+    public int ExtendedSessionDurationDays { get; init; }
+    public int AbsoluteSessionLimitDays { get; init; }
+    public int StandardExpiryExtensionHours { get; init; }
+    public int ExtendedExpiryExtensionHours { get; init; }
+    public int ExpiryExtensionTriggerPercent { get; init; }
 }
