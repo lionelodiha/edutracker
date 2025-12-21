@@ -27,7 +27,7 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
         builder.Property(us => us.ExpiresAt)
             .IsRequired();
 
-        builder.Property(us => us.LastActiveAt)
+        builder.Property(us => us.AbsoluteExpiresAt)
             .IsRequired();
 
         builder.OwnsOne<AuditState>(UserSession.Audit, audit =>
