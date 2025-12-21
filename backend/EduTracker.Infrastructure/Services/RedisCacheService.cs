@@ -1,8 +1,7 @@
 using System.Text.Json;
 using EduTracker.Application.Services;
-using EduTracker.Infrastructure.Configurations.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace EduTracker.Infrastructure.Services;
@@ -12,20 +11,20 @@ internal class RedisCacheService : ICacheService
     private readonly IDatabase? _db;
     private readonly ILogger<RedisCacheService> _logger;
 
-    public RedisCacheService(IOptions<RedisOptions> options, ILogger<RedisCacheService> logger)
+    public RedisCacheService(IConfiguration configuration, ILogger<RedisCacheService> logger)
     {
         _logger = logger;
-        RedisOptions opts = options.Value;
+        string? connectionString = configuration.GetConnectionString("Redis");
 
-        if (string.IsNullOrWhiteSpace(opts.ConnectionString))
+        if (string.IsNullOrWhiteSpace(connectionString))
         {
-            _logger.LogWarning("Redis:ConnectionString must be provided in configuration. Redis cache will be disabled.");
+            _logger.LogWarning("Redis connection string is missing. Redis cache will be disabled.");
             return;
         }
 
         try
         {
-            ConnectionMultiplexer redisConnection = ConnectionMultiplexer.Connect(opts.ConnectionString);
+            ConnectionMultiplexer redisConnection = ConnectionMultiplexer.Connect(connectionString);
             _db = redisConnection.GetDatabase();
             _logger.LogInformation("Connected to Redis successfully.");
         }

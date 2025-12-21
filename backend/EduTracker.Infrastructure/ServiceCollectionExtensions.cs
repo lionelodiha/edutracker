@@ -17,7 +17,6 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructureServices(IConfiguration configuration, params Assembly[] assembliesToScan)
         {
-            services.Configure<RedisOptions>(configuration.GetSection("Redis"));
             services.AddSingleton<ICacheService, RedisCacheService>();
 
             services.Configure<HashingOptions>(configuration.GetSection("Hashing"));

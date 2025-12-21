@@ -9,3 +9,11 @@ public record SessionManagementOptions
     public int ExtendedExpiryExtensionHours { get; init; }
     public int ExpiryExtensionTriggerPercent { get; init; }
 }
+
+public record JwtOptions
+{
+    public string SecretKey { get; init; } = string.Empty;
+    public string Issuer { get; init; } = string.Empty;
+    public string Audience { get; init; } = string.Empty;
+    public int AccessTokenExpirationMinutes { get; init; }
+}

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using EduTracker.Api.Constants.Cookies;
 using EduTracker.Api.Extensions.Responses;
 using EduTracker.Api.Middleware;
 using EduTracker.Api.Services;
@@ -32,6 +31,49 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration, [typeof(IHandler<,>).Assembly]);
 
 builder.Services.AddScoped<CookieService>();
+
+
+// Configure authentication
+// builder.Services.AddAuthentication(options =>
+// {
+//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+// })
+// .AddJwtBearer(options =>
+// {
+//     var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+//     options.RequireHttpsMetadata = true; // Always require HTTPS in production
+//     options.SaveToken = true;
+//     options.TokenValidationParameters = new TokenValidationParameters
+//     {
+//         ValidateIssuerSigningKey = true,
+//         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.SecretKey)),
+//         ValidateIssuer = true,
+//         ValidIssuer = jwtSettings.Issuer,
+//         ValidateAudience = true,
+//         ValidAudience = jwtSettings.Audience,
+//         ValidateLifetime = true,
+//         ClockSkew = TimeSpan.FromMinutes(1)
+//     };
+
+//     // Custom event handlers for detailed logging
+//     options.Events = new JwtBearerEvents
+//     {
+//         OnAuthenticationFailed = context =>
+//         {
+//             var logger = context.HttpContext.RequestServices.GetService<ILogger<Program>>();
+//             logger?.LogWarning("JWT authentication failed: {Exception}", context.Exception.Message);
+//             return Task.CompletedTask;
+//         },
+//         OnTokenValidated = context =>
+//         {
+//             var logger = context.HttpContext.RequestServices.GetService<ILogger<Program>>();
+//             logger?.LogInformation("JWT token validated for user: {User}", context.Principal?.Identity?.Name);
+//             return Task.CompletedTask;
+//         }
+//     };
+// });
 
 WebApplication app = builder.Build();
 
