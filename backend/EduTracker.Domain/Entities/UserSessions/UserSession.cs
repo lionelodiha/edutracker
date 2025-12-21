@@ -12,11 +12,15 @@ public class UserSession : IEntity, IAuditable
 
     private UserSession() { }
 
-    public UserSession(Guid userId, TimeSpan sessionDuration)
+    public UserSession(Guid userId, TimeSpan initialLifetime, TimeSpan absoluteLifetime)
     {
+        DateTime now = DateTime.UtcNow;
+
         UserId = userId;
-        ExpiresAt = DateTime.UtcNow.Add(sessionDuration);
-        LastActiveAt = DateTime.UtcNow;
+        ExpiresAt = now.Add(initialLifetime);
+        AbsoluteExpiresAt = now.Add(absoluteLifetime);
+
+        _audit.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -24,32 +28,37 @@ public class UserSession : IEntity, IAuditable
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
-    public bool IsRevoked { get; private set; }
+    public bool IsRevoked { get; private set; } = false;
+    public DateTime? RevokedAt { get; private set; }
+
     public DateTime ExpiresAt { get; private set; }
-    public DateTime LastActiveAt { get; private set; }
+    public DateTime AbsoluteExpiresAt { get; private set; }
 
     public DateTime CreatedAt => _audit.CreatedAt;
     public DateTime UpdatedAt => _audit.UpdatedAt;
 
-    public bool IsActive => !IsRevoked && ExpiresAt > DateTime.UtcNow;
+    public bool IsActive => !IsRevoked
+        && DateTime.UtcNow < ExpiresAt
+        && DateTime.UtcNow < AbsoluteExpiresAt;
 
-    public void RefreshActivity()
+    public void ExtendSession(DateTime newExpiry)
     {
-        LastActiveAt = DateTime.UtcNow;
-        _audit.UpdateAudit();
-    }
+        if (newExpiry > AbsoluteExpiresAt)
+            newExpiry = AbsoluteExpiresAt;
 
-    public void ExtendSession(TimeSpan duration)
-    {
-        ExpiresAt = ExpiresAt.Add(duration);
-        _audit.UpdateAudit();
+        if (newExpiry > ExpiresAt)
+        {
+            ExpiresAt = newExpiry;
+            _audit.UpdateAudit();
+        }
     }
 
     public void Revoke()
     {
+        if (IsRevoked) return;
+
         IsRevoked = true;
+        RevokedAt = DateTime.UtcNow;
         _audit.UpdateAudit();
     }
-
-    public void UpdateAudit() => _audit.UpdateAudit();
 }

@@ -22,6 +22,8 @@ public class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         UserName = userName.EnsureNotEmptyAndTrim();
         EmailHash = emailHash.EnsureNotEmptyAndTrim();
         PasswordHash = passwordHash.EnsureNotEmptyAndTrim();
+
+        _audit.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -67,6 +69,4 @@ public class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public void SetEncryptedData(byte[] data) => _sensitive.SetEncryptedData(data, _audit);
     public void ClearDecryptedData() => _sensitive.ClearDecryptedData();
     public void ClearEncryptedData() => _sensitive.ClearEncryptedData();
-
-    public void UpdateAudit() => _audit.UpdateAudit();
 }
