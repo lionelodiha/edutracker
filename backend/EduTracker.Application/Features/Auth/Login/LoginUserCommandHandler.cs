@@ -37,7 +37,8 @@ public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingSer
 
         UserSession session = new(
             userId: userData.Id,
-            sessionDuration: sessionLifetime.ResolveSession(message.RememberMe)
+            initialLifetime: sessionLifetime.ResolveSession(message.RememberMe),
+            absoluteLifetime: TimeSpan.FromDays(90)
         );
 
         db.UserSessions.Add(session);
