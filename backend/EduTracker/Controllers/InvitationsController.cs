@@ -29,22 +29,11 @@ public class InvitationsController : ControllerBase
             return BadRequest(new { message = "Organization ID is required" });
         }
 
-        // Check if user already exists
-        string normalizedEmail = dto.Email.Trim().ToLowerInvariant();
-        string emailHash = _hashingService.HashEmail(normalizedEmail);
-
-        if (await _context.Users.AnyAsync(u => u.EmailHash == emailHash))
-        {
-            return BadRequest(new { message = "User with this email already exists" });
-        }
-
-        // Check if active invitation already exists
         var existingInvite = await _context.Invitations
             .FirstOrDefaultAsync(i => i.Email == dto.Email && i.OrganizationId == organizationId && i.Status == "pending");
 
         if (existingInvite != null)
         {
-             // return existing invite or regenerate? Let's regenerate.
              _context.Invitations.Remove(existingInvite);
         }
 
@@ -53,7 +42,7 @@ public class InvitationsController : ControllerBase
             Email = dto.Email,
             Role = dto.Role,
             OrganizationId = organizationId,
-            ExpiresAt = DateTime.UtcNow.AddDays(7) // 7 days expiry
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
         };
 
         _context.Invitations.Add(invitation);
@@ -61,11 +50,6 @@ public class InvitationsController : ControllerBase
 
         var org = await _context.Organizations.FindAsync(organizationId);
 
-        // Generate link (assuming frontend is running on same host or configured url)
-        // For local dev we assume localhost:5173 (Vite default) or whatever the origin is.
-        // We'll return the token and let frontend construct the full link, or construct it here.
-        // Better to return the token and a relative path.
-        
         return Ok(new InvitationResponseDto(
             invitation.Id, 
             invitation.Email, 
@@ -99,7 +83,6 @@ public class InvitationsController : ControllerBase
             return BadRequest(new { message = "Invitation has expired" });
         }
         
-        // Fetch Organization Name
         var org = await _context.Organizations.FindAsync(invitation.OrganizationId);
 
         return Ok(new InvitationResponseDto(
@@ -110,5 +93,45 @@ public class InvitationsController : ControllerBase
             org?.Name ?? "Unknown Organization",
             $"/auth?token={invitation.Id}"
         ));
+    }
+
+    [HttpPost("accept")]
+    public async Task<IActionResult> AcceptInvitation([FromBody] AcceptInvitationDto dto, [FromQuery] Guid userId)
+    {
+        var invitation = await _context.Invitations.FirstOrDefaultAsync(i => i.Id == dto.Token);
+        
+        if (invitation == null || invitation.Status != "pending")
+        {
+            return BadRequest(new { message = "Invalid or expired invitation." });
+        }
+
+        if (invitation.ExpiresAt.HasValue && invitation.ExpiresAt.Value < DateTime.UtcNow)
+        {
+            invitation.Status = "expired";
+            await _context.SaveChangesAsync();
+            return BadRequest(new { message = "Invitation has expired." });
+        }
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+             return BadRequest(new { message = "User not found." });
+        }
+
+        if (!_context.UserOrganizations.Any(uo => uo.UserId == user.Id && uo.OrganizationId == invitation.OrganizationId))
+        {
+            var userOrg = new UserOrganization
+            {
+                UserId = user.Id,
+                OrganizationId = invitation.OrganizationId,
+                Role = invitation.Role
+            };
+            _context.UserOrganizations.Add(userOrg);
+        }
+
+        invitation.Status = "used";
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Invitation accepted." });
     }
 }

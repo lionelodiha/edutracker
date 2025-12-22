@@ -31,7 +31,18 @@ class AuthService {
       avatarUrl: 'https://ui-avatars.com/api/?name=Demo+Admin',
       organizationId: 'demo-org'
     };
-    this.setStoredAuth({ user: demoUser, token: 'demo-token' });
+
+    const demoOrgs = [
+        { organizationId: 'demo-org', name: 'Demo Organization', role: 'admin' as const },
+        { organizationId: 'demo-org-2', name: 'Secondary School', role: 'teacher' as const }
+    ];
+
+    this.setStoredAuth({ 
+        user: demoUser, 
+        token: 'demo-token',
+        organizations: demoOrgs,
+        organizationName: 'Demo Organization'
+    });
     localStorage.setItem(DEMO_KEY, 'true');
     
     // Initialize demo data
@@ -72,6 +83,24 @@ class AuthService {
   getOrganizationName(): string | undefined {
     const auth = this.getStoredAuth();
     return auth?.organizationName;
+  }
+
+  getOrganizations() {
+    const auth = this.getStoredAuth();
+    return auth?.organizations || [];
+  }
+
+  selectOrganization(orgId: string) {
+    const auth = this.getStoredAuth();
+    if (!auth || !auth.organizations) return;
+
+    const org = auth.organizations.find(o => o.organizationId === orgId);
+    if (org) {
+        auth.user.organizationId = org.organizationId;
+        auth.user.role = org.role;
+        auth.organizationName = org.name;
+        this.setStoredAuth(auth);
+    }
   }
 
   getToken(): string | null {
@@ -131,6 +160,12 @@ class AuthService {
 
       const result = await response.json();
       if (result.token) {
+          if (result.organizations && result.organizations.length === 1) {
+              const org = result.organizations[0];
+              result.user.organizationId = org.organizationId;
+              result.user.role = org.role;
+              result.organizationName = org.name;
+          }
           this.setStoredAuth(result);
       }
       return result;
@@ -156,6 +191,12 @@ class AuthService {
     }
 
     const data = await response.json();
+    if (data.organizations && data.organizations.length === 1) {
+        const org = data.organizations[0];
+        data.user.organizationId = org.organizationId;
+        data.user.role = org.role;
+        data.organizationName = org.name;
+    }
     this.setStoredAuth(data);
     return data;
   }

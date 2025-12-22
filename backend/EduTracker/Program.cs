@@ -114,12 +114,18 @@ using (var scope = app.Services.CreateScope())
                 encryptionService
             );
 
-            adminUser.SetRole("admin");
             adminUser.SetStatus("active");
             adminUser.SetAvatarUrl("https://ui-avatars.com/api/?name=System+Admin");
-            adminUser.SetOrganizationId(defaultOrg.Id);
-
+            
             context.Users.Add(adminUser);
+            
+            // Add UserOrganization
+            context.UserOrganizations.Add(new UserOrganization
+            {
+                UserId = adminUser.Id,
+                OrganizationId = defaultOrg.Id,
+                Role = "admin"
+            });
         }
         context.SaveChanges();
     }
@@ -128,8 +134,22 @@ using (var scope = app.Services.CreateScope())
     string masterEmail = "master@edutracker.com";
     string masterEmailHash = hashingService.HashEmail(masterEmail);
 
-    if (!context.Users.Any(u => u.Role == "master_admin"))
+    // Check if master admin exists by email
+    if (!context.Users.Any(u => u.EmailHash == masterEmailHash))
     {
+        // Create Master Org if not exists (optional, or reuse default)
+        var masterOrg = context.Organizations.Find("org-master");
+        if (masterOrg == null)
+        {
+            masterOrg = new Organization
+            {
+                Id = "org-master",
+                Name = "System Administration",
+                SubscriptionStatus = "active"
+            };
+            context.Organizations.Add(masterOrg);
+        }
+
         var registerRequest = new RegisterUserRequest(
             "Master",
             "",
@@ -149,12 +169,19 @@ using (var scope = app.Services.CreateScope())
             encryptionService
         );
 
-        masterUser.SetRole("master_admin");
         masterUser.SetStatus("active");
         masterUser.SetAvatarUrl("https://ui-avatars.com/api/?name=Master+Admin");
-        masterUser.SetOrganizationId(null);
-
+        
         context.Users.Add(masterUser);
+
+        // Add UserOrganization
+        context.UserOrganizations.Add(new UserOrganization
+        {
+            UserId = masterUser.Id,
+            OrganizationId = masterOrg.Id,
+            Role = "master_admin"
+        });
+
         context.SaveChanges();
     }
 }

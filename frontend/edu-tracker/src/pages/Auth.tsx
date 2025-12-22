@@ -74,11 +74,17 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await authService.login({
+      await authService.login({
         emailOrUsername: loginData.emailOrUsername,
         password: loginData.password
       });
-      navigate(`/dashboard/${response.user.role}`);
+
+      const user = authService.getCurrentUser();
+      if (user?.organizationId && user?.role) {
+        navigate(`/dashboard/${user.role}`);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to login');
     } finally {
