@@ -12,11 +12,12 @@ public class UserSession : IEntity, IAuditable
 
     private UserSession() { }
 
-    public UserSession(Guid userId, TimeSpan initialLifetime, TimeSpan absoluteLifetime)
+    public UserSession(Guid userId, bool rememberMe, TimeSpan initialLifetime, TimeSpan absoluteLifetime)
     {
         DateTime now = DateTime.UtcNow;
 
         UserId = userId;
+        RememberMe = rememberMe;
         ExpiresAt = now.Add(initialLifetime);
         AbsoluteExpiresAt = now.Add(absoluteLifetime);
 
@@ -28,6 +29,7 @@ public class UserSession : IEntity, IAuditable
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
+    public bool RememberMe { get; set; } = false;
     public bool IsRevoked { get; private set; } = false;
     public DateTime? RevokedAt { get; private set; }
 

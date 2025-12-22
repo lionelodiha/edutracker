@@ -1,0 +1,164 @@
+using EduTracker.Application.Configurations.Security;
+using EduTracker.Application.Constants.Cache;
+using EduTracker.Application.Extensions.Entities;
+using EduTracker.Application.Models;
+using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Enums;
+using EduTracker.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+namespace EduTracker.Application.Services;
+
+public class SessionManagementService
+{
+    private readonly TimeSpan _standardSessionDuration;
+    private readonly TimeSpan _extendedSessionDuration;
+    private readonly TimeSpan _absoluteSessionLimit;
+
+    private readonly TimeSpan _standardExpiryExtension;
+    private readonly TimeSpan _extendedExpiryExtension;
+
+    private readonly double _expiryExtensionTriggerPercent;
+
+    private readonly ICacheService _cacheService;
+    private readonly AppDbContext _dbContext;
+
+    public SessionManagementService(IOptions<SessionManagementOptions> options, ICacheService cacheService, AppDbContext dbContext)
+    {
+        _cacheService = cacheService;
+        _dbContext = dbContext;
+        SessionManagementOptions opts = options.Value;
+
+        if (opts.StandardSessionDurationHours <= 0)
+            throw new InvalidOperationException("SessionManagement:StandardSessionDurationHours must be greater than 0.");
+
+        if (opts.ExtendedSessionDurationDays <= 0)
+            throw new InvalidOperationException("SessionManagement:ExtendedSessionDurationDays must be greater than 0.");
+
+        if (opts.AbsoluteSessionLimitDays < opts.ExtendedSessionDurationDays)
+            throw new InvalidOperationException("SessionManagement:AbsoluteSessionLimitDays must be greater than or equal to ExtendedSessionDurationDays.");
+
+        if (opts.ExpiryExtensionTriggerPercent < 1 || opts.ExpiryExtensionTriggerPercent > 100)
+            throw new InvalidOperationException("SessionManagement:ExpiryExtensionTriggerPercent must be between 1 and 100.");
+
+        _standardSessionDuration = TimeSpan.FromHours(opts.StandardSessionDurationHours);
+        _extendedSessionDuration = TimeSpan.FromDays(opts.ExtendedSessionDurationDays);
+        _absoluteSessionLimit = TimeSpan.FromDays(opts.AbsoluteSessionLimitDays);
+
+        _standardExpiryExtension = TimeSpan.FromHours(opts.StandardExpiryExtensionHours);
+        _extendedExpiryExtension = TimeSpan.FromHours(opts.ExtendedExpiryExtensionHours);
+
+        _expiryExtensionTriggerPercent = opts.ExpiryExtensionTriggerPercent;
+    }
+
+    public async Task<UserSession> CreateSessionAsync(Guid userId, SystemRole systemRole, bool rememberMe = false, CancellationToken cancellationToken = default)
+    {
+        TimeSpan initialLifetime = rememberMe ? _extendedSessionDuration : _standardSessionDuration;
+        UserSession session = new(userId, rememberMe, initialLifetime, _absoluteSessionLimit);
+
+        _dbContext.UserSessions.Add(session);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        SessionData sessionData = session.ToSessionData(systemRole);
+        await _cacheService.SetAsync(CacheKey(session.Id), sessionData, TimeSpan.FromMinutes(30));
+
+        return session;
+    }
+
+    public async Task<SessionData?> GetSessionDataAsync(Guid sessionId)
+    {
+        var cachedSession = await _cacheService.GetAsync<SessionData>(CacheKey(sessionId));
+
+        if (cachedSession is not null) return cachedSession;
+
+        SessionData? sessionData = await _dbContext.UserSessions
+            .AsNoTracking()
+            .Where(s => s.Id == sessionId)
+            .Select(s => new SessionData
+            (
+                SessionId: s.Id,
+                UserId: s.UserId,
+                ExpiresAt: s.ExpiresAt,
+                AbsoluteExpiresAt: s.AbsoluteExpiresAt,
+                IsRevoked: s.IsRevoked,
+                RememberMe: s.RememberMe,
+                Role: s.User.Role
+            ))
+            .FirstOrDefaultAsync();
+
+        if (sessionData is null) return null;
+
+        TimeSpan remainingTime = sessionData.ExpiresAt - DateTime.UtcNow;
+        TimeSpan maxCacheDuration = TimeSpan.FromMinutes(30);
+
+        TimeSpan cacheDuration = remainingTime < maxCacheDuration ? remainingTime : maxCacheDuration;
+
+        if (cacheDuration > TimeSpan.Zero)
+            await _cacheService.SetAsync(CacheKey(sessionId), sessionData, cacheDuration);
+
+        return sessionData;
+    }
+
+    public async Task<bool> ValidateAsync(Guid sessionId)
+    {
+        SessionData? sessionData = await GetSessionDataAsync(sessionId);
+        return sessionData?.IsActive ?? false;
+    }
+
+    public async Task<bool> TryExtendSessionAsync(Guid sessionId)
+    {
+        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
+
+        if (session is null || !session.IsActive) return false;
+
+        if (!IsNearExpiry(session)) return false;
+
+        TimeSpan extension = session.RememberMe ? _extendedExpiryExtension : _standardExpiryExtension;
+        session.ExtendSession(DateTime.UtcNow + extension);
+
+        _dbContext.UserSessions.Update(session);
+        await _dbContext.SaveChangesAsync();
+
+        SessionData? sessionData = await GetSessionDataAsync(sessionId);
+
+        if (sessionData is not null)
+        {
+            TimeSpan remainingTime = sessionData.ExpiresAt - DateTime.UtcNow;
+            TimeSpan maxCacheDuration = TimeSpan.FromMinutes(30);
+
+            TimeSpan cacheDuration = remainingTime < maxCacheDuration ? remainingTime : maxCacheDuration;
+
+            sessionData = sessionData with { ExpiresAt = session.ExpiresAt };
+            await _cacheService.SetAsync(CacheKey(session.Id), sessionData, cacheDuration);
+        }
+
+        return true;
+    }
+
+    public async Task<bool> RevokeSessionAsync(Guid sessionId)
+    {
+        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
+
+        if (session is null || session.IsRevoked) return false;
+
+        session.Revoke();
+        _dbContext.UserSessions.Update(session);
+
+        await _dbContext.SaveChangesAsync();
+        await _cacheService.RemoveAsync(CacheKey(sessionId));
+
+        return true;
+    }
+
+    private static string CacheKey(Guid sessionId) => $"{CacheKeys.Session}{sessionId}";
+
+    private bool IsNearExpiry(UserSession session)
+    {
+        TimeSpan remaining = session.ExpiresAt - DateTime.UtcNow;
+        double totalSeconds = (session.RememberMe ? _extendedSessionDuration : _standardSessionDuration).TotalSeconds;
+        TimeSpan threshold = TimeSpan.FromSeconds(totalSeconds * _expiryExtensionTriggerPercent / 100.0);
+
+        return remaining <= threshold;
+    }
+}

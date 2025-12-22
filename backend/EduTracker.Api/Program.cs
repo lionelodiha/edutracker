@@ -96,7 +96,7 @@ app.MapPost("/auth/register", async (RegisterUserCommand command, IMediator medi
     return Results.Created(locationUri, response.WithoutData().ToApiResponse());
 });
 
-app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, SessionPolicy sessionLifetime, CancellationToken ct) =>
+app.MapPost("/auth/login", async (LoginUserCommand command, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, SessionManagementService sessionLifetime, CancellationToken ct) =>
 {
     OperationResult<SessionData> response = await mediator.Send(command, ct);
 

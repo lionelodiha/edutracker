@@ -12,7 +12,9 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddApplicationServices(IConfiguration configuration)
         {
             services.Configure<SessionManagementOptions>(configuration.GetSection("SessionManagement"));
-            services.AddSingleton<SessionPolicy>();
+            services.AddScoped<SessionManagementService>();
+
+            services.Configure<SessionTokenOptions>(configuration.GetSection("SessionToken"));
 
             return services;
         }
