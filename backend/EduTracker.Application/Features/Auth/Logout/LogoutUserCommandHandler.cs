@@ -9,11 +9,9 @@ namespace EduTracker.Application.Features.Auth.Logout;
 public class LogoutUserCommandHandler(SessionManagementService sessionManagementService)
     : IHandler<LogoutUserCommand, OperationResult<object>>
 {
-    private readonly SessionManagementService _sessionService = sessionManagementService;
-
     public async Task<OperationResult<object>> Handle(LogoutUserCommand message, CancellationToken cancellationToken = default)
     {
-        await _sessionService.DeleteSessionAsync(message.SessionId, cancellationToken);
+        await sessionManagementService.DeleteSessionAsync(message.SessionId, cancellationToken);
 
         return ResponseCatalog.Auth.LogoutSuccessful
             .As<object>()
