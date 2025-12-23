@@ -54,5 +54,16 @@ internal static partial class ResponseCatalog
                 )
             ]
         );
+
+        public static OperationOutcomeResponse LogoutSuccessful = new(
+            Id: "AUTH_LOGOUT_SUCCESS",
+            Title: "You're logged out!",
+            Details: [
+                new ResponseDetail(
+                    Message: "You've successfully logged out. See you next time!",
+                    Severity: ResponseSeverity.Info
+                )
+            ]
+        );
     }
 }
