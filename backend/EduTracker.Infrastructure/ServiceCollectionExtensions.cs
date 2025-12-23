@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IHashingService, HashingService>();
 
             services.Configure<DataEncryptionOptions>(configuration.GetSection("DataEncryption"));
-            services.AddSingleton<IDataEncryptionService, AesDataEncryptionService>();
+            services.AddSingleton<IDataEncryptionService, AesGcmDataEncryptionService>();
 
             services.AddCqrsWithValidation(assembliesToScan);
 

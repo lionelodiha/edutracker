@@ -1,24 +1,38 @@
-namespace EduTracker.Application.Services;
-
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using EduTracker.Application.Configurations.Security;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+
+namespace EduTracker.Application.Services;
 
 public class JwtService
 {
-    private readonly string _secretKey;
     private readonly string _issuer;
     private readonly string _audience;
     private readonly int _expiryMinutes;
+    private readonly SigningCredentials _signingCredentials;
 
-    public JwtService(string secretKey, string issuer, string audience, int expiryMinutes = 60)
+    public JwtService(IOptions<SessionTokenOptions> options)
     {
-        _secretKey = secretKey;
-        _issuer = issuer;
-        _audience = audience;
-        _expiryMinutes = expiryMinutes;
+        var opts = options.Value ?? throw new InvalidOperationException("SessionTokenOptions must be provided.");
+
+        if (string.IsNullOrWhiteSpace(opts.SecretKey))
+            throw new InvalidOperationException("SessionToken:SecretKey must be provided.");
+        if (string.IsNullOrWhiteSpace(opts.Issuer))
+            throw new InvalidOperationException("SessionToken:Issuer must be provided.");
+        if (string.IsNullOrWhiteSpace(opts.Audience))
+            throw new InvalidOperationException("SessionToken:Audience must be provided.");
+        if (opts.AccessTokenExpirationMinutes <= 0)
+            throw new InvalidOperationException("SessionToken:AccessTokenExpirationMinutes must be greater than 0.");
+
+        _issuer = opts.Issuer;
+        _audience = opts.Audience;
+        _expiryMinutes = opts.AccessTokenExpirationMinutes;
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(opts.SecretKey));
+        _signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
     }
 
     public string GenerateToken(string userId, string userName)
@@ -30,24 +44,21 @@ public class JwtService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
         var token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
-            signingCredentials: creds
+            signingCredentials: _signingCredentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public ClaimsPrincipal ValidateToken(string token)
+    public ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_secretKey);
+        var key = _signingCredentials.Key;
 
         var parameters = new TokenValidationParameters
         {
@@ -56,7 +67,7 @@ public class JwtService
             ValidateIssuerSigningKey = true,
             ValidIssuer = _issuer,
             ValidAudience = _audience,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
+            IssuerSigningKey = key,
             ClockSkew = TimeSpan.Zero
         };
 
@@ -64,10 +75,10 @@ public class JwtService
         {
             var principal = tokenHandler.ValidateToken(token, parameters, out var validatedToken);
 
-            if (!(validatedToken is JwtSecurityToken jwtToken) ||
-                !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            if (validatedToken is not JwtSecurityToken jwtToken || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new SecurityTokenException("Invalid token");
+                return null;
+                throw new SecurityTokenException("Invalid token algorithm");
             }
 
             return principal;
