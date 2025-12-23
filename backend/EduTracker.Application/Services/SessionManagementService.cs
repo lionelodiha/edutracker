@@ -145,6 +145,42 @@ public class SessionManagementService
         return true;
     }
 
+    public async Task<bool> DeleteSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        UserSession? session = await _dbContext.UserSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
+
+        if (session is null) return false;
+
+        _dbContext.UserSessions.Remove(session);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(sessionId));
+
+        return true;
+    }
+
+    public async Task<bool> DeleteAllUserSessionsExceptAsync(Guid userId, Guid? currentSessionId = null, CancellationToken cancellationToken = default)
+    {
+        IQueryable<UserSession> query = _dbContext.UserSessions.Where(s => s.UserId == userId);
+
+        if (currentSessionId.HasValue)
+            query = query.Where(s => s.Id != currentSessionId.Value);
+
+        List<Guid> sessionIds = await query
+            .Select(s => s.Id)
+            .ToListAsync(cancellationToken);
+
+        if (sessionIds.Count is 0) return false;
+
+        await query.ExecuteDeleteAsync(cancellationToken);
+
+        foreach (Guid sessionId in sessionIds)
+            await _cacheService.RemoveAsync(CacheKey(sessionId));
+
+        return true;
+    }
+
     private static string CacheKey(Guid sessionId) => $"{CacheKeys.Session}{sessionId}";
 
     private bool IsNearExpiry(UserSession session)

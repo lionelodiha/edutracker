@@ -1,4 +1,3 @@
-using EduTracker.Application.Constants.Cache;
 using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Entities;
