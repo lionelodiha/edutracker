@@ -10,13 +10,13 @@ public static class UserSessionExtensions
     {
         public SessionData ToSessionData(SystemRole role)
             => new(
-                session.Id,
-                session.UserId,
-                session.ExpiresAt,
-                session.AbsoluteExpiresAt,
-                session.IsRevoked,
-                session.RememberMe,
-                role
+                SessionId: session.Id,
+                UserId: session.UserId,
+                ExpiresAt: session.ExpiresAt,
+                AbsoluteExpiresAt: session.AbsoluteExpiresAt,
+                IsRevoked: session.IsRevoked,
+                RememberMe: session.RememberMe,
+                Role: role
             );
     }
 }

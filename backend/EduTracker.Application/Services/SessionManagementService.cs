@@ -66,7 +66,7 @@ public class SessionManagementService
         return session;
     }
 
-    public async Task<SessionData?> GetSessionDataAsync(Guid sessionId)
+    public async Task<SessionData?> GetSessionDataAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         var cachedSession = await _cacheService.GetAsync<SessionData>(CacheKey(sessionId));
 
@@ -85,14 +85,11 @@ public class SessionManagementService
                 RememberMe: s.RememberMe,
                 Role: s.User.Role
             ))
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (sessionData is null) return null;
 
-        TimeSpan remainingTime = sessionData.ExpiresAt - DateTime.UtcNow;
-        TimeSpan maxCacheDuration = TimeSpan.FromMinutes(30);
-
-        TimeSpan cacheDuration = remainingTime < maxCacheDuration ? remainingTime : maxCacheDuration;
+        TimeSpan cacheDuration = CalculateCacheTimeToLive(sessionData.ExpiresAt, TimeSpan.FromMinutes(30));
 
         if (cacheDuration > TimeSpan.Zero)
             await _cacheService.SetAsync(CacheKey(sessionId), sessionData, cacheDuration);
@@ -100,15 +97,15 @@ public class SessionManagementService
         return sessionData;
     }
 
-    public async Task<bool> ValidateAsync(Guid sessionId)
+    public async Task<bool> ValidateAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        SessionData? sessionData = await GetSessionDataAsync(sessionId);
+        SessionData? sessionData = await GetSessionDataAsync(sessionId, cancellationToken);
         return sessionData?.IsActive ?? false;
     }
 
-    public async Task<bool> TryExtendSessionAsync(Guid sessionId)
+    public async Task<bool> TryExtendSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
+        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken: cancellationToken);
 
         if (session is null || !session.IsActive) return false;
 
@@ -118,34 +115,31 @@ public class SessionManagementService
         session.ExtendSession(DateTime.UtcNow + extension);
 
         _dbContext.UserSessions.Update(session);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        SessionData? sessionData = await GetSessionDataAsync(sessionId);
+        SessionData? sessionData = await GetSessionDataAsync(sessionId, cancellationToken);
 
         if (sessionData is not null)
         {
-            TimeSpan remainingTime = sessionData.ExpiresAt - DateTime.UtcNow;
-            TimeSpan maxCacheDuration = TimeSpan.FromMinutes(30);
-
-            TimeSpan cacheDuration = remainingTime < maxCacheDuration ? remainingTime : maxCacheDuration;
-
+            TimeSpan cacheDuration = CalculateCacheTimeToLive(sessionData.ExpiresAt, TimeSpan.FromMinutes(30));
             sessionData = sessionData with { ExpiresAt = session.ExpiresAt };
+
             await _cacheService.SetAsync(CacheKey(session.Id), sessionData, cacheDuration);
         }
 
         return true;
     }
 
-    public async Task<bool> RevokeSessionAsync(Guid sessionId)
+    public async Task<bool> RevokeSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
+        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken: cancellationToken);
 
         if (session is null || session.IsRevoked) return false;
 
         session.Revoke();
         _dbContext.UserSessions.Update(session);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
         await _cacheService.RemoveAsync(CacheKey(sessionId));
 
         return true;
@@ -160,5 +154,14 @@ public class SessionManagementService
         TimeSpan threshold = TimeSpan.FromSeconds(totalSeconds * _expiryExtensionTriggerPercent / 100.0);
 
         return remaining <= threshold;
+    }
+
+    private static TimeSpan CalculateCacheTimeToLive(DateTime expiresAtUtc, TimeSpan maxTimeToLive)
+    {
+        TimeSpan remaining = expiresAtUtc - DateTime.UtcNow;
+
+        if (remaining <= TimeSpan.Zero) return TimeSpan.Zero;
+
+        return remaining < maxTimeToLive ? remaining : maxTimeToLive;
     }
 }
