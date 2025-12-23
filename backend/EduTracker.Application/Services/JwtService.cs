@@ -12,18 +12,24 @@ public class JwtService
     private readonly string _issuer;
     private readonly string _audience;
     private readonly int _expiryMinutes;
+
     private readonly SigningCredentials _signingCredentials;
+    private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
+    private readonly TokenValidationParameters _tokenValidationParameters;
 
     public JwtService(IOptions<SessionTokenOptions> options)
     {
-        var opts = options.Value ?? throw new InvalidOperationException("SessionTokenOptions must be provided.");
+        SessionTokenOptions opts = options.Value;
 
         if (string.IsNullOrWhiteSpace(opts.SecretKey))
             throw new InvalidOperationException("SessionToken:SecretKey must be provided.");
+
         if (string.IsNullOrWhiteSpace(opts.Issuer))
             throw new InvalidOperationException("SessionToken:Issuer must be provided.");
+
         if (string.IsNullOrWhiteSpace(opts.Audience))
             throw new InvalidOperationException("SessionToken:Audience must be provided.");
+
         if (opts.AccessTokenExpirationMinutes <= 0)
             throw new InvalidOperationException("SessionToken:AccessTokenExpirationMinutes must be greater than 0.");
 
@@ -31,36 +37,10 @@ public class JwtService
         _audience = opts.Audience;
         _expiryMinutes = opts.AccessTokenExpirationMinutes;
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(opts.SecretKey));
+        SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(opts.SecretKey));
         _signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-    }
 
-    public string GenerateToken(string userId, string userName)
-    {
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, userId),
-            new Claim(JwtRegisteredClaimNames.UniqueName, userName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
-            signingCredentials: _signingCredentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    public ClaimsPrincipal? ValidateToken(string token)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = _signingCredentials.Key;
-
-        var parameters = new TokenValidationParameters
+        _tokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = true,
             ValidateAudience = true,
@@ -68,18 +48,32 @@ public class JwtService
             ValidIssuer = _issuer,
             ValidAudience = _audience,
             IssuerSigningKey = key,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
         };
+    }
 
+    public string GenerateToken(Claim[] claims)
+    {
+        JwtSecurityToken token = new(
+            issuer: _issuer,
+            audience: _audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
+            signingCredentials: _signingCredentials
+        );
+
+        return _jwtSecurityTokenHandler.WriteToken(token);
+    }
+
+    public ClaimsPrincipal? ValidateToken(string token)
+    {
         try
         {
-            var principal = tokenHandler.ValidateToken(token, parameters, out var validatedToken);
+            ClaimsPrincipal principal = _jwtSecurityTokenHandler.ValidateToken(
+                token, _tokenValidationParameters, out SecurityToken validatedToken
+            );
 
-            if (validatedToken is not JwtSecurityToken jwtToken || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return null;
-                throw new SecurityTokenException("Invalid token algorithm");
-            }
+            if (!IsValidJwtAlgorithm(validatedToken)) return null;
 
             return principal;
         }
@@ -87,5 +81,11 @@ public class JwtService
         {
             return null;
         }
+    }
+
+    private static bool IsValidJwtAlgorithm(SecurityToken token)
+    {
+        return token is JwtSecurityToken jwtToken
+            && jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
     }
 }
