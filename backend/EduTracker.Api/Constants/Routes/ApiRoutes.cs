@@ -1,4 +1,4 @@
-namespace EduTracker.Constants.Routes;
+namespace EduTracker.Api.Constants.Routes;
 
 internal static partial class ApiRoutes
 {

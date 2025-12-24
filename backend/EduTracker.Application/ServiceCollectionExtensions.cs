@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<SessionManagementService>();
 
             services.Configure<SessionTokenOptions>(configuration.GetSection("SessionToken"));
+            services.AddSingleton<JwtService>();
 
             return services;
         }
