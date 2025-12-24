@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Infrastructure.Services;
 
-public class HashingService : IHashingService
+internal class HashingService : IHashingService
 {
     private readonly byte[] _emailHmacKey;
     private readonly int _passwordWorkFactor;

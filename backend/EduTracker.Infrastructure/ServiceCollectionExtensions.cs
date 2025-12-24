@@ -2,7 +2,6 @@ using System.Reflection;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Services;
 using EduTracker.Infrastructure.Configurations.Security;
-using EduTracker.Infrastructure.Configurations.Settings;
 using EduTracker.Infrastructure.CQRS.Messaging;
 using EduTracker.Infrastructure.Services;
 using FluentValidation;
@@ -17,14 +16,13 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructureServices(IConfiguration configuration, params Assembly[] assembliesToScan)
         {
-            services.Configure<RedisOptions>(configuration.GetSection("Redis"));
             services.AddSingleton<ICacheService, RedisCacheService>();
 
             services.Configure<HashingOptions>(configuration.GetSection("Hashing"));
             services.AddSingleton<IHashingService, HashingService>();
 
             services.Configure<DataEncryptionOptions>(configuration.GetSection("DataEncryption"));
-            services.AddSingleton<IDataEncryptionService, AesDataEncryptionService>();
+            services.AddSingleton<IDataEncryptionService, AesGcmDataEncryptionService>();
 
             services.AddCqrsWithValidation(assembliesToScan);
 

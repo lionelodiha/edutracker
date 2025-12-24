@@ -54,5 +54,51 @@ internal static partial class ResponseCatalog
                 )
             ]
         );
+
+        public static OperationOutcomeResponse LogoutSuccessful = new(
+            Id: "AUTH_LOGOUT_SUCCESS",
+            Title: "You're logged out!",
+            Details: [
+                new ResponseDetail(
+                    Message: "You've successfully logged out. See you next time!",
+                    Severity: ResponseSeverity.Info
+                )
+            ]
+        );
+
+        public static readonly OperationFailureResponse SessionNotFound = new(
+            Id: "AUTH_SESSION_NOT_FOUND",
+            StatusCode: HttpStatusCodes.Unauthorized,
+            Title: "Session not found.",
+            Details: [
+                new ResponseDetail(
+                    Message: "Your session could not be found or has expired. Please sign in again.",
+                    Severity: ResponseSeverity.Warning
+                )
+            ]
+        );
+
+        public static readonly OperationFailureResponse SessionStateInvalid = new(
+            Id: "AUTH_SESSION_STATE_INVALID",
+            StatusCode: HttpStatusCodes.Unauthorized,
+            Title: "Invalid session state.",
+            Details: [
+                new ResponseDetail(
+                    Message: "Your session is in an invalid state. Please sign in again.",
+                    Severity: ResponseSeverity.Warning
+                )
+            ]
+        );
+
+        public static readonly OperationOutcomeResponse SessionRefreshed = new(
+            Id: "AUTH_SESSION_REFRESHED",
+            Title: "Session refreshed.",
+            Details: [
+                new ResponseDetail(
+                    Message: "Your session has been refreshed successfully.",
+                    Severity: ResponseSeverity.Info
+                )
+            ]
+        );
     }
 }

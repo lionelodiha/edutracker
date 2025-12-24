@@ -9,14 +9,14 @@ internal record OperationOutcomeResponse(
 	object? Data = default
 ) : BaseOperationResponse<OperationOutcomeResponse>(Id, Title, Details)
 {
-	public OperationOutcomeResponse<T> As<T>() => new(Id, Title, Details, default);
+	public OperationOutcomeResponse<T> As<T>() => new(Id, Title, Details);
 }
 
 internal record OperationOutcomeResponse<TData>(
 	string Id,
 	string Title,
 	ResponseDetail[] Details,
-	TData? Data
+	TData? Data = default
 ) : BaseOperationResponse<OperationOutcomeResponse<TData>>(Id, Title, Details)
 {
 	public OperationOutcomeResponse<TData> WithData(TData data) => this with { Data = data };

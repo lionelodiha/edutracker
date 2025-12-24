@@ -1,6 +1,6 @@
 namespace EduTracker.Infrastructure.Configurations.Security;
 
-public record HashingOptions
+internal record HashingOptions
 {
     public string EmailHmacKey { get; init; } = string.Empty;
     public int PasswordWorkFactor { get; init; } = 12;

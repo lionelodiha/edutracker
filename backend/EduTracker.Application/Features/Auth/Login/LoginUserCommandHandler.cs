@@ -1,6 +1,6 @@
-using EduTracker.Application.Constants.Cache;
 using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
+using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.Login;
 
-public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingService, ICacheService cacheService, SessionLifetime sessionLifetime)
+public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingService, SessionManagementService sessionManagementService)
     : IHandler<LoginUserCommand, OperationResult<SessionData>>
 {
     public async Task<OperationResult<SessionData>> Handle(LoginUserCommand message, CancellationToken cancellationToken = default)
@@ -35,29 +35,11 @@ public class LoginUserCommandHandler(AppDbContext db, IHashingService hashingSer
         if (!passwordValid)
             throw ResponseCatalog.Auth.InvalidCredentials.ToException();
 
-        UserSession session = new(
-            userId: userData.Id,
-            sessionDuration: sessionLifetime.ResolveSession(message.RememberMe)
-        );
-
-        db.UserSessions.Add(session);
-        await db.SaveChangesAsync(cancellationToken);
-
-        SessionData data = new(
-            SessionId: session.Id,
-            UserId: session.UserId,
-            ExpiresAt: session.ExpiresAt,
-            IsRevoked: session.IsRevoked,
-            Role: userData.Role
-        );
-
-        string cacheKey = $"{CacheKeys.Session}{session.UserId:N}";
-        TimeSpan cacheDuration = TimeSpan.FromDays(1);
-        await cacheService.SetAsync(cacheKey, data, cacheDuration);
+        UserSession session = await sessionManagementService.CreateSessionAsync(userData.Id, userData.Role, message.RememberMe, cancellationToken);
 
         return ResponseCatalog.Auth.LoginSuccessful
             .As<SessionData>()
-            .WithData(data)
+            .WithData(session.ToSessionData(userData.Role))
             .ToOperationResult();
     }
 }

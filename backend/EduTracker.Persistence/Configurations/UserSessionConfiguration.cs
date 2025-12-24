@@ -21,13 +21,16 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
             .HasForeignKey(us => us.UserId)
             .IsRequired();
 
+        builder.Property(us => us.RememberMe)
+            .IsRequired();
+
         builder.Property(us => us.IsRevoked)
             .IsRequired();
 
         builder.Property(us => us.ExpiresAt)
             .IsRequired();
 
-        builder.Property(us => us.LastActiveAt)
+        builder.Property(us => us.AbsoluteExpiresAt)
             .IsRequired();
 
         builder.OwnsOne<AuditState>(UserSession.Audit, audit =>

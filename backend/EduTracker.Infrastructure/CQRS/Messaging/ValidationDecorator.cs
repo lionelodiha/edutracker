@@ -7,7 +7,7 @@ using FluentValidation.Results;
 
 namespace EduTracker.Infrastructure.CQRS.Messaging;
 
-public class ValidationDecorator<TRequest, TResponse>(IHandler<TRequest, TResponse> next, IEnumerable<IValidator<TRequest>> validators)
+internal class ValidationDecorator<TRequest, TResponse>(IHandler<TRequest, TResponse> next, IEnumerable<IValidator<TRequest>> validators)
     : IHandler<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
     private readonly IHandler<TRequest, TResponse> _next = next;

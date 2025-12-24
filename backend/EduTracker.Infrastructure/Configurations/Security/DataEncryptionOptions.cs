@@ -1,6 +1,6 @@
 namespace EduTracker.Infrastructure.Configurations.Security;
 
-public record DataEncryptionOptions
+internal record DataEncryptionOptions
 {
     public string Key { get; init; } = string.Empty;
 }
