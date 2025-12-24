@@ -41,9 +41,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            IssuerSigningKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(tokenOptions.SecretKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.SecretKey)),
             ValidateIssuer = true,
             ValidIssuer = tokenOptions.Issuer,
             ValidateAudience = true,
@@ -92,6 +90,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseMiddleware<JwtFromCookieMiddleware>();
 app.UseMiddleware<TraceIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
