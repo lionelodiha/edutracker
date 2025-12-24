@@ -14,6 +14,9 @@ public class UserSession : IEntity, IAuditable
 
     public UserSession(Guid userId, bool rememberMe, TimeSpan initialLifetime, TimeSpan absoluteLifetime)
     {
+        if (absoluteLifetime < initialLifetime)
+            throw new InvalidOperationException("Absolute lifetime must be greater than or equal to initial lifetime.");
+
         DateTime now = DateTime.UtcNow;
 
         UserId = userId;
@@ -29,7 +32,9 @@ public class UserSession : IEntity, IAuditable
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
-    public bool RememberMe { get; set; } = false;
+    public Guid SessionStamp { get; private set; } = Guid.NewGuid();
+
+    public bool RememberMe { get; private set; } = false;
     public bool IsRevoked { get; private set; } = false;
     public DateTime? RevokedAt { get; private set; }
 
@@ -39,9 +44,14 @@ public class UserSession : IEntity, IAuditable
     public DateTime CreatedAt => _audit.CreatedAt;
     public DateTime UpdatedAt => _audit.UpdatedAt;
 
-    public bool IsActive => !IsRevoked
-        && DateTime.UtcNow < ExpiresAt
-        && DateTime.UtcNow < AbsoluteExpiresAt;
+    public bool IsActive
+    {
+        get
+        {
+            DateTime now = DateTime.UtcNow;
+            return !IsRevoked && now < ExpiresAt && now < AbsoluteExpiresAt;
+        }
+    }
 
     public void ExtendSession(DateTime newExpiry)
     {
@@ -55,12 +65,19 @@ public class UserSession : IEntity, IAuditable
         }
     }
 
-    public void Revoke()
+    public void RefreshSessionStamp()
+    {
+        SessionStamp = Guid.NewGuid();
+        _audit.UpdateAudit();
+    }
+
+    public void RevokeAndRotate()
     {
         if (IsRevoked) return;
 
         IsRevoked = true;
         RevokedAt = DateTime.UtcNow;
+        SessionStamp = Guid.NewGuid();
         _audit.UpdateAudit();
     }
 }

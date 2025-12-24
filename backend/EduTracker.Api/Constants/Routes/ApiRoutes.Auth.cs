@@ -8,5 +8,7 @@ internal static partial class ApiRoutes
 
         public const string Register = "/register";
         public const string Login = "/login";
+        public const string Refresh = "/refresh";
+        public const string Logout = "/logout";
     }
 }

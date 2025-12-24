@@ -79,6 +79,7 @@ public class SessionManagementService
             (
                 SessionId: s.Id,
                 UserId: s.UserId,
+                SessionStamp: s.SessionStamp,
                 ExpiresAt: s.ExpiresAt,
                 AbsoluteExpiresAt: s.AbsoluteExpiresAt,
                 IsRevoked: s.IsRevoked,
@@ -97,37 +98,29 @@ public class SessionManagementService
         return sessionData;
     }
 
-    public async Task<bool> ValidateAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    public async Task<SessionData?> RefreshSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        SessionData? sessionData = await GetSessionDataAsync(sessionId, cancellationToken);
-        return sessionData?.IsActive ?? false;
-    }
+        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
 
-    public async Task<bool> TryExtendSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
-    {
-        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken: cancellationToken);
+        if (session is null || !session.IsActive) return null;
 
-        if (session is null || !session.IsActive) return false;
-
-        if (!IsNearExpiry(session)) return false;
-
-        TimeSpan extension = session.RememberMe ? _extendedExpiryExtension : _standardExpiryExtension;
-        session.ExtendSession(DateTime.UtcNow + extension);
-
-        _dbContext.UserSessions.Update(session);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        SessionData? sessionData = await GetSessionDataAsync(sessionId, cancellationToken);
-
-        if (sessionData is not null)
+        if (IsNearExpiry(session))
         {
-            TimeSpan cacheDuration = CalculateCacheTimeToLive(sessionData.ExpiresAt, TimeSpan.FromMinutes(30));
-            sessionData = sessionData with { ExpiresAt = session.ExpiresAt };
+            TimeSpan extension = session.RememberMe
+                ? _extendedExpiryExtension
+                : _standardExpiryExtension;
 
-            await _cacheService.SetAsync(CacheKey(session.Id), sessionData, cacheDuration);
+            session.ExtendSession(DateTime.UtcNow + extension);
         }
 
-        return true;
+        session.RefreshSessionStamp();
+
+        _dbContext.Update(session);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _cacheService.RemoveAsync(CacheKey(session.Id));
+
+        return session.ToSessionData(session.User.Role);
     }
 
     public async Task<bool> RevokeSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
@@ -136,7 +129,7 @@ public class SessionManagementService
 
         if (session is null || session.IsRevoked) return false;
 
-        session.Revoke();
+        session.RevokeAndRotate();
         _dbContext.UserSessions.Update(session);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
@@ -147,8 +140,7 @@ public class SessionManagementService
 
     public async Task<bool> DeleteSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        UserSession? session = await _dbContext.UserSessions
-            .FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
+        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
 
         if (session is null) return false;
 

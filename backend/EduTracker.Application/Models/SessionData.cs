@@ -5,6 +5,7 @@ namespace EduTracker.Application.Models;
 public record SessionData(
     Guid SessionId,
     Guid UserId,
+    Guid SessionStamp,
     DateTime ExpiresAt,
     DateTime AbsoluteExpiresAt,
     bool IsRevoked,
@@ -12,7 +13,12 @@ public record SessionData(
     SystemRole Role
 )
 {
-    public bool IsActive => !IsRevoked
-        && DateTime.UtcNow < ExpiresAt
-        && DateTime.UtcNow < AbsoluteExpiresAt;
+    public bool IsActive
+    {
+        get
+        {
+            DateTime now = DateTime.UtcNow;
+            return !IsRevoked && now < ExpiresAt && now < AbsoluteExpiresAt;
+        }
+    }
 }

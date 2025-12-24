@@ -12,6 +12,7 @@ public static class UserSessionExtensions
             => new(
                 SessionId: session.Id,
                 UserId: session.UserId,
+                SessionStamp: session.SessionStamp,
                 ExpiresAt: session.ExpiresAt,
                 AbsoluteExpiresAt: session.AbsoluteExpiresAt,
                 IsRevoked: session.IsRevoked,

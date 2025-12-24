@@ -6,6 +6,8 @@ using EduTracker.Api.Extensions.Responses;
 using EduTracker.Api.Services;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Features.Auth.Login;
+using EduTracker.Application.Features.Auth.Logout;
+using EduTracker.Application.Features.Auth.Refresh;
 using EduTracker.Application.Features.Auth.Register;
 using EduTracker.Application.Features.Auth.Revoke;
 using EduTracker.Application.Models;
@@ -27,6 +29,13 @@ public static class AuthEndpoints
 
             group.MapPost(ApiRoutes.Auth.Login, Login)
                 .WithSummary("Login with a user account");
+
+            group.MapPost(ApiRoutes.Auth.Refresh, Refresh)
+                .WithSummary("Refresh access token");
+
+            group.MapPost(ApiRoutes.Auth.Logout, Logout)
+                .WithSummary("Logout current session")
+                .RequireAuthorization();
 
             return group;
         }
@@ -75,5 +84,56 @@ public static class AuthEndpoints
         );
 
         return Results.Ok(loginResult.WithoutData().ToApiResponse());
+    }
+
+    private static async Task<IResult> Refresh(IMediator mediator, HttpRequest httpRequest, HttpResponse httpResponse, CookieService cookieService, JwtService jwtService, CancellationToken ct)
+    {
+        string? sessionCookie = cookieService.GetCookie(httpRequest, CookieKeys.Session);
+
+        if (string.IsNullOrWhiteSpace(sessionCookie) || !Guid.TryParseExact(sessionCookie, "N", out Guid sessionId))
+            return Results.Unauthorized();
+
+        OperationResult<SessionData> refreshResult = await mediator.Send(new RefreshUserCommand(sessionId), ct);
+
+        if (refreshResult.Data is null) return Results.Unauthorized();
+
+        SessionData session = refreshResult.Data;
+
+        string accessToken = jwtService.GenerateToken(
+        [
+            new Claim(JwtRegisteredClaimNames.Sub, session.UserId.ToString()),
+            new Claim("sid", session.SessionId.ToString()),
+            new Claim(ClaimTypes.Role, session.Role.ToString())
+        ]);
+
+        cookieService.SetCookie(
+            httpResponse,
+            CookieKeys.Session,
+            session.SessionId.ToString("N"),
+            session.ExpiresAt
+        );
+
+        cookieService.SetCookie(
+            httpResponse,
+            CookieKeys.AccessToken,
+            accessToken,
+            DateTime.UtcNow.AddMinutes(15)
+        );
+
+        return Results.Ok(refreshResult.WithoutData().ToApiResponse());
+    }
+
+    private static async Task<IResult> Logout(ClaimsPrincipal user, IMediator mediator, HttpResponse httpResponse, CookieService cookieService, CancellationToken ct)
+    {
+        string? sessionIdClaim = user.FindFirst("sid")?.Value;
+
+        if (!Guid.TryParse(sessionIdClaim, out Guid sessionId)) return Results.Unauthorized();
+
+        OperationResult<object> result = await mediator.Send(new LogoutUserCommand(sessionId), ct);
+
+        cookieService.DeleteCookie(httpResponse, CookieKeys.Session);
+        cookieService.DeleteCookie(httpResponse, CookieKeys.AccessToken);
+
+        return Results.Ok(result.ToApiResponse());
     }
 }
