@@ -100,7 +100,9 @@ public class SessionManagementService
 
     public async Task<SessionData?> RefreshSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        UserSession? session = await _dbContext.UserSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
+        UserSession? session = await _dbContext.UserSessions
+            .Include(us => us.User)
+            .FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
 
         if (session is null || !session.IsActive) return null;
 

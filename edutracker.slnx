@@ -6,6 +6,16 @@
     <File Path="Directory.Packages.props" />
   </Folder>
 
+  <Folder Name="/sql/Users/">
+    <File Path="sql/Users/list_user.sql" />
+  </Folder>
+
+  <Folder Name="/sql/UserSessions/">
+    <File Path="sql/UserSessions/delete_inactive_sessions.sql" />
+    <File Path="sql/UserSessions/find_inactive_sessions.sql" />
+    <File Path="sql/UserSessions/list_user_sessions.sql" />
+  </Folder>
+
   <Folder Name="/src/">
     <Project Path="backend/EduTracker.Api/EduTracker.Api.csproj" />
     <Project Path="backend/EduTracker.Application/EduTracker.Application.csproj" />
