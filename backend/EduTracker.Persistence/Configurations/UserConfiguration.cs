@@ -26,6 +26,9 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(64);
 
+        builder.Property(u => u.IsLocked)
+            .IsRequired();
+
         builder.Property(u => u.PasswordHash)
             .IsRequired()
             .HasMaxLength(60);
