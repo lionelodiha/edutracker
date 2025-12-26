@@ -1,4 +1,3 @@
-using System;
 using EduTracker.Api.Constants.Cookies;
 
 namespace EduTracker.Api.Middleware;

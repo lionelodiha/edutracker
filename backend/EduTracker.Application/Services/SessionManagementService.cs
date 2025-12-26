@@ -100,29 +100,34 @@ public class SessionManagementService
 
     public async Task<SessionData?> RefreshSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        UserSession? session = await _dbContext.UserSessions
-            .Include(us => us.User)
-            .FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
+        var sessionData = await _dbContext.UserSessions
+            .Where(s => s.Id == sessionId)
+            .Select(s => new
+            {
+                Session = s,
+                s.User.Role,
+            })
+            .SingleOrDefaultAsync(cancellationToken);
 
-        if (session is null || !session.IsActive) return null;
+        if (sessionData is null || sessionData.Session is null || !sessionData.Session.IsActive) return null;
 
-        if (IsNearExpiry(session))
+        if (IsNearExpiry(sessionData.Session))
         {
-            TimeSpan extension = session.RememberMe
+            TimeSpan extension = sessionData.Session.RememberMe
                 ? _extendedExpiryExtension
                 : _standardExpiryExtension;
 
-            session.ExtendSession(DateTime.UtcNow + extension);
+            sessionData.Session.ExtendSession(DateTime.UtcNow + extension);
         }
 
-        session.RefreshSessionStamp();
+        sessionData.Session.RefreshSessionStamp();
 
-        _dbContext.Update(session);
+        _dbContext.Update(sessionData.Session);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        await _cacheService.RemoveAsync(CacheKey(session.Id));
+        await _cacheService.RemoveAsync(CacheKey(sessionData.Session.Id));
 
-        return session.ToSessionData(session.User.Role);
+        return sessionData.Session.ToSessionData(sessionData.Role);
     }
 
     public async Task<bool> RevokeSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
@@ -175,7 +180,7 @@ public class SessionManagementService
         return true;
     }
 
-    private static string CacheKey(Guid sessionId) => $"{CacheKeys.Session}{sessionId}";
+    private static string CacheKey(Guid sessionId) => $"{CacheKeys.Session}{sessionId:N}";
 
     private bool IsNearExpiry(UserSession session)
     {

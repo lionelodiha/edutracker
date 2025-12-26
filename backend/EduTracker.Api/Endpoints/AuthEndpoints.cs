@@ -4,6 +4,7 @@ using EduTracker.Api.Constants.Cookies;
 using EduTracker.Api.Constants.Routes;
 using EduTracker.Api.Extensions.Responses;
 using EduTracker.Api.Services;
+using EduTracker.Application.Constants.Claims;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Features.Auth.Login;
 using EduTracker.Application.Features.Auth.Logout;
@@ -64,9 +65,9 @@ public static class AuthEndpoints
 
         string accessToken = jwtService.GenerateToken(
         [
-            new Claim(JwtRegisteredClaimNames.Sub, session.UserId.ToString()),
-            new Claim("sid", session.SessionId.ToString()),
-            new Claim(ClaimTypes.Role, session.Role.ToString())
+            new Claim(AppClaimTypes.UserId, session.UserId.ToString()),
+            new Claim(AppClaimTypes.SessionStamp, session.SessionId.ToString()),
+            new Claim(AppClaimTypes.Role, session.Role.ToString())
         ]);
 
         cookieService.SetCookie(
@@ -101,9 +102,9 @@ public static class AuthEndpoints
 
         string accessToken = jwtService.GenerateToken(
         [
-            new Claim(JwtRegisteredClaimNames.Sub, session.UserId.ToString()),
-            new Claim("sid", session.SessionId.ToString()),
-            new Claim(ClaimTypes.Role, session.Role.ToString())
+            new Claim(AppClaimTypes.UserId, session.UserId.ToString()),
+            new Claim(AppClaimTypes.SessionStamp, session.SessionId.ToString()),
+            new Claim(AppClaimTypes.Role, session.Role.ToString())
         ]);
 
         cookieService.SetCookie(
