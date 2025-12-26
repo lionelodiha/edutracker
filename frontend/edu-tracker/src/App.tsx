@@ -6,6 +6,7 @@ import TeacherDashboard from './pages/dashboard/TeacherDashboard';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import MasterAdminDashboard from './pages/MasterAdminDashboard';
+import DashboardHome from './pages/DashboardHome';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -19,6 +20,16 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         
+        {/* Dashboard Selection */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <DashboardHome />
+            </ProtectedRoute>
+          } 
+        />
+
         {/* Dashboard Routes - Protected */}
         <Route 
           path="/dashboard/teacher" 

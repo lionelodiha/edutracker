@@ -14,9 +14,16 @@ export interface User {
   organizationId?: string;
 }
 
+export interface OrganizationInfo {
+  organizationId: string;
+  name: string;
+  role: UserRole;
+}
+
 export interface AuthResponse {
   user: User;
   token: string;
+  organizations?: OrganizationInfo[];
   organizationName?: string;
 }
 
