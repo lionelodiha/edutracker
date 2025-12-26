@@ -2,14 +2,18 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EduTracker.Api.Endpoints;
+using EduTracker.Api.Extensions;
 using EduTracker.Api.Middleware;
 using EduTracker.Api.Services;
 using EduTracker.Application;
 using EduTracker.Application.Configurations.Security;
 using EduTracker.Application.CQRS.Messaging;
+using EduTracker.Application.Exceptions;
+using EduTracker.Application.Services;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -53,28 +57,44 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnAuthenticationFailed = context =>
             {
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<Program>>();
+                Endpoint? endpoint = context.HttpContext.GetEndpoint();
+                bool hasAuthorize = endpoint?.Metadata?.GetMetadata<IAuthorizeData>() is not null;
 
-                logger.LogWarning(
-                    context.Exception,
-                    "JWT authentication failed"
-                );
+                if (hasAuthorize)
+                    throw new AppException("UNAUTHORIZED", 401, "You are not authorized.");
 
+                context.NoResult();
                 return Task.CompletedTask;
             },
 
-            OnTokenValidated = context =>
+            OnTokenValidated = async context =>
             {
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<Program>>();
+                if (context.Principal is null)
+                    throw new AppException("UNAUTHORIZED", 401, "You are not authorized.");
 
-                logger.LogInformation(
-                    "JWT token validated for {Subject}",
-                    context.Principal?.Identity?.Name
-                );
+                Guid? userId = context.Principal.GetUserId();
+                Guid? securityStamp = context.Principal.GetSecurityStamp();
 
-                return Task.CompletedTask;
+                if (userId is null || securityStamp is null)
+                    throw new AppException("UNAUTHORIZED", 401, "You are not authorized.");
+
+                var sessionManager = context.HttpContext.RequestServices.GetRequiredService<SessionManagementService>();
+
+                var sessionData = await sessionManager.GetSessionDataAsync(userId.Value)
+                    ?? throw new AppException("UNAUTHORIZED", 401, "You are not authorized.");
+
+                string userRoles = sessionData.Role.ToString();
+
+                if (userRoles == context.Principal.GetRole())
+                    throw new AppException("UNAUTHORIZED", 401, "You are not authorized.");
+
+                if (sessionData.SessionStamp != securityStamp)
+                    throw new AppException("UNAUTHORIZED", 401, "You are not authorized.");
+            },
+
+            OnForbidden = context =>
+            {
+                throw new AppException("FORBIDDEN", 403, "You do not have permission to access this resource.");
             }
         };
     }
