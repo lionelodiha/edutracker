@@ -7,7 +7,7 @@ internal static class StringExtensions
         public string EnsureNotEmptyAndTrim()
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException($"value cannot be empty.");
+                throw new ArgumentException("value cannot be empty.");
 
             return value.Trim();
         }

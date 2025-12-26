@@ -31,6 +31,8 @@ public class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string UserName { get; private set; } = null!;
     public string EmailHash { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
+
+    public bool IsLocked { get; private set; } = false;
     public SystemRole Role { get; private set; } = SystemRole.User;
 
     public DateTime CreatedAt => _audit.CreatedAt;
@@ -41,27 +43,54 @@ public class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
 
     public ICollection<UserSession> Sessions { get; private set; } = [];
 
-    public void SetRole(SystemRole role)
+    public void ChangeRole(SystemRole newRole)
     {
-        Role = role;
+        if (Role == newRole) return;
+
+        if (!Enum.IsDefined(newRole))
+            throw new ArgumentException("Invalid role.");
+
+        Role = newRole;
         _audit.UpdateAudit();
     }
 
     public void UpdateUserName(string newUserName)
     {
+        if (newUserName == UserName) return;
+
         UserName = newUserName.EnsureNotEmptyAndTrim();
         _audit.UpdateAudit();
     }
 
     public void UpdateEmailHash(string newEmailHash)
     {
+        if (newEmailHash == EmailHash) return;
+
         EmailHash = newEmailHash.EnsureNotEmptyAndTrim();
         _audit.UpdateAudit();
     }
 
     public void UpdatePasswordHash(string newPasswordHash)
     {
+        if (newPasswordHash == PasswordHash) return;
+
         PasswordHash = newPasswordHash.EnsureNotEmptyAndTrim();
+        _audit.UpdateAudit();
+    }
+
+    public void LockAccount()
+    {
+        if (IsLocked) return;
+
+        IsLocked = true;
+        _audit.UpdateAudit();
+    }
+
+    public void UnlockAccount()
+    {
+        if (!IsLocked) return;
+
+        IsLocked = false;
         _audit.UpdateAudit();
     }
 

@@ -58,11 +58,10 @@ public class UserSession : IEntity, IAuditable
         if (newExpiry > AbsoluteExpiresAt)
             newExpiry = AbsoluteExpiresAt;
 
-        if (newExpiry > ExpiresAt)
-        {
-            ExpiresAt = newExpiry;
-            _audit.UpdateAudit();
-        }
+        if (newExpiry <= ExpiresAt) return;
+
+        ExpiresAt = newExpiry;
+        _audit.UpdateAudit();
     }
 
     public void RefreshSessionStamp()
