@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using BCryption = BCrypt.Net.BCrypt;
 using EduTracker.Application.Services;

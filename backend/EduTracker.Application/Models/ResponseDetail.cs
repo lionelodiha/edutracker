@@ -1,4 +1,4 @@
-using EduTracker.Application.Enums;
+﻿using EduTracker.Application.Enums;
 
 namespace EduTracker.Application.Models;
 

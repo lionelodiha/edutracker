@@ -1,4 +1,4 @@
-using EduTracker.Application.Models;
+﻿using EduTracker.Application.Models;
 
 namespace EduTracker.Application.Common.Responses;
 

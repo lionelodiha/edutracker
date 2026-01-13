@@ -1,4 +1,4 @@
-namespace EduTracker.Application.Models;
+﻿namespace EduTracker.Application.Models;
 
 public record OperationResult<T>(
     string MessageId,

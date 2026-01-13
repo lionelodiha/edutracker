@@ -1,4 +1,4 @@
-using EduTracker.Domain.Components.Security;
+﻿using EduTracker.Domain.Components.Security;
 
 namespace EduTracker.Domain.Abstractions;
 
@@ -7,8 +7,8 @@ internal interface IHasSensitiveData<TSensitive> where TSensitive : ISensitiveDa
     byte[] EncryptedData { get; }
     TSensitive? SensitiveData { get; }
 
-    void SetSensitiveData(TSensitive data);
     void SetEncryptedData(byte[] data);
-    void ClearDecryptedData();
-    void ClearEncryptedData();
+
+    void SetSensitiveData(TSensitive data);
+    void ClearSensitiveData();
 }

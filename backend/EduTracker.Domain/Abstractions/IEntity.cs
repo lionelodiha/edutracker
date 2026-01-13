@@ -1,4 +1,4 @@
-namespace EduTracker.Domain.Abstractions;
+﻿namespace EduTracker.Domain.Abstractions;
 
 internal interface IEntity
 {

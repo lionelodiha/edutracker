@@ -1,6 +1,6 @@
-namespace EduTracker.Api.Services;
+﻿namespace EduTracker.Api.Services;
 
-public class CookieService()
+public class CookieService
 {
     public void SetCookie(HttpResponse response, string name, string value, DateTime? expiresUtc = null, bool httpOnly = true, bool secure = true, string path = "/", string? domain = null)
     {
@@ -10,7 +10,7 @@ public class CookieService()
             Secure = secure,
             SameSite = SameSiteMode.Strict,
             Expires = expiresUtc,
-            Path = path
+            Path = path,
         };
 
         if (!string.IsNullOrWhiteSpace(domain))

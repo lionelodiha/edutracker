@@ -1,4 +1,4 @@
-namespace EduTracker.Application.CQRS.Messaging;
+﻿namespace EduTracker.Application.CQRS.Messaging;
 
 public interface IMediator
 {

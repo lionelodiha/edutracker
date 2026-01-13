@@ -1,4 +1,4 @@
-using EduTracker.Application.Common.Responses;
+﻿using EduTracker.Application.Common.Responses;
 using EduTracker.Application.Models;
 
 namespace EduTracker.Application.Exceptions;
@@ -8,6 +8,22 @@ public class AppException : Exception
 	public int StatusCode { set; get; }
 	public string Id { set; get; }
 	public List<ResponseDetail>? Details { set; get; }
+
+	public AppException(string? id, int statusCode, string? title, ResponseDetail[]? details = null)
+	: base(ResolveMessage(title))
+	{
+		Id = string.IsNullOrWhiteSpace(id)
+			? "UNKNOWN_ERROR"
+			: id.Trim();
+
+		StatusCode = statusCode is > 99 and < 600
+			? statusCode
+			: 500;
+
+		Details = (details is { Length: > 0 })
+			? [.. details]
+			: null;
+	}
 
 	internal AppException(OperationFailureResponse error) : base(ResolveMessage(error))
 	{
@@ -21,22 +37,6 @@ public class AppException : Exception
 
 		Details = (error.Details is { Length: > 0 })
 			? [.. error.Details]
-			: null;
-	}
-
-	public AppException(string? id, int statusCode, string? title, ResponseDetail[]? details = null)
-		: base(ResolveMessage(title))
-	{
-		Id = string.IsNullOrWhiteSpace(id)
-			? "UNKNOWN_ERROR"
-			: id.Trim();
-
-		StatusCode = statusCode is > 99 and < 600
-			? statusCode
-			: 500;
-
-		Details = (details is { Length: > 0 })
-			? [.. details]
 			: null;
 	}
 

@@ -1,4 +1,4 @@
-using EduTracker.Persistence.Context;
+﻿using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,10 +11,14 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddPersistenceServices(IConfiguration configuration)
         {
+            const string connectionName = "Database";
+
+            string connectionString = configuration.GetConnectionString(connectionName)
+                ?? throw new InvalidOperationException($"Connection string '{connectionName}' is not configured.");
+
             services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("Database"));
-            });
+                options.UseSqlServer(connectionString)
+            );
 
             return services;
         }

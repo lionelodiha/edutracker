@@ -1,20 +1,13 @@
-using EduTracker.Domain.Components.Auditing;
+﻿namespace EduTracker.Domain.Components.Security;
 
-namespace EduTracker.Domain.Components.Security;
-
-public class SensitiveDataState<TSensitive> where TSensitive : ISensitiveData
+public class SensitiveDataState<TSensitive>
+    where TSensitive : ISensitiveData
 {
     public byte[] EncryptedData { get; private set; } = [];
-    public TSensitive? SensitiveData { get; private set; }
+    public TSensitive? SensitiveData { get; private set; } = default;
 
-    public void SetSensitiveData(TSensitive data) => SensitiveData = data;
+    internal void SetEncryptedData(byte[] data) => EncryptedData = data;
 
-    public void SetEncryptedData(byte[] data, AuditState? auditHandler = null)
-    {
-        EncryptedData = data;
-        auditHandler?.UpdateAudit();
-    }
-
-    public void ClearDecryptedData() => SensitiveData = default;
-    public void ClearEncryptedData() => EncryptedData = [];
+    internal void SetSensitiveData(TSensitive data) => SensitiveData = data;
+    internal void ClearSensitiveData() => SensitiveData = default;
 }

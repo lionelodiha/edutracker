@@ -1,9 +1,9 @@
-using EduTracker.Api.Models;
+﻿using EduTracker.Api.Models;
 using EduTracker.Application.Models;
 
 namespace EduTracker.Api.Extensions.Responses;
 
-public static class OperationResultExtension
+internal static class OperationResultExtension
 {
     extension<T>(OperationResult<T> result)
     {

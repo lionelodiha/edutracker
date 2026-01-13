@@ -1,4 +1,4 @@
-using EduTracker.Application.Common.Responses;
+﻿using EduTracker.Application.Common.Responses;
 using EduTracker.Application.Exceptions;
 
 namespace EduTracker.Application.Extensions.Responses;

@@ -1,6 +1,7 @@
-namespace EduTracker.Api.Constants.Routes;
+﻿namespace EduTracker.Api.Constants.Routes;
 
 internal static partial class ApiRoutes
 {
-    public const string BasePath = "/api";
+    public const string BasePath = "/";
+    public const string ApiBasePath = "/api";
 }

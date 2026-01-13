@@ -1,13 +1,20 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using EduTracker.Api.Endpoints;
-using EduTracker.Api.Extensions.Security;
+using EduTracker.Api;
+using EduTracker.Api.Authentication;
+using EduTracker.Api.Constants.Auth;
+using EduTracker.Api.Endpoints.Auth;
+using EduTracker.Api.Endpoints.Base;
+using EduTracker.Api.Endpoints.Users;
+using EduTracker.Api.Extensions.OpenApi;
 using EduTracker.Api.Middleware;
-using EduTracker.Api.Services;
 using EduTracker.Application;
 using EduTracker.Application.CQRS.Messaging;
+using EduTracker.Domain.Enums;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 
@@ -15,39 +22,65 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddInfrastructureServices(builder.Configuration, [typeof(IHandler<,>).Assembly]);
+builder.Services.AddInfrastructureServices(builder.Configuration, [typeof(IMediator).Assembly]);
+builder.Services.AddApiServices();
 
-builder.Services.AddScoped<CookieService>();
+builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddOpenApi();
+builder.Services.AddAuthentication(AuthenticationSchemes.Session)
+    .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(
+        AuthenticationSchemes.Session,
+        options => { options.ClaimsIssuer = "EduTracker"; }
+    );
+
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthenticationResultHandler>();
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("UserOnly", p => p.RequireRole(SystemRole.User.ToString()))
+    .AddPolicy("AdminOnly", p => p.RequireRole(SystemRole.Admin.ToString(), SystemRole.SuperAdmin.ToString()))
+    .AddPolicy("SuperAdminOnly", p => p.RequireRole(SystemRole.SuperAdmin.ToString()));
 
 builder.Services.Configure<JsonOptions>(opts =>
 {
-    opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    opts.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    opts.SerializerOptions.WriteIndented = true;
-    opts.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    JsonSerializerOptions serializer = opts.SerializerOptions;
+
+    serializer.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    serializer.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    serializer.WriteIndented = true;
+    serializer.Converters.Add(new JsonStringEnumConverter());
 });
 
-builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddOpenApi(options =>
+{
+    options.AddCustomOpenApiTransformer();
+});
 
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "EduTracker API Gateway";
+        options.DefaultHttpClient = new(ScalarTarget.Node, ScalarClient.Fetch);
+    });
+}
+else
+{
+    app.UseHttpsRedirection();
 }
 
-app.UseMiddleware<JwtFromCookieMiddleware>();
 app.UseMiddleware<TraceIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-app.UseHttpsRedirection();
+app.UseMiddleware<SessionRefreshMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapBaseEndpoints();
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 
 app.Run();

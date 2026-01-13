@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Services;
 using EduTracker.Infrastructure.Configurations.Security;
@@ -7,6 +7,8 @@ using EduTracker.Infrastructure.Services;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using EduTracker.Infrastructure.CQRS.Decorators;
+using EduTracker.Application.CQRS.Decorators;
 
 namespace EduTracker.Infrastructure;
 
@@ -50,7 +52,9 @@ public static class ServiceCollectionExtensions
                 );
             }
 
-            services.Decorate(typeof(IHandler<,>), typeof(ValidationDecorator<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RetryBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         }
     }
 }

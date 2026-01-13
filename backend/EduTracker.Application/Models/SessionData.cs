@@ -5,20 +5,17 @@ namespace EduTracker.Application.Models;
 public record SessionData(
     Guid SessionId,
     Guid UserId,
-    Guid SessionStamp,
     DateTime ExpiresAt,
     DateTime AbsoluteExpiresAt,
     bool IsRevoked,
     bool RememberMe,
+    bool IsLocked,
     SystemRole Role
 )
 {
-    public bool IsActive
+    public bool IsExpired()
     {
-        get
-        {
-            DateTime now = DateTime.UtcNow;
-            return !IsRevoked && now < ExpiresAt && now < AbsoluteExpiresAt;
-        }
+        DateTime now = DateTime.UtcNow;
+        return now >= ExpiresAt || now >= AbsoluteExpiresAt || IsRevoked;
     }
 }

@@ -1,3 +1,3 @@
-namespace EduTracker.Domain.Components.Security;
+﻿namespace EduTracker.Domain.Components.Security;
 
 public interface ISensitiveData { }

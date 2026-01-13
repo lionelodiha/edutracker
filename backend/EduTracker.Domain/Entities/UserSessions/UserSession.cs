@@ -1,4 +1,4 @@
-using EduTracker.Domain.Abstractions;
+﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Users;
 
@@ -6,77 +6,94 @@ namespace EduTracker.Domain.Entities.UserSessions;
 
 public class UserSession : IEntity, IAuditable
 {
-    private readonly AuditState _audit = new();
-
-    public static string Audit => nameof(_audit);
+    internal readonly AuditState AuditState = new();
 
     private UserSession() { }
 
-    public UserSession(Guid userId, bool rememberMe, TimeSpan initialLifetime, TimeSpan absoluteLifetime)
+    public UserSession(Guid userId, bool rememberMe, TimeSpan slidingLifetime, TimeSpan absoluteLifetime)
     {
-        if (absoluteLifetime < initialLifetime)
-            throw new InvalidOperationException("Absolute lifetime must be greater than or equal to initial lifetime.");
+        if (slidingLifetime <= TimeSpan.Zero)
+            throw new ArgumentException("Sliding lifetime must be positive.", nameof(slidingLifetime));
+
+        if (absoluteLifetime < slidingLifetime)
+            throw new ArgumentException(
+                "Absolute lifetime must be greater than or equal to sliding lifetime.",
+                nameof(absoluteLifetime)
+            );
 
         DateTime now = DateTime.UtcNow;
 
         UserId = userId;
         RememberMe = rememberMe;
-        ExpiresAt = now.Add(initialLifetime);
+        ExpiresAt = now.Add(slidingLifetime);
         AbsoluteExpiresAt = now.Add(absoluteLifetime);
 
-        _audit.UpdateAudit();
+        AuditState.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
 
+    public DateTime CreatedAt => AuditState.CreatedAt;
+    public DateTime UpdatedAt => AuditState.UpdatedAt;
+
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
-    public Guid SessionStamp { get; private set; } = Guid.NewGuid();
+    public bool RememberMe { get; private set; }
 
-    public bool RememberMe { get; private set; } = false;
-    public bool IsRevoked { get; private set; } = false;
+    public bool IsRevoked { get; private set; }
     public DateTime? RevokedAt { get; private set; }
 
     public DateTime ExpiresAt { get; private set; }
     public DateTime AbsoluteExpiresAt { get; private set; }
 
-    public DateTime CreatedAt => _audit.CreatedAt;
-    public DateTime UpdatedAt => _audit.UpdatedAt;
-
-    public bool IsActive
+    public bool IsExpired()
     {
-        get
-        {
-            DateTime now = DateTime.UtcNow;
-            return !IsRevoked && now < ExpiresAt && now < AbsoluteExpiresAt;
-        }
+        DateTime now = DateTime.UtcNow;
+        return now >= ExpiresAt || now >= AbsoluteExpiresAt || IsRevoked;
     }
 
-    public void ExtendSession(DateTime newExpiry)
+    public bool ShouldRefresh(double thresholdPercent)
     {
-        if (newExpiry > AbsoluteExpiresAt)
-            newExpiry = AbsoluteExpiresAt;
+        if (thresholdPercent < 1 || thresholdPercent > 100)
+            throw new ArgumentOutOfRangeException(nameof(thresholdPercent), "Threshold percent must be between 1 and 100.");
 
-        if (newExpiry <= ExpiresAt) return;
+        double thresholdFraction = thresholdPercent / 100.0;
 
-        ExpiresAt = newExpiry;
-        _audit.UpdateAudit();
+        if (IsRevoked) return false;
+
+        DateTime now = DateTime.UtcNow;
+
+        if (now >= AbsoluteExpiresAt) return false;
+
+        TimeSpan remaining = ExpiresAt - now;
+        TimeSpan total = ExpiresAt - CreatedAt;
+
+        if (total <= TimeSpan.Zero) return true;
+
+        double remainingPercent = remaining.TotalSeconds / total.TotalSeconds;
+        return remainingPercent <= thresholdFraction;
     }
 
-    public void RefreshSessionStamp()
+    public void ExtendSession(TimeSpan slidingLifetime)
     {
-        SessionStamp = Guid.NewGuid();
-        _audit.UpdateAudit();
+        if (IsRevoked) return;
+
+        DateTime now = DateTime.UtcNow;
+        ExpiresAt = now.Add(slidingLifetime);
+
+        if (ExpiresAt > AbsoluteExpiresAt)
+            ExpiresAt = AbsoluteExpiresAt;
+
+        AuditState.UpdateAudit();
     }
 
-    public void RevokeAndRotate()
+    public void Revoke()
     {
         if (IsRevoked) return;
 
         IsRevoked = true;
         RevokedAt = DateTime.UtcNow;
-        SessionStamp = Guid.NewGuid();
-        _audit.UpdateAudit();
+        AuditState.UpdateAudit();
     }
 }

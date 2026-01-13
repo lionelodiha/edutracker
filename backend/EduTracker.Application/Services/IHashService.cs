@@ -1,4 +1,4 @@
-namespace EduTracker.Application.Services;
+﻿namespace EduTracker.Application.Services;
 
 public interface IHashingService
 {

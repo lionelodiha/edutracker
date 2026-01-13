@@ -1,4 +1,4 @@
-namespace EduTracker.Infrastructure.Configurations.Security;
+﻿namespace EduTracker.Infrastructure.Configurations.Security;
 
 internal record HashingOptions
 {

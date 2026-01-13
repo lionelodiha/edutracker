@@ -1,6 +1,7 @@
-namespace EduTracker.Infrastructure.Configurations.Security;
+﻿namespace EduTracker.Infrastructure.Configurations.Security;
 
 internal record DataEncryptionOptions
 {
-    public string Key { get; init; } = string.Empty;
+    public byte CurrentKeyVersion { get; set; } = 1;
+    public Dictionary<byte, string> Keys { get; set; } = [];
 }

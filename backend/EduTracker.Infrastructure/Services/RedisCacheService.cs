@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using EduTracker.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -34,7 +34,7 @@ internal class RedisCacheService : ICacheService
         }
     }
 
-    public async Task<bool> SetAsync<T>(string key, T value, TimeSpan? expiry = null)
+    public async Task<bool> SetAsync<T>(string key, T value, TimeSpan? TimeToLive = null)
     {
         if (string.IsNullOrWhiteSpace(key) || _db is null)
             return false;
@@ -42,7 +42,7 @@ internal class RedisCacheService : ICacheService
         try
         {
             string json = JsonSerializer.Serialize(value);
-            Expiration expiration = expiry.HasValue ? new Expiration(expiry.Value) : Expiration.Default;
+            Expiration expiration = TimeToLive.HasValue ? new Expiration(TimeToLive.Value) : Expiration.Default;
 
             return await _db.StringSetAsync(key, json, expiration);
         }

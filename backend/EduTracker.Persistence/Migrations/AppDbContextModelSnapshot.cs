@@ -43,9 +43,6 @@ namespace EduTracker.Persistence.Migrations
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("SessionStamp")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -103,7 +100,7 @@ namespace EduTracker.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "_audit", b1 =>
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
                         {
                             b1.Property<Guid>("UserSessionId")
                                 .HasColumnType("uniqueidentifier");
@@ -124,14 +121,14 @@ namespace EduTracker.Persistence.Migrations
                                 .HasForeignKey("UserSessionId");
                         });
 
-                    b.Navigation("User");
+                    b.Navigation("AuditState");
 
-                    b.Navigation("_audit");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
                 {
-                    b.OwnsOne("EduTracker.Domain.Components.Security.SensitiveDataState<EduTracker.Domain.Entities.Users.UserSensitive>", "_sensitive", b1 =>
+                    b.OwnsOne("EduTracker.Domain.Components.Security.SensitiveDataState<EduTracker.Domain.Entities.Users.UserSensitive>", "SensitiveDataState", b1 =>
                         {
                             b1.Property<Guid>("UserId")
                                 .HasColumnType("uniqueidentifier");
@@ -149,7 +146,7 @@ namespace EduTracker.Persistence.Migrations
                                 .HasForeignKey("UserId");
                         });
 
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "_audit", b1 =>
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
                         {
                             b1.Property<Guid>("UserId")
                                 .HasColumnType("uniqueidentifier");
@@ -170,9 +167,9 @@ namespace EduTracker.Persistence.Migrations
                                 .HasForeignKey("UserId");
                         });
 
-                    b.Navigation("_audit");
+                    b.Navigation("AuditState");
 
-                    b.Navigation("_sensitive");
+                    b.Navigation("SensitiveDataState");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>

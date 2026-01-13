@@ -1,6 +1,6 @@
-namespace EduTracker.Api.Middleware;
+﻿namespace EduTracker.Api.Middleware;
 
-public class TraceIdMiddleware(RequestDelegate next)
+internal class TraceIdMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 

@@ -2,14 +2,13 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EduTracker.Domain\EduTracker.Domain.csproj" />
     <ProjectReference Include="..\EduTracker.Persistence\EduTracker.Persistence.csproj" />
-    <ProjectReference Include="..\EduTracker.Shared\EduTracker.Shared.csproj" />
   </ItemGroup>
 
 </Project>

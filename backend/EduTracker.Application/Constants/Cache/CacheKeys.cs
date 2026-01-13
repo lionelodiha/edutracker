@@ -1,4 +1,4 @@
-namespace EduTracker.Application.Constants.Cache;
+﻿namespace EduTracker.Application.Constants.Cache;
 
 internal static class CacheKeys
 {

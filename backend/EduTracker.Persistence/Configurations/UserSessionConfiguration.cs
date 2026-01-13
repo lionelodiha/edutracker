@@ -1,5 +1,4 @@
-using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Entities.UserSessions;
+﻿using EduTracker.Domain.Entities.UserSessions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +10,17 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
     {
         builder.HasKey(us => us.Id);
 
+        builder.OwnsOne(us => us.AuditState, audit =>
+        {
+            audit.Property(a => a.CreatedAt)
+                .HasColumnName("CreatedAt")
+                .IsRequired();
+
+            audit.Property(a => a.UpdatedAt)
+                .HasColumnName("UpdatedAt")
+                .IsRequired();
+        });
+
         builder.HasIndex(us => us.UserId);
 
         builder.Property(us => us.UserId)
@@ -19,9 +29,6 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
         builder.HasOne(us => us.User)
             .WithMany(u => u.Sessions)
             .HasForeignKey(us => us.UserId)
-            .IsRequired();
-
-        builder.Property(us => us.SessionStamp)
             .IsRequired();
 
         builder.Property(us => us.RememberMe)
@@ -35,16 +42,5 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
 
         builder.Property(us => us.AbsoluteExpiresAt)
             .IsRequired();
-
-        builder.OwnsOne<AuditState>(UserSession.Audit, audit =>
-        {
-            audit.Property(a => a.CreatedAt)
-                .HasColumnName("CreatedAt")
-                .IsRequired();
-
-            audit.Property(a => a.UpdatedAt)
-                .HasColumnName("UpdatedAt")
-                .IsRequired();
-        });
     }
 }
