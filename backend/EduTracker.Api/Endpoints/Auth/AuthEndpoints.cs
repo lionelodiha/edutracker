@@ -1,13 +1,16 @@
 using EduTracker.Api.Constants.Cookies;
 using EduTracker.Api.Constants.Routes;
-using EduTracker.Api.Endpoints.Auth.Handlers;
+using EduTracker.Api.Endpoints.Auth.Handlers.LoginUser;
+using EduTracker.Api.Endpoints.Auth.Handlers.LogoutUser;
+using EduTracker.Api.Endpoints.Auth.Handlers.RefreshSession;
+using EduTracker.Api.Endpoints.Auth.Handlers.RegisterUser;
 using EduTracker.Api.Models;
 using EduTracker.Application.Features.Auth.Models;
 using Scalar.AspNetCore;
 
 namespace EduTracker.Api.Endpoints.Auth;
 
-public static class AuthEndpoints
+internal static class AuthEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {

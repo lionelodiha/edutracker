@@ -1,6 +1,6 @@
 namespace EduTracker.Api.Constants.Auth;
 
-public static class SessionClaimTypes
+internal static class SessionClaimTypes
 {
     public const string SessionId = "jb:session_id";
 }

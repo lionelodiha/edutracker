@@ -6,8 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace EduTracker.Infrastructure.CQRS.Decorators;
 
-internal class RetryBehavior<TRequest, TResponse>(ILogger<RetryBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+internal sealed class RetryBehavior<TRequest, TResponse>(
+    ILogger<RetryBehavior<TRequest, TResponse>> logger
+) : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IMessage<TResponse>
 {
     private const int MaxRetries = 3;
     private static readonly TimeSpan BaseDelay = TimeSpan.FromMilliseconds(100);

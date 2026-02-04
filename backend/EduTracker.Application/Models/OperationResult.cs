@@ -1,6 +1,6 @@
 ﻿namespace EduTracker.Application.Models;
 
-public record OperationResult<T>(
+public sealed record OperationResult<T>(
     string MessageId,
     string Message,
     List<ResponseDetail>? Details,

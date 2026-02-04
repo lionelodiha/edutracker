@@ -1,6 +1,6 @@
 ﻿namespace EduTracker.Domain.Components.Security;
 
-public class SensitiveDataState<TSensitive>
+public sealed class SensitiveDataState<TSensitive>
     where TSensitive : ISensitiveData
 {
     public byte[] EncryptedData { get; private set; } = [];

@@ -2,5 +2,5 @@
 
 internal static class CookieKeys
 {
-    public const string Session = "et_session_id";
+    public const string Session = "jb_session_id";
 }

@@ -2,7 +2,7 @@
 
 namespace EduTracker.Application.Models;
 
-public record ResponseDetail(
+public sealed record ResponseDetail(
     string Message,
     ResponseSeverity Severity
 );

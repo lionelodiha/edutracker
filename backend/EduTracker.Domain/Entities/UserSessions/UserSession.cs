@@ -4,9 +4,9 @@ using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Domain.Entities.UserSessions;
 
-public class UserSession : IEntity, IAuditable
+public sealed class UserSession : IEntity, IAuditable
 {
-    internal readonly AuditState AuditState = new();
+    public readonly AuditState AuditState = new();
 
     private UserSession() { }
 

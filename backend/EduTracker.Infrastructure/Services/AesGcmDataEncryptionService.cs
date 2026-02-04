@@ -1,37 +1,28 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 using EduTracker.Application.Enums;
 using EduTracker.Application.Services;
-using EduTracker.Infrastructure.Configurations.Security;
+using EduTracker.Infrastructure.Configurations.Security.DataEncryption;
 using Microsoft.Extensions.Options;
 
 namespace EduTracker.Infrastructure.Services;
 
-internal class AesGcmDataEncryptionService : IDataEncryptionService
+internal sealed class AesGcmDataEncryptionService : IDataEncryptionService
 {
     private readonly Dictionary<byte, byte[]> _masterKeys;
     private readonly byte _currentVersion;
 
-    private const int KeySizeBytes = 32;
     private const int NonceSizeBytes = 12;
     private const int TagSizeBytes = 16;
 
     public AesGcmDataEncryptionService(IOptions<DataEncryptionOptions> options)
     {
-        if (options?.Value?.Keys is null || options.Value.Keys.Count is 0)
-            throw new InvalidOperationException("At least one key must be configured.");
+        DataEncryptionOptions opts = options.Value;
 
-        _currentVersion = options.Value.CurrentKeyVersion;
-        _masterKeys = options.Value.Keys.ToDictionary(
+        _currentVersion = opts.CurrentKeyVersion;
+        _masterKeys = opts.Keys.ToDictionary(
             kvp => kvp.Key,
             kvp => Convert.FromBase64String(kvp.Value)
         );
-
-        foreach (byte[] key in _masterKeys.Values)
-        {
-            if (key.Length is not KeySizeBytes)
-                throw new InvalidOperationException($"Each key must be {KeySizeBytes} bytes (AES-256).");
-        }
     }
 
     public byte[] Encrypt(byte[] data, CryptoPurpose purpose)
@@ -71,8 +62,8 @@ internal class AesGcmDataEncryptionService : IDataEncryptionService
         return HKDF.DeriveKey(
             HashAlgorithmName.SHA256,
             masterKey,
-            KeySizeBytes,
-            info: Encoding.UTF8.GetBytes(purpose.ToString())
+            outputLength: 32,
+            info: [(byte)purpose]
         );
     }
 

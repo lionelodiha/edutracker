@@ -1,15 +1,15 @@
 using EduTracker.Api.Constants.Routes;
-using EduTracker.Api.Endpoints.Base.Handlers;
+using EduTracker.Api.Endpoints.Base.Handlers.GetInfo;
 
 namespace EduTracker.Api.Endpoints.Base;
 
-public static class BaseEndpoints
+internal static class BaseEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
         public void MapBaseEndpoints()
         {
-            app.MapGet(ApiRoutes.BasePath, GetInfoEndpointHandler.Handle)
+            app.MapGet(ApiRoutes.ApiBasePath, GetInfoEndpointHandler.Handle)
                 .ExcludeFromDescription();
         }
     }

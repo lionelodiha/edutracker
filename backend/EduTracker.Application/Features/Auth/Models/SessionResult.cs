@@ -1,6 +1,6 @@
 namespace EduTracker.Application.Features.Auth.Models;
 
-public record SessionResult(
+public sealed record SessionResult(
     Guid SessionId,
     SessionTimestampsResponse Timestamps
 );
