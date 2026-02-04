@@ -44,7 +44,7 @@ internal sealed class ExceptionHandlingMiddleware(
         }
         else
         {
-            httpContext.Response.StatusCode = 500;
+            httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
             response = ex.ToApiResponse<object>();
 
             if (logger.IsEnabled(LogLevel.Error))

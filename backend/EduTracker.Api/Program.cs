@@ -8,7 +8,6 @@ using EduTracker.Api.Endpoints.Sessions;
 using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.OpenApi;
-using EduTracker.Api.Extensions.ReverseProxy;
 using EduTracker.Api.Middleware;
 using EduTracker.Application;
 using EduTracker.Application.Configurations.Seeders;
@@ -49,15 +48,6 @@ builder.Services.Configure<JsonOptions>(opts =>
     serializer.WriteIndented = true;
     serializer.Converters.Add(new JsonStringEnumConverter());
 });
-
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
-    .AddTransforms(builderContext =>
-    {
-        builderContext
-            .AddInternalSessionAuth()
-            .AddInternalTraceId();
-    });
 
 builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); });
 
@@ -103,8 +93,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapReverseProxy();
 
 app.MapBaseEndpoints();
 app.MapAuthEndpoints();

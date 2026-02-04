@@ -14,7 +14,6 @@
     <PackageVersion Include="Scalar.AspNetCore" Version="2.12.18" />
     <PackageVersion Include="Scrutor" Version="7.0.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.10.1" />
-    <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
   </ItemGroup>
 
 </Project>
