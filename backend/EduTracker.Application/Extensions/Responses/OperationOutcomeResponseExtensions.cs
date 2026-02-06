@@ -8,11 +8,11 @@ internal static class OperationOutcomeResponseExtensions
     private static void NormalizeResponse(IOperationResponse response, out string messageId, out string message, out List<ResponseDetail>? details)
     {
         messageId = string.IsNullOrWhiteSpace(response.Id)
-            ? "UNKNOWN_ID"
+            ? "COMMON_OPERATION_COMPLETED"
             : response.Id;
 
         message = string.IsNullOrWhiteSpace(response.Title)
-            ? "No message provided."
+            ? "Operation completed successfully."
             : response.Title;
 
         details = response.Details is { Length: > 0 }
@@ -31,10 +31,10 @@ internal static class OperationOutcomeResponseExtensions
 
     extension(OperationOutcomeResponse response)
     {
-        public OperationResult<object?> ToOperationResult()
+        public OperationResult<object> ToOperationResult()
         {
             NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
-            return new OperationResult<object?>(messageId, message, details, response.Data);
+            return new OperationResult<object>(messageId, message, details, response.Data);
         }
     }
 }

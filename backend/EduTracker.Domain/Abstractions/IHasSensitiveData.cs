@@ -2,7 +2,8 @@
 
 namespace EduTracker.Domain.Abstractions;
 
-internal interface IHasSensitiveData<TSensitive> where TSensitive : ISensitiveData
+internal interface IHasSensitiveData<TSensitive>
+    where TSensitive : ISensitiveData
 {
     byte[] EncryptedData { get; }
     TSensitive? SensitiveData { get; }

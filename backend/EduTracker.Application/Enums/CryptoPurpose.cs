@@ -1,6 +1,6 @@
 namespace EduTracker.Application.Enums;
 
-public enum CryptoPurpose
+public enum CryptoPurpose : byte
 {
-    UserSensitiveData,
+    UserSensitiveData = 0x01,
 }

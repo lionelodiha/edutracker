@@ -2,12 +2,12 @@
 using System.Text;
 using BCryption = BCrypt.Net.BCrypt;
 using EduTracker.Application.Services;
-using EduTracker.Infrastructure.Configurations.Security;
 using Microsoft.Extensions.Options;
+using EduTracker.Infrastructure.Configurations.Security.Hashing;
 
 namespace EduTracker.Infrastructure.Services;
 
-internal class HashingService : IHashingService
+internal sealed class HashingService : IHashingService
 {
     private readonly byte[] _emailHmacKey;
     private readonly int _passwordWorkFactor;
@@ -16,21 +16,15 @@ internal class HashingService : IHashingService
     {
         HashingOptions opts = options.Value;
 
-        if (string.IsNullOrWhiteSpace(opts.EmailHmacKey))
-            throw new InvalidOperationException("Hashing:EmailHmacKey must be provided in configuration.");
-
-        if (opts.PasswordWorkFactor <= 0)
-            throw new InvalidOperationException("Hashing:PasswordWorkFactor must be greater than 0.");
-
-        _emailHmacKey = Encoding.UTF8.GetBytes(opts.EmailHmacKey);
+        _emailHmacKey = Convert.FromBase64String(opts.EmailHmacKey);
         _passwordWorkFactor = opts.PasswordWorkFactor;
     }
 
     public async Task<string> HashPasswordAsync(string password)
-        => await Task.Run(() => BCryption.HashPassword(password, _passwordWorkFactor));
+        => await Task.FromResult(BCryption.HashPassword(password, _passwordWorkFactor));
 
     public async Task<bool> VerifyPasswordAsync(string password, string hashedPassword)
-        => await Task.Run(() => BCryption.Verify(password, hashedPassword));
+        => await Task.FromResult(BCryption.Verify(password, hashedPassword));
 
     public string HashEmail(string email)
     {
@@ -42,11 +36,11 @@ internal class HashingService : IHashingService
 
     public bool VerifyEmail(string email, string hashedEmail)
     {
-        string computed = HashEmail(email);
+        byte[] expected = Convert.FromHexString(hashedEmail);
+        using HMACSHA256 hmac = new(_emailHmacKey);
 
-        return CryptographicOperations.FixedTimeEquals(
-            Encoding.UTF8.GetBytes(computed),
-            Encoding.UTF8.GetBytes(hashedEmail)
-        );
+        byte[] actual = hmac.ComputeHash(Encoding.UTF8.GetBytes(email));
+
+        return CryptographicOperations.FixedTimeEquals(actual, expected);
     }
 }

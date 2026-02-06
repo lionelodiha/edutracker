@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EduTracker.Persistence.Configurations;
 
-internal class UserConfiguration : IEntityTypeConfiguration<User>
+internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
@@ -34,19 +34,19 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         });
 
         builder.Property(u => u.UserName)
-            .IsRequired()
-            .HasMaxLength(30);
+            .HasMaxLength(UserLimits.UserNameMaxLength)
+            .IsRequired();
 
         builder.HasIndex(u => u.EmailHash)
             .IsUnique();
 
         builder.Property(u => u.EmailHash)
-            .IsRequired()
-            .HasMaxLength(64);
+            .HasMaxLength(UserLimits.EmailHashLength)
+            .IsRequired();
 
         builder.Property(u => u.PasswordHash)
-            .IsRequired()
-            .HasMaxLength(60);
+            .HasMaxLength(UserLimits.PasswordHashLength)
+            .IsRequired();
 
         builder.Property(u => u.IsLocked)
             .IsRequired();
@@ -58,7 +58,7 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(u => u.Sessions)
             .WithOne(us => us.User)
             .HasForeignKey(us => us.UserId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
     }
 }

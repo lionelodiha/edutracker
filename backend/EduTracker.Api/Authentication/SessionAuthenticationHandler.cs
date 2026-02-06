@@ -1,7 +1,8 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using EduTracker.Api.Constants.Auth;
 using EduTracker.Api.Constants.Cookies;
-using EduTracker.Api.Extensions.Claims;
+using EduTracker.Api.Helpers;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -10,8 +11,13 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Api.Authentication;
 
-internal class SessionAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, SessionManagementService sessionService)
-    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+internal sealed class SessionAuthenticationHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    SessionStateService sessionService,
+    UserAuthenticationStateService userAuthService
+) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -25,10 +31,19 @@ internal class SessionAuthenticationHandler(IOptionsMonitor<AuthenticationScheme
 
         SessionData? sessionData = await sessionService.GetSessionDataAsync(sessionId, Context.RequestAborted);
 
-        if (sessionData is null || sessionData.IsLocked || sessionData.IsExpired())
+        if (sessionData is null || sessionData.IsExpired())
             return AuthenticateResult.Fail("Invalid or expired session");
 
-        IEnumerable<Claim> claims = sessionData.ToClaims();
+        UserAuthData? authData = await userAuthService.GetUserAuthDataAsync(sessionData.UserId, Context.RequestAborted);
+
+        if (authData is null || authData.IsLocked)
+            return AuthenticateResult.Fail("User account is locked or not found");
+
+        List<Claim> claims = [
+            new Claim(ClaimTypes.NameIdentifier, authData.UserId.ToString()),
+            new Claim(ClaimTypes.Role, authData.Role.ToString()),
+            new Claim(SessionClaimTypes.SessionId, sessionData.SessionId.ToString())
+        ];
 
         ClaimsIdentity identity = new(claims, Scheme.Name);
         ClaimsPrincipal principal = new(identity);
@@ -39,11 +54,7 @@ internal class SessionAuthenticationHandler(IOptionsMonitor<AuthenticationScheme
 
     private bool TryGetSessionIdFromCookie(out Guid sessionId)
     {
-        sessionId = Guid.Empty;
-
-        if (!Request.Cookies.TryGetValue(CookieKeys.Session, out string? rawSessionId))
-            return false;
-
+        string? rawSessionId = CookieHelper.GetCookie(Context.Request, CookieKeys.Session);
         return Guid.TryParse(rawSessionId, out sessionId);
     }
 }

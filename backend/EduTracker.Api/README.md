@@ -1,12 +1,45 @@
-# EduTracker API
+# EduTracker API Gateway
 
-Welcome to the **EduTracker API**, the api is designed to manage users, sessions, and authentication and other services to manage the educational resources of a school.
+Welcome to the **EduTracker API Gateway**, the central entry point for the EduTracker ecosystem. This gateway is designed to manage users, sessions, and authentication while orchestrating requests across multiple specialized microservices.
+
+## Ecosystem Overview
+
+EduTracker is a distributed ecosystem of services designed to streamline the career management and recruitment lifecycle. The Gateway serves as the "brain" and security layer, handling:
+
+- **Identity & Access Management (IAM)**: Centralized user registration, login, and profile management.
+- **Session Orchestration**: Managing stateful and stateless sessions across the ecosystem.
+- **Service Delegation**: Routing and delegating requests to downstream services.
+
+### Downstream Services (The "Sub-Services")
+
+The Gateway is built to eventually delegate domain-specific operations to:
+
+- **ecom**: Job posting and candidate sourcing.
+- **matching**: Job matching algorithms and recommendations.
+- **roadmap**: Career path visualization and skill mapping.
 
 ---
 
-## 🔐 Authentication & Security
+## Architecture
 
-All interactions with the Api are secured. We use a combination of hashing for sensitive data and encryption for personal identifiers.
+The Gateway acts as a thin, highly efficient layer between clients and backend logic.
+
+```pgsql
+Web/Mobile Client
+└─> EduTracker API Gateway
+    ├─ Auth & Registration
+    ├─ User Management
+    ├─ Session Manager
+    ├─ E-com Service
+    ├─ Matching Service
+    └─ Roadmap Service
+```
+
+---
+
+## Authentication & Security
+
+All interactions with the EduTracker ecosystem are secured via the Gateway. We use a combination of hashing for sensitive data and encryption for personal identifiers.
 
 ### Data Security Policy
 
@@ -16,7 +49,7 @@ All interactions with the Api are secured. We use a combination of hashing for s
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 The API follows RESTful conventions and returns a standardized response envelope.
 
@@ -28,14 +61,13 @@ The API follows RESTful conventions and returns a standardized response envelope
   "messageId": "string (UUID)",
   "message": "Human readable summary",
   "details": [],
-  "data": { ... },
-  "timestamp": "ISO8601"
+  "data": { ... }
 }
 ```
 
 ---
 
-## 🛠️ Development & Tooling
+## Development & Tooling
 
 - **Scalars / OpenAPI**: Interactive documentation is available at `/openapi/v1.json` (or via the Scalar UI in development).
 - **Structured Logging**: Every request is tagged with a `TraceId` for debugging.

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EduTracker.Persistence.Configurations;
 
-internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
+internal sealed class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
 {
     public void Configure(EntityTypeBuilder<UserSession> builder)
     {
@@ -24,11 +24,6 @@ internal class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
         builder.HasIndex(us => us.UserId);
 
         builder.Property(us => us.UserId)
-            .IsRequired();
-
-        builder.HasOne(us => us.User)
-            .WithMany(u => u.Sessions)
-            .HasForeignKey(us => us.UserId)
             .IsRequired();
 
         builder.Property(us => us.RememberMe)

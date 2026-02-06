@@ -18,7 +18,7 @@ dotnet restore
 dotnet run
 ```
 
-The API will start on the configured port `https://localhost:5270`.
+The API will start on the configured port `https://localhost:3187`.
 
 ### Frontend Setup
 

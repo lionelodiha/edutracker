@@ -2,18 +2,16 @@
 
 internal class TraceIdMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next = next;
-
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext httpContext)
     {
-        string traceId = context.TraceIdentifier;
+        string traceId = httpContext.TraceIdentifier;
 
-        context.Response.OnStarting(() =>
+        httpContext.Response.OnStarting(() =>
         {
-            context.Response.Headers["X-Trace-Id"] = traceId;
+            httpContext.Response.Headers["X-Trace-Id"] = traceId;
             return Task.CompletedTask;
         });
 
-        await _next(context);
+        await next(httpContext);
     }
 }

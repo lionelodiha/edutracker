@@ -1,16 +1,18 @@
-﻿using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Enums;
-using EduTracker.Application.Exceptions;
-using EduTracker.Application.Models;
+﻿using System.Net;
 using FluentValidation;
 using FluentValidation.Results;
 using EduTracker.Application.CQRS.Decorators;
-using System.Net;
+using EduTracker.Application.CQRS.Messaging;
+using EduTracker.Application.Enums;
+using EduTracker.Application.Exceptions;
+using EduTracker.Application.Models;
 
 namespace EduTracker.Infrastructure.CQRS.Decorators;
 
-internal class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+internal sealed class ValidationBehavior<TRequest, TResponse>(
+    IEnumerable<IValidator<TRequest>> validators
+) : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IMessage<TResponse>
 {
     public async Task<TResponse> Handle(TRequest request, Func<Task<TResponse>> next, CancellationToken cancellationToken = default)
     {
@@ -22,18 +24,19 @@ internal class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TR
             List<ResponseDetail> failures = [.. validationResults
                 .SelectMany(r => r.Errors)
                 .Where(f => f is not null)
-                .Select(f => new ResponseDetail($"{f.PropertyName}: {f.ErrorMessage}", ResponseSeverity.Error))
+                .Select(f => new ResponseDetail(
+                    Message: f.ErrorMessage,
+                    Severity: ResponseSeverity.Error
+                ))
             ];
 
             if (failures.Count > 0)
-            {
                 throw new AppException(
-                    id: "SYSTEM_VALIDATION_FAILED",
+                    id: "COMMON_VALIDATION_FAILED",
                     statusCode: (int)HttpStatusCode.BadRequest,
-                    title: "Validation failed.",
+                    title: "One or more validation errors occurred.",
                     details: [.. failures]
                 );
-            }
         }
 
         return await next();

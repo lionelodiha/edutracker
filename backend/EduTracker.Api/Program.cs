@@ -1,29 +1,31 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using EduTracker.Api;
 using EduTracker.Api.Authentication;
 using EduTracker.Api.Constants.Auth;
 using EduTracker.Api.Endpoints.Auth;
 using EduTracker.Api.Endpoints.Base;
+using EduTracker.Api.Endpoints.Sessions;
 using EduTracker.Api.Endpoints.Users;
+using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.OpenApi;
 using EduTracker.Api.Middleware;
 using EduTracker.Application;
+using EduTracker.Application.Configurations.Seeders;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Domain.Enums;
+using EduTracker.Application.Features.Seeders.SeedSuperAdmin;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddPersistenceServices(builder.Configuration);
-builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddInfrastructureServices(builder.Configuration, [typeof(IMediator).Assembly]);
-builder.Services.AddApiServices();
+builder.Services.AddPersistenceServices(builder.Configuration.GetConnectionString("Database"));
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices([typeof(IMediator).Assembly]);
 
 builder.Services.AddHttpContextAccessor();
 
@@ -35,10 +37,7 @@ builder.Services.AddAuthentication(AuthenticationSchemes.Session)
 
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthenticationResultHandler>();
 
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("UserOnly", p => p.RequireRole(SystemRole.User.ToString()))
-    .AddPolicy("AdminOnly", p => p.RequireRole(SystemRole.Admin.ToString(), SystemRole.SuperAdmin.ToString()))
-    .AddPolicy("SuperAdminOnly", p => p.RequireRole(SystemRole.SuperAdmin.ToString()));
+builder.Services.AddAuthorizationBuilder().AddCustomPolicies();
 
 builder.Services.Configure<JsonOptions>(opts =>
 {
@@ -50,12 +49,29 @@ builder.Services.Configure<JsonOptions>(opts =>
     serializer.Converters.Add(new JsonStringEnumConverter());
 });
 
-builder.Services.AddOpenApi(options =>
-{
-    options.AddCustomOpenApiTransformer();
-});
+builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); });
 
 WebApplication app = builder.Build();
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    SuperAdminSeedOptions options = scope.ServiceProvider
+        .GetRequiredService<IOptions<SuperAdminSeedOptions>>()
+        .Value;
+
+    IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+    SeedSuperAdminCommand command = new(
+        options.FirstName,
+        options.MiddleName,
+        options.LastName,
+        options.UserName,
+        options.Email,
+        options.Password
+    );
+
+    await mediator.Send(command, CancellationToken.None);
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -74,13 +90,13 @@ else
 
 app.UseMiddleware<TraceIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<SessionRefreshMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapBaseEndpoints();
 app.MapAuthEndpoints();
+app.MapSessionEndpoints();
 app.MapUserEndpoints();
 
 app.Run();
