@@ -1,5 +1,4 @@
 using EduTracker.Application.Features.Organizations.Models;
-using EduTracker.Domain.Entities.Organizations;
 
 namespace EduTracker.Application.Extensions.Entities;
 
