@@ -8,7 +8,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
     public SeedSuperAdminCommandValidator()
     {
         RuleFor(x => x.FirstName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("First name is required.")
             .MinimumLength(UserLimits.NameMinLength)
                 .WithMessage($"First name must be at least {UserLimits.NameMinLength} characters long.")
@@ -18,7 +18,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
                 .WithMessage("First name contains invalid characters.");
 
         RuleFor(x => x.MiddleName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .MinimumLength(UserLimits.NameMinLength)
                 .WithMessage($"Middle name must be at least {UserLimits.NameMinLength} characters long.")
             .MaximumLength(UserLimits.NameMaxLength)
@@ -27,7 +27,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
                 .WithMessage("Middle name contains invalid characters.");
 
         RuleFor(x => x.LastName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Last name is required.")
             .MinimumLength(UserLimits.NameMinLength)
                 .WithMessage($"Last name must be at least {UserLimits.NameMinLength} characters long.")
@@ -37,7 +37,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
                 .WithMessage("Last name contains invalid characters.");
 
         RuleFor(x => x.UserName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Username is required.")
             .MinimumLength(UserLimits.UserNameMinLength)
                 .WithMessage($"Username must be at least {UserLimits.UserNameMinLength} characters long.")
@@ -47,7 +47,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
                 .WithMessage("Username may only contain letters, numbers, underscores, and hyphens.");
 
         RuleFor(x => x.Email)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Email address is required.")
             .MaximumLength(UserLimits.EmailMaxLength)
                 .WithMessage($"Email address must not exceed {UserLimits.EmailMaxLength} characters.")
@@ -55,7 +55,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
                 .WithMessage("Please provide a valid email address.");
 
         RuleFor(x => x.Password)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(UserLimits.PasswordMinLength)
                 .WithMessage($"Password must be at least {UserLimits.PasswordMinLength} characters long.")
@@ -65,7 +65,7 @@ public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuper
         When(x => !string.IsNullOrEmpty(x.Password), () =>
         {
             RuleFor(x => x.Password)
-                .Cascade(CascadeMode.Stop)
+                .Cascade(CascadeMode.StopOnFirstFailure)
                 .Must(ContainUppercase).WithMessage("Password must contain at least one uppercase letter.")
                 .Must(ContainLowercase).WithMessage("Password must contain at least one lowercase letter.")
                 .Must(ContainDigit).WithMessage("Password must contain at least one number.")

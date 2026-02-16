@@ -8,7 +8,7 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
     public UpdateUserCommandValidator()
     {
         RuleFor(x => x.FirstName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("First name is required.")
             .MinimumLength(UserLimits.NameMinLength)
                 .WithMessage($"First name must be at least {UserLimits.NameMinLength} characters long.")
@@ -19,7 +19,7 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
             .When(x => x.FirstName is not null);
 
         RuleFor(x => x.MiddleName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .MinimumLength(UserLimits.NameMinLength)
                 .WithMessage($"Middle name must be at least {UserLimits.NameMinLength} characters long.")
             .MaximumLength(UserLimits.NameMaxLength)
@@ -29,7 +29,7 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
             .When(x => x.MiddleName is not null);
 
         RuleFor(x => x.LastName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Last name is required.")
             .MinimumLength(UserLimits.NameMinLength)
                 .WithMessage($"Last name must be at least {UserLimits.NameMinLength} characters long.")
@@ -40,7 +40,7 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
             .When(x => x.LastName is not null);
 
         RuleFor(x => x.UserName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Username is required.")
             .MinimumLength(UserLimits.UserNameMinLength)
                 .WithMessage($"Username must be at least {UserLimits.UserNameMinLength} characters long.")
