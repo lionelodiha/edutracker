@@ -8,13 +8,13 @@ public sealed class LoginUserCommandValidator : AbstractValidator<LoginUserComma
     public LoginUserCommandValidator()
     {
         RuleFor(x => x.Identifier)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Username or email is required.")
             .MaximumLength(UserLimits.IdentifierMaxLength)
                 .WithMessage($"Identifier must not exceed {UserLimits.IdentifierMaxLength} characters.");
 
         RuleFor(x => x.Password)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .NotEmpty().WithMessage("Password is required.");
     }
 }

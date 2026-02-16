@@ -21,7 +21,7 @@ public sealed class GetUsersQueryValidator : AbstractValidator<GetUsersQuery>
             .When(x => x.Cursor.HasValue);
 
         RuleFor(x => x.UserName)
-            .Cascade(CascadeMode.Stop)
+            .Cascade(CascadeMode.StopOnFirstFailure)
             .MinimumLength(1)
                 .WithMessage($"Username must be at least {1} characters long.")
             .MaximumLength(UserLimits.UserNameMaxLength)
