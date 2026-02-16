@@ -13,8 +13,9 @@ public sealed class Organization : IEntity, IAuditable
 
     public Organization(string name, Guid ownerUserId)
     {
-        SetName(name);
         OwnerUserId = ownerUserId;
+
+        SetName(name);
         AuditState.UpdateAudit();
     }
 
@@ -29,17 +30,27 @@ public sealed class Organization : IEntity, IAuditable
     public User OwnerUser { get; private set; } = null!;
 
     public ICollection<OrganizationMember> Members { get; private set; } = [];
-    public ICollection<OrganizationSubscription> Subscriptions { get; private set; } = [];
     public ICollection<PaymentMethod> PaymentMethods { get; private set; } = [];
     public ICollection<Course> Courses { get; private set; } = [];
     public ICollection<Class> Classes { get; private set; } = [];
 
-    public void SetName(string name)
+    public void SetName(string newName)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Organization name is required.", nameof(name));
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Organization name is required.", nameof(newName));
 
-        Name = name.Trim();
+        int length = newName.Length;
+
+        if (length < OrganizationLimits.NameMinLength || length > OrganizationLimits.NameMaxLength)
+            throw new ArgumentException(
+                $"Name must be between {OrganizationLimits.NameMinLength} and {OrganizationLimits.NameMaxLength} characters.",
+                nameof(newName)
+            );
+
+        if (!OrganizationLimits.NameRegex().IsMatch(newName))
+            throw new ArgumentException("Name contains invalid characters.", nameof(newName));
+
+        Name = newName.Trim();
         AuditState.UpdateAudit();
     }
 }

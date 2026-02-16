@@ -16,6 +16,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         SetUserName(userName);
         SetEmailHash(emailHash);
         SetPasswordHash(passwordHash);
+
+        AuditState.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -54,7 +56,9 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         if (string.IsNullOrWhiteSpace(newUserName))
             throw new ArgumentException("UserName cannot be null or empty.", nameof(newUserName));
 
-        if (newUserName.Length < UserLimits.UserNameMinLength || newUserName.Length > UserLimits.UserNameMaxLength)
+        int length = newUserName.Length;
+
+        if (length < UserLimits.UserNameMinLength || length > UserLimits.UserNameMaxLength)
             throw new ArgumentException(
                 $"UserName must be between {UserLimits.UserNameMinLength} and {UserLimits.UserNameMaxLength} characters.",
                 nameof(newUserName)

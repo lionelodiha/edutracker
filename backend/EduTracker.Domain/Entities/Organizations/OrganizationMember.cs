@@ -1,7 +1,6 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Organizations;
 
@@ -13,17 +12,11 @@ public sealed class OrganizationMember : IEntity, IAuditable
 
     public OrganizationMember(Guid organizationId, Guid userId, OrganizationMemberRole role, OrganizationMemberStatus status)
     {
-        if (!Enum.IsDefined(role))
-            throw new ArgumentException("Invalid organization role.", nameof(role));
-
-        if (!Enum.IsDefined(status))
-            throw new ArgumentException("Invalid organization member status.", nameof(status));
-
         OrganizationId = organizationId;
         UserId = userId;
-        Role = role;
-        Status = status;
-        JoinedAt = DateTime.UtcNow;
+
+        UpdateRole(role);
+        UpdateStatus(status);
 
         AuditState.UpdateAudit();
     }
@@ -42,23 +35,25 @@ public sealed class OrganizationMember : IEntity, IAuditable
     public OrganizationMemberRole Role { get; private set; }
     public OrganizationMemberStatus Status { get; private set; }
 
-    public DateTime JoinedAt { get; private set; }
-
-    public void UpdateRole(OrganizationMemberRole role)
+    public void UpdateRole(OrganizationMemberRole newRole)
     {
-        if (!Enum.IsDefined(role))
-            throw new ArgumentException("Invalid organization role.", nameof(role));
+        if (!Enum.IsDefined(newRole))
+            throw new ArgumentException("Invalid organization role.", nameof(newRole));
 
-        Role = role;
+        if (newRole == Role) return;
+
+        Role = newRole;
         AuditState.UpdateAudit();
     }
 
-    public void UpdateStatus(OrganizationMemberStatus status)
+    public void UpdateStatus(OrganizationMemberStatus newStatus)
     {
-        if (!Enum.IsDefined(status))
-            throw new ArgumentException("Invalid organization member status.", nameof(status));
+        if (!Enum.IsDefined(newStatus))
+            throw new ArgumentException("Invalid organization member status.", nameof(newStatus));
 
-        Status = status;
+        if (newStatus == Status) return;
+
+        Status = newStatus;
         AuditState.UpdateAudit();
     }
 }

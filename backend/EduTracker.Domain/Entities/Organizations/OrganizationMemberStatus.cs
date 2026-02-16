@@ -1,8 +1,8 @@
-namespace EduTracker.Domain.Enums;
+namespace EduTracker.Domain.Entities.Organizations;
 
 public enum OrganizationMemberStatus
 {
     Invited,
     Active,
-    Suspended
+    Suspended,
 }
