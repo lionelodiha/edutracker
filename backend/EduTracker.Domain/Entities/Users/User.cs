@@ -1,7 +1,6 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
-using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Users;
@@ -51,60 +50,62 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public void SetSensitiveData(UserSensitive data) => SensitiveDataState.SetSensitiveData(data);
     public void ClearSensitiveData() => SensitiveDataState.ClearSensitiveData();
 
-    public void SetUserName(string userName)
+    public void SetUserName(string newUserName)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("UserName cannot be null or empty.", nameof(userName));
+        if (string.IsNullOrWhiteSpace(newUserName))
+            throw new ArgumentException("UserName cannot be null or empty.", nameof(newUserName));
 
-        if (userName.Length < UserLimits.UserNameMinLength || userName.Length > UserLimits.UserNameMaxLength)
+        if (newUserName.Length < UserLimits.UserNameMinLength || newUserName.Length > UserLimits.UserNameMaxLength)
             throw new ArgumentException(
                 $"UserName must be between {UserLimits.UserNameMinLength} and {UserLimits.UserNameMaxLength} characters.",
-                nameof(userName)
+                nameof(newUserName)
             );
 
-        if (!UserLimits.UserNameRegex().IsMatch(userName))
-            throw new ArgumentException("UserName contains invalid characters.", nameof(userName));
+        if (!UserLimits.UserNameRegex().IsMatch(newUserName))
+            throw new ArgumentException("UserName contains invalid characters.", nameof(newUserName));
 
-        UserName = userName;
+        UserName = newUserName;
         AuditState.UpdateAudit();
     }
 
-    public void SetEmailHash(string emailHash)
+    public void SetEmailHash(string newEmailHash)
     {
-        if (string.IsNullOrWhiteSpace(emailHash))
-            throw new ArgumentException("EmailHash cannot be null or empty.", nameof(emailHash));
+        if (string.IsNullOrWhiteSpace(newEmailHash))
+            throw new ArgumentException("EmailHash cannot be null or empty.", nameof(newEmailHash));
 
-        if (emailHash.Length is not UserLimits.EmailHashLength)
+        if (newEmailHash.Length is not UserLimits.EmailHashLength)
             throw new ArgumentException(
                 $"EmailHash must be exactly {UserLimits.EmailHashLength} characters.",
-                nameof(emailHash)
+                nameof(newEmailHash)
             );
 
-        EmailHash = emailHash;
+        EmailHash = newEmailHash;
         AuditState.UpdateAudit();
     }
 
-    public void SetPasswordHash(string passwordHash)
+    public void SetPasswordHash(string newPasswordHash)
     {
-        if (string.IsNullOrWhiteSpace(passwordHash))
-            throw new ArgumentException("PasswordHash cannot be null or empty.", nameof(passwordHash));
+        if (string.IsNullOrWhiteSpace(newPasswordHash))
+            throw new ArgumentException("PasswordHash cannot be null or empty.", nameof(newPasswordHash));
 
-        if (passwordHash.Length is not UserLimits.PasswordHashLength)
+        if (newPasswordHash.Length is not UserLimits.PasswordHashLength)
             throw new ArgumentException(
                 $"PasswordHash must be exactly {UserLimits.PasswordHashLength} characters.",
-                nameof(passwordHash)
+                nameof(newPasswordHash)
             );
 
-        PasswordHash = passwordHash;
+        PasswordHash = newPasswordHash;
         AuditState.UpdateAudit();
     }
 
-    public void UpdateRole(SystemRole role)
+    public void UpdateRole(SystemRole newRole)
     {
-        if (!Enum.IsDefined(role))
-            throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(role));
+        if (!Enum.IsDefined(newRole))
+            throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(newRole));
 
-        Role = role;
+        if (newRole == Role) return;
+
+        Role = newRole;
         AuditState.UpdateAudit();
     }
 
