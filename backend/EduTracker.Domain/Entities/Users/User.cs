@@ -1,7 +1,6 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
-using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Users;
 
@@ -31,8 +30,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string EmailHash { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
 
-    public bool IsLocked { get; private set; } = false;
-    public SystemRole Role { get; private set; } = SystemRole.User;
+    public bool IsLocked { get; private set; }
+    public UserRole Role { get; private set; } = UserRole.User;
 
     public ICollection<UserSession> Sessions { get; private set; } = [];
 
@@ -98,7 +97,7 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         AuditState.UpdateAudit();
     }
 
-    public void UpdateRole(SystemRole newRole)
+    public void UpdateRole(UserRole newRole)
     {
         if (!Enum.IsDefined(newRole))
             throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(newRole));
