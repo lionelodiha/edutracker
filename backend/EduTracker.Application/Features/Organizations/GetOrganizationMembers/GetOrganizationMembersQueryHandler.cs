@@ -4,7 +4,7 @@ using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Organizations.Models;
 using EduTracker.Application.Models;
-using EduTracker.Domain.Entities.Organizations;
+using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,8 +27,6 @@ public sealed class GetOrganizationMembersQueryHandler(
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         List<OrganizationMemberResponse> members = await db.OrganizationMembers
-            .Include(m => m.RoleAssignments)
-            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .Where(m => m.OrganizationId == message.OrganizationId)
             .Select(m => m.ToOrganizationMemberResponse())

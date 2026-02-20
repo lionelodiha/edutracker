@@ -3,7 +3,6 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Domain.Entities.Academics;
-using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -25,21 +24,17 @@ public sealed class CreateClassCommandHandler(
             ?? throw ResponseCatalog.Course.NotFound.ToException();
 
         OrganizationMember? actor = await db.OrganizationMembers
-            .Include(m => m.RoleAssignments)
-            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.OrganizationId == course.OrganizationId && m.UserId == message.ActorId.Value, cancellationToken);
 
-        if (actor is null || actor.Status != OrganizationMemberStatus.Active || !actor.HasRole(RoleKeys.OrganizationAdmin))
+        if (actor is null || actor.Status != OrganizationMemberStatus.Active || actor.Role != OrganizationMemberRole.Admin)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         OrganizationMember? teacher = await db.OrganizationMembers
-            .Include(m => m.RoleAssignments)
-            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == message.TeacherMemberId && m.OrganizationId == course.OrganizationId, cancellationToken);
 
-        if (teacher is null || !teacher.HasRole(RoleKeys.Teacher))
+        if (teacher is null || teacher.Role != OrganizationMemberRole.Teacher)
             throw ResponseCatalog.Organization.MemberNotFound.ToException();
 
         Class @class = new(

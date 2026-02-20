@@ -2,8 +2,7 @@ using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
-using EduTracker.Domain.Entities.Organizations;
-using EduTracker.Domain.Entities.Security;
+using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,12 +22,10 @@ public sealed class InviteOrganizationMemberCommandHandler(
             ?? throw ResponseCatalog.Organization.NotFound.ToException();
 
         OrganizationMember? actor = await db.OrganizationMembers
-            .Include(m => m.RoleAssignments)
-            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.OrganizationId == organization.Id && m.UserId == message.ActorId.Value, cancellationToken);
 
-        if (actor is null || actor.Status != OrganizationMemberStatus.Active || !actor.HasRole(RoleKeys.OrganizationAdmin))
+        if (actor is null || actor.Status != OrganizationMemberStatus.Active || actor.Role != OrganizationMemberRole.Admin)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         bool targetExists = await db.Users.AnyAsync(u => u.Id == message.UserId, cancellationToken);
@@ -41,19 +38,12 @@ public sealed class InviteOrganizationMemberCommandHandler(
         if (alreadyMember)
             throw ResponseCatalog.Organization.MemberAlreadyExists.ToException();
 
-        RbacRole roleToAssign = await db.RbacRoles
-            .FirstOrDefaultAsync(r => r.Key == message.RoleKey && r.OrganizationId == organization.Id, cancellationToken)
-            ?? await db.RbacRoles
-            .FirstOrDefaultAsync(r => r.Key == message.RoleKey && r.IsSystem, cancellationToken)
-            ?? throw new EduTracker.Application.Exceptions.AppException("ROLE_NOT_FOUND", 404, "Role not found");
-
         OrganizationMember member = new(
             organizationId: organization.Id,
             userId: message.UserId,
+            role: message.Role,
             status: OrganizationMemberStatus.Invited
         );
-
-        member.AssignRole(roleToAssign.Id, message.ActorId.Value);
 
         db.OrganizationMembers.Add(member);
         await db.SaveChangesAsync(cancellationToken);

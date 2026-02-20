@@ -4,7 +4,7 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
-using EduTracker.Domain.Entities.Users;
+using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 

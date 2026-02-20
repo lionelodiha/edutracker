@@ -25,7 +25,7 @@ internal static class UpdateOrganizationMemberRoleEndpointHandler
             ActorId: actorId,
             OrganizationId: id,
             MemberId: memberId,
-            RoleKey: request.RoleKey
+            Role: request.Role
         );
 
         OperationResult<object> result = await mediator.Send(command, cancellationToken);

@@ -24,10 +24,6 @@ internal sealed class ClassEnrollmentConfiguration : IEntityTypeConfiguration<Cl
         builder.Property(e => e.EnrolledAt)
             .IsRequired();
 
-        builder.Property(e => e.Status)
-            .HasConversion<string>()
-            .IsRequired();
-
         builder.HasIndex(e => new { e.ClassId, e.StudentMemberId })
             .IsUnique();
 

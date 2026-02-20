@@ -21,13 +21,7 @@ internal sealed class GradeConfiguration : IEntityTypeConfiguration<Grade>
                 .IsRequired();
         });
 
-        builder.Property(g => g.RawScore)
-            .IsRequired();
-
         builder.Property(g => g.Score)
-            .IsRequired();
-
-        builder.Property(g => g.GradedAtUtc)
             .IsRequired();
 
         builder.Property(g => g.GradedAt)
@@ -41,17 +35,6 @@ internal sealed class GradeConfiguration : IEntityTypeConfiguration<Grade>
             .HasForeignKey(g => g.AssignmentId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
-
-        builder.HasOne(g => g.Assessment)
-            .WithMany(a => a.Grades)
-            .HasForeignKey(g => g.AssessmentId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-
-        builder.HasOne(g => g.Enrollment)
-            .WithMany(e => e.Grades)
-            .HasForeignKey(g => g.EnrollmentId)
-            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(g => g.StudentMember)
             .WithMany()

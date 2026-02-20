@@ -4,7 +4,6 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
-using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Entities.Users;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
@@ -26,23 +25,18 @@ public sealed class UnlockUserCommandHandler(
             CacheKeys.UserAuthenticationState(message.ActorId.Value)
         );
 
-        IReadOnlyList<string>? actorRoles = cachedUserAuth?.Roles;
+        SystemRole? actorRole = cachedUserAuth?.Role;
 
-        if (actorRoles is null)
-        {
-            actorRoles = await db.Users
-                .AsNoTracking()
-                .Where(u => u.Id == message.ActorId)
-                .SelectMany(u => u.RoleAssignments
-                    .Where(ra => ra.IsActive)
-                    .Select(ra => ra.Role.Key))
-                .ToListAsync(cancellationToken);
-        }
+        actorRole ??= await db.Users
+            .AsNoTracking()
+            .Where(u => u.Id == message.ActorId)
+            .Select(u => (SystemRole?)u.Role)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (actorRoles is null || actorRoles.Count == 0)
+        if (actorRole is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        if (!actorRoles.Contains(RoleKeys.Admin) && !actorRoles.Contains(RoleKeys.SuperAdmin))
+        if (actorRole is SystemRole.User)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         User targetUser = await db.Users

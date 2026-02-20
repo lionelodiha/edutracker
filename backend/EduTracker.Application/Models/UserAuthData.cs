@@ -4,6 +4,6 @@ namespace EduTracker.Application.Models;
 
 public sealed record UserAuthData(
     Guid UserId,
-    IReadOnlyList<string> Roles,
+    SystemRole Role,
     bool IsLocked
 );

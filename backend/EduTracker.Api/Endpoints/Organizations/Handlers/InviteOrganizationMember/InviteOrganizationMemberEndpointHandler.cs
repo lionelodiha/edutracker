@@ -24,7 +24,7 @@ internal static class InviteOrganizationMemberEndpointHandler
             ActorId: actorId,
             OrganizationId: id,
             UserId: request.UserId,
-            RoleKey: request.RoleKey
+            Role: request.Role
         );
 
         OperationResult<Guid> result = await mediator.Send(command, cancellationToken);

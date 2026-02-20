@@ -2,7 +2,6 @@ using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
-using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -19,11 +18,9 @@ public sealed class UpdateOrganizationSubscriptionCommandHandler(
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
         OrganizationMember? actor = await db.OrganizationMembers
-            .Include(m => m.RoleAssignments)
-            .ThenInclude(ra => ra.Role)
             .FirstOrDefaultAsync(m => m.OrganizationId == message.OrganizationId && m.UserId == message.ActorId.Value, cancellationToken);
 
-        if (actor is null || actor.Status != OrganizationMemberStatus.Active || !actor.HasRole(RoleKeys.OrganizationAdmin))
+        if (actor is null || actor.Status != OrganizationMemberStatus.Active || actor.Role != OrganizationMemberRole.Admin)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         var subscription = await db.OrganizationSubscriptions

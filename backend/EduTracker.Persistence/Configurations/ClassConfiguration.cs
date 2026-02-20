@@ -21,23 +21,14 @@ internal sealed class ClassConfiguration : IEntityTypeConfiguration<Class>
                 .IsRequired();
         });
 
-        builder.Property(c => c.Name)
-            .HasMaxLength(256)
-            .IsRequired();
-
         builder.Property(c => c.Term)
-            .HasMaxLength(100);
-
-        builder.Property(c => c.Level)
-            .HasMaxLength(100);
-
-        builder.Property(c => c.Stream)
-            .HasMaxLength(100);
-
-        builder.Property(c => c.Active)
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.HasIndex(c => new { c.OrganizationId, c.Name });
+        builder.Property(c => c.Year)
+            .IsRequired();
+
+        builder.HasIndex(c => new { c.OrganizationId, c.Term, c.Year });
         builder.HasIndex(c => c.CourseId);
         builder.HasIndex(c => c.TeacherMemberId);
 

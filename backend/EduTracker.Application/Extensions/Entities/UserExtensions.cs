@@ -5,23 +5,23 @@ namespace EduTracker.Application.Extensions.Entities;
 
 internal static class UserExtensions
 {
-    public static UserResponse ToUserResponse(this User user)
+    extension(User user)
     {
-        if (user.SensitiveData is null)
-            throw new InvalidOperationException("User sensitive data has not been decrypted.");
+        public UserResponse ToUserResponse()
+        {
+            if (user.SensitiveData is null)
+                throw new InvalidOperationException("User sensitive data has not been decrypted.");
 
-        UserSensitive data = user.SensitiveData;
+            UserSensitive data = user.SensitiveData;
 
-        return new UserResponse(
-            user.Id,
-            user.UserName,
-            data.FirstName,
-            data.MiddleName,
-            data.LastName,
-            user.RoleAssignments
-                .Where(ra => ra.IsActive && !ra.IsExpired())
-                .Select(ra => ra.Role.Key)
-                .ToList()
-        );
+            return new UserResponse(
+                user.Id,
+                user.UserName,
+                data.FirstName,
+                data.MiddleName,
+                data.LastName,
+                user.Role
+            );
+        }
     }
 }

@@ -10,7 +10,7 @@ using EduTracker.Application.Features.Auth.Models;
 using EduTracker.Application.Helpers;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
-using EduTracker.Domain.Entities.Users;
+using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -47,10 +47,7 @@ public sealed class LoginUserCommandHandler(
                 u.Id,
                 u.PasswordHash,
                 u.IsLocked,
-                Roles = u.RoleAssignments
-                    .Where(ra => ra.IsActive && !ra.IsExpired())
-                    .Select(ra => ra.Role.Key)
-                    .ToList(),
+                u.Role,
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw ResponseCatalog.Auth.InvalidCredentials.ToException();

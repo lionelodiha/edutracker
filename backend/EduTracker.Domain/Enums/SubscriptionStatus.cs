@@ -2,9 +2,8 @@ namespace EduTracker.Domain.Enums;
 
 public enum SubscriptionStatus
 {
+    Inactive,
     Active,
-    Suspended,
-    Expired,
-    Canceled,
-    Trial,
+    PastDue,
+    Canceled
 }
