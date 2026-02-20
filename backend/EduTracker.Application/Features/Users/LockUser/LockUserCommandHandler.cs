@@ -5,8 +5,8 @@ using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Users.Models;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
+using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -24,31 +24,38 @@ public sealed class LockUserCommandHandler(
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
         var cachedUser = await cacheService.GetAsync<UserResponse>(CacheKeys.UserProfileById(request.ActorId.Value));
-        SystemRole? actorRole = cachedUser?.Role;
+        IReadOnlyList<string>? actorRoles = cachedUser?.Roles;
 
-        actorRole ??= await db.Users
-            .AsNoTracking()
-            .Where(u => u.Id == request.ActorId)
-            .Select(u => (SystemRole?)u.Role)
-            .FirstOrDefaultAsync(cancellationToken);
+        if (actorRoles is null)
+        {
+            actorRoles = await db.Users
+                .AsNoTracking()
+                .Where(u => u.Id == request.ActorId)
+                .SelectMany(u => u.RoleAssignments
+                    .Where(ra => ra.IsActive)
+                    .Select(ra => ra.Role.Key))
+                .ToListAsync(cancellationToken);
+        }
 
-        if (actorRole is null)
+        if (actorRoles is null || actorRoles.Count == 0)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        if (actorRole is SystemRole.User)
+        if (!actorRoles.Contains(RoleKeys.Admin) && !actorRoles.Contains(RoleKeys.SuperAdmin))
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         if (request.ActorId == request.TargetId)
             throw ResponseCatalog.Authorization.CannotActOnSelf.ToException();
 
         User targetUser = await db.Users
+            .Include(u => u.RoleAssignments)
+            .ThenInclude(ra => ra.Role)
             .FirstOrDefaultAsync(u => u.Id == request.TargetId, cancellationToken)
             ?? throw ResponseCatalog.User.NotFound.ToException();
 
-        if (targetUser.Role is SystemRole.SuperAdmin)
+        if (targetUser.HasRole(RoleKeys.SuperAdmin))
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
-        if (actorRole is SystemRole.Admin && targetUser.Role is SystemRole.Admin)
+        if (actorRoles.Contains(RoleKeys.Admin) && targetUser.HasRole(RoleKeys.Admin))
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         if (targetUser.IsLocked)

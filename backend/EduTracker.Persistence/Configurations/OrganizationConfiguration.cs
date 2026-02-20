@@ -12,6 +12,9 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
 
         builder.HasIndex(o => o.Name);
 
+        builder.HasIndex(o => o.Slug)
+            .IsUnique();
+
         builder.OwnsOne(o => o.AuditState, audit =>
         {
             audit.Property(a => a.CreatedAt)
@@ -24,7 +27,14 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
         });
 
         builder.Property(o => o.Name)
-            .HasMaxLength(256)
+            .HasMaxLength(OrganizationLimits.NameMaxLength)
+            .IsRequired();
+
+        builder.Property(o => o.Slug)
+            .HasMaxLength(OrganizationLimits.SlugMaxLength)
+            .IsRequired();
+
+        builder.Property(o => o.IsActive)
             .IsRequired();
 
         builder.Property(o => o.OwnerUserId)
@@ -54,6 +64,22 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
+        builder.HasMany(o => o.Roles)
+            .WithOne(r => r.Organization)
+            .HasForeignKey(r => r.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(o => o.Permissions)
+            .WithOne(p => p.Organization)
+            .HasForeignKey(p => p.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(o => o.AcademicYears)
+            .WithOne(ay => ay.Organization)
+            .HasForeignKey(ay => ay.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
         builder.HasMany(o => o.Courses)
             .WithOne(c => c.Organization)
             .HasForeignKey(c => c.OrganizationId)
@@ -63,6 +89,12 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
         builder.HasMany(o => o.Classes)
             .WithOne(c => c.Organization)
             .HasForeignKey(c => c.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        builder.HasMany(o => o.GradingSchemes)
+            .WithOne(gs => gs.Organization)
+            .HasForeignKey(gs => gs.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
     }

@@ -1,4 +1,4 @@
-using EduTracker.Domain.Entities.Organizations;
+using EduTracker.Domain.Entities.Billing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,6 +19,15 @@ internal sealed class PaymentMethodConfiguration : IEntityTypeConfiguration<Paym
             audit.Property(a => a.UpdatedAt)
                 .HasColumnName("UpdatedAt")
                 .IsRequired();
+        });
+
+        builder.OwnsOne(p => p.SensitiveDataState, sensitive =>
+        {
+            sensitive.Property(s => s.EncryptedData)
+                .HasColumnName("Data")
+                .IsRequired();
+
+            sensitive.Ignore(s => s.SensitiveData);
         });
 
         builder.Property(p => p.Provider)

@@ -1,10 +1,10 @@
-using EduTracker.Domain.Enums;
+using EduTracker.Domain.Entities.Security;
 
 namespace EduTracker.Api.Constants.Auth;
 
 internal static class AuthorizationRoles
 {
-    public const string User = nameof(SystemRole.User);
-    public const string Admin = nameof(SystemRole.Admin);
-    public const string SuperAdmin = nameof(SystemRole.SuperAdmin);
+    public const string User = RoleKeys.User;
+    public const string Admin = RoleKeys.Admin;
+    public const string SuperAdmin = RoleKeys.SuperAdmin;
 }

@@ -1,12 +1,10 @@
 using EduTracker.Api.Constants.Auth;
 using EduTracker.Api.Constants.Cookies;
 using EduTracker.Api.Constants.Routes;
-using EduTracker.Api.Endpoints.Users.Handlers.DemoteUser;
 using EduTracker.Api.Endpoints.Users.Handlers.GetCurrentUser;
 using EduTracker.Api.Endpoints.Users.Handlers.GetUserById;
 using EduTracker.Api.Endpoints.Users.Handlers.GetUsers;
 using EduTracker.Api.Endpoints.Users.Handlers.LockUser;
-using EduTracker.Api.Endpoints.Users.Handlers.PromoteUser;
 using EduTracker.Api.Endpoints.Users.Handlers.UnlockUser;
 using EduTracker.Api.Endpoints.Users.Handlers.UpdateCurrentUser;
 using EduTracker.Api.Endpoints.Users.Handlers.UpdateCurrentUserPassword;
@@ -177,78 +175,6 @@ internal static class UserEndpoints
                 .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
                 .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError)
                 .RequireAuthorization();
-
-            userGroup.MapPost(ApiRoutes.User.Promote, PromoteUserEndpointHandler.Handle)
-                .WithName(nameof(PromoteUserEndpointHandler))
-                .WithSummary("Promote user")
-                .WithDescription(
-                    $"""
-                    Promotes a user to the next role in the system hierarchy.
-
-                    **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **SuperAdmin role** are required.
-
-                    **Request Body**:
-                    - `UserId` (GUID, required): The unique identifier of the user to promote.
-
-                    **Role Hierarchy**:
-                    - User → Admin → SuperAdmin
-                    - Users already at the highest role (SuperAdmin) cannot be promoted.
-
-                    **Notes**:
-                    - Only SuperAdmins can perform this action.
-                    - Attempting to promote a non-existent user will return `404 NotFound`.
-                    - Attempting to promote a user already at the highest role will return `409 Conflict`.
-
-                    **Possible responses**:
-                    - `200 OK`: User successfully promoted.
-                    - `403 Forbidden`: Current user does not have SuperAdmin privileges.
-                    - `404 NotFound`: No user exists with the specified ID.
-                    - `409 Conflict`: User is already at the highest role.
-                    - `500 InternalServerError`: Unexpected server error.
-                    """
-                )
-                .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
-                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError)
-                .RequireAuthorization(AuthorizationPolicyNames.SuperAdminOnly);
-
-            userGroup.MapPost(ApiRoutes.User.Demote, DemoteUserEndpointHandler.Handle)
-                .WithName(nameof(DemoteUserEndpointHandler))
-                .WithSummary("Demote user")
-                .WithDescription(
-                    $"""
-                    Demotes a user to the previous role in the system hierarchy.
-
-                    **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **SuperAdmin role** are required.
-
-                    **Request Body**:
-                    - `UserId` (GUID, required): The unique identifier of the user to demote.
-
-                    **Role Hierarchy**:
-                    - SuperAdmin → Admin → User
-                    - Users already at the lowest role (User) cannot be demoted.
-
-                    **Notes**:
-                    - Only SuperAdmins can perform this action.
-                    - Attempting to demote a non-existent user will return `404 NotFound`.
-                    - Attempting to demote a user already at the lowest role will return `409 Conflict`.
-
-                    **Possible responses**:
-                    - `200 OK`: User successfully demoted.
-                    - `403 Forbidden`: Current user does not have SuperAdmin privileges.
-                    - `404 NotFound`: No user exists with the specified ID.
-                    - `409 Conflict`: User is already at the lowest role.
-                    - `500 InternalServerError`: Unexpected server error.
-                    """
-                )
-                .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
-                .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError)
-                .RequireAuthorization(AuthorizationPolicyNames.SuperAdminOnly);
 
             userGroup.MapPost(ApiRoutes.User.Lock, LockUserEndpointHandler.Handle)
                 .WithName(nameof(LockUserEndpointHandler))

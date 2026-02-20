@@ -3,6 +3,7 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Domain.Enums;
+using EduTracker.Domain.Entities.Security;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,9 +26,13 @@ public sealed class CreateOrganizationCommandHandler(
         OrganizationMember ownerMember = new(
             organizationId: organization.Id,
             userId: message.OwnerUserId.Value,
-            role: OrganizationMemberRole.Admin,
             status: OrganizationMemberStatus.Active
         );
+
+        RbacRole orgAdminRole = await db.RbacRoles
+            .FirstAsync(r => r.Key == RoleKeys.OrganizationAdmin && r.IsSystem, cancellationToken);
+
+        ownerMember.AssignRole(orgAdminRole.Id, message.OwnerUserId.Value);
 
         db.Organizations.Add(organization);
         db.OrganizationMembers.Add(ownerMember);

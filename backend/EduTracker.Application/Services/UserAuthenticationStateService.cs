@@ -25,7 +25,10 @@ public sealed class UserAuthenticationStateService(
             .Where(u => u.Id == userId)
             .Select(u => new UserAuthData(
                 u.Id,
-                u.Role,
+                u.RoleAssignments
+                    .Where(ra => ra.IsActive && !ra.IsExpired())
+                    .Select(ra => ra.Role.Key)
+                    .ToList(),
                 u.IsLocked
             ))
             .FirstOrDefaultAsync(cancellationToken);

@@ -41,9 +41,11 @@ internal sealed class SessionAuthenticationHandler(
 
         List<Claim> claims = [
             new Claim(ClaimTypes.NameIdentifier, authData.UserId.ToString()),
-            new Claim(ClaimTypes.Role, authData.Role.ToString()),
             new Claim(SessionClaimTypes.SessionId, sessionData.SessionId.ToString())
         ];
+
+        foreach (string role in authData.Roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
         ClaimsIdentity identity = new(claims, Scheme.Name);
         ClaimsPrincipal principal = new(identity);

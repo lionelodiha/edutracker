@@ -23,7 +23,10 @@ public sealed class GetOrganizationsQueryHandler(
             .Select(m => new OrganizationListItemResponse(
                 m.OrganizationId,
                 m.Organization.Name,
-                m.Role,
+                m.RoleAssignments
+                    .Where(ra => ra.IsActive && !ra.IsExpired())
+                    .Select(ra => ra.Role.Key)
+                    .ToList(),
                 m.Status
             ))
             .ToListAsync(cancellationToken);

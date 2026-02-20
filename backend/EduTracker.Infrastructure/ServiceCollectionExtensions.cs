@@ -34,6 +34,8 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IHashingService, HashingService>();
 
             services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddSingleton<IPaymentService, FakePaymentService>();
+
             services.AddCqrsWithValidation(assembliesToScan);
 
             return services;
@@ -47,14 +49,14 @@ public static class ServiceCollectionExtensions
             {
                 services.Scan(scan => scan
                     .FromAssemblies(assembly)
-                    .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)))
+                    .AddClasses(classes => classes.AssignableTo(typeof(IHandler<,>)), publicOnly: false)
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()
                 );
 
                 services.Scan(scan => scan
                     .FromAssemblies(assembly)
-                    .AddClasses(classes => classes.AssignableTo(typeof(IValidator<>)))
+                    .AddClasses(classes => classes.AssignableTo(typeof(IValidator<>)), publicOnly: false)
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()
                 );

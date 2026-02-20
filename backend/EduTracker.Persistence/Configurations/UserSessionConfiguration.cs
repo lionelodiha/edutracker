@@ -1,4 +1,4 @@
-﻿using EduTracker.Domain.Entities.UserSessions;
+﻿using EduTracker.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

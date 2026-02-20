@@ -1,4 +1,4 @@
-using EduTracker.Domain.Entities.Organizations;
+using EduTracker.Domain.Entities.Billing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -29,13 +29,24 @@ internal sealed class OrganizationSubscriptionConfiguration : IEntityTypeConfigu
             .HasConversion<string>()
             .IsRequired();
 
-        builder.Property(s => s.TrialEndsAt);
-
-        builder.Property(s => s.CurrentPeriodStart)
+        builder.Property(s => s.BillingCycle)
+            .HasConversion<string>()
             .IsRequired();
 
-        builder.Property(s => s.CurrentPeriodEnd)
+        builder.Property(s => s.StartUtc)
             .IsRequired();
+
+        builder.Property(s => s.EndUtc)
+            .IsRequired();
+
+        builder.Property(s => s.TrialEndsUtc);
+
+        builder.Property(s => s.RenewAuto)
+            .IsRequired();
+
+        builder.Ignore(s => s.CurrentPeriodStart);
+        builder.Ignore(s => s.CurrentPeriodEnd);
+        builder.Ignore(s => s.TrialEndsAt);
 
         builder.HasIndex(s => new { s.OrganizationId, s.Status });
 
@@ -44,5 +55,10 @@ internal sealed class OrganizationSubscriptionConfiguration : IEntityTypeConfigu
             .HasForeignKey(s => s.OwnerUserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
+
+        builder.HasOne(s => s.PlanCatalog)
+            .WithMany(p => p.Subscriptions)
+            .HasForeignKey(s => s.PlanId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

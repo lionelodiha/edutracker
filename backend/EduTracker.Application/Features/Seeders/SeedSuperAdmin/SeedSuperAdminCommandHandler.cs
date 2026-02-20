@@ -5,8 +5,8 @@ using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Helpers;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
+using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +21,7 @@ public sealed class SeedSuperAdminCommandHandler(
     public async Task<OperationResult<object>> Handle(SeedSuperAdminCommand message, CancellationToken cancellationToken = default)
     {
         bool superAdminExists = await db.Users
-            .AnyAsync(u => u.Role == SystemRole.SuperAdmin, cancellationToken);
+            .AnyAsync(u => u.RoleAssignments.Any(ra => ra.IsActive && !ra.IsExpired() && ra.Role.Key == RoleKeys.SuperAdmin), cancellationToken);
 
         if (superAdminExists)
             return ResponseCatalog.System.SuperAdminSeeded.ToOperationResult();
@@ -54,7 +54,11 @@ public sealed class SeedSuperAdminCommandHandler(
         );
 
         superAdmin.SetEncryptedData(encryptedData);
-        superAdmin.UpdateRole(SystemRole.SuperAdmin);
+
+        RbacRole superAdminRole = await db.RbacRoles
+            .FirstAsync(r => r.Key == RoleKeys.SuperAdmin, cancellationToken);
+
+        superAdmin.AssignRole(superAdminRole.Id, superAdmin.Id);
 
         db.Users.Add(superAdmin);
         await db.SaveChangesAsync(cancellationToken);

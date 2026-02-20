@@ -3,6 +3,7 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Domain.Entities.Academics;
+using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -24,18 +25,22 @@ public sealed class EnrollStudentCommandHandler(
             ?? throw ResponseCatalog.Class.NotFound.ToException();
 
         OrganizationMember? actor = await db.OrganizationMembers
+            .Include(m => m.RoleAssignments)
+            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.OrganizationId == classEntity.OrganizationId && m.UserId == message.ActorId.Value, cancellationToken);
 
         if (actor is null || actor.Status != OrganizationMemberStatus.Active ||
-            (actor.Role != OrganizationMemberRole.Admin && actor.Role != OrganizationMemberRole.Teacher))
+            (!actor.HasRole(RoleKeys.OrganizationAdmin) && !actor.HasRole(RoleKeys.Teacher)))
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         OrganizationMember? student = await db.OrganizationMembers
+            .Include(m => m.RoleAssignments)
+            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == message.StudentMemberId && m.OrganizationId == classEntity.OrganizationId, cancellationToken);
 
-        if (student is null || student.Role != OrganizationMemberRole.Student || student.Status != OrganizationMemberStatus.Active)
+        if (student is null || !student.HasRole(RoleKeys.Student) || student.Status != OrganizationMemberStatus.Active)
             throw ResponseCatalog.Organization.MemberNotFound.ToException();
 
         bool exists = await db.ClassEnrollments

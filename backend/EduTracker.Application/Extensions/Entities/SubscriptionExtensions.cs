@@ -1,4 +1,5 @@
 using EduTracker.Application.Features.Subscriptions.Models;
+using EduTracker.Domain.Entities.Billing;
 
 namespace EduTracker.Application.Extensions.Entities;
 

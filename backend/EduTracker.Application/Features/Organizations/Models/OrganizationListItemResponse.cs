@@ -5,6 +5,6 @@ namespace EduTracker.Application.Features.Organizations.Models;
 public sealed record OrganizationListItemResponse(
     Guid OrganizationId,
     string Name,
-    OrganizationMemberRole Role,
+    IReadOnlyList<string> Roles,
     OrganizationMemberStatus Status
 );
