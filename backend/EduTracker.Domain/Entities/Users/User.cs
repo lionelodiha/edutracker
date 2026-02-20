@@ -1,6 +1,7 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
+using EduTracker.Domain.Entities.Security;
 
 namespace EduTracker.Domain.Entities.Users;
 
@@ -33,7 +34,7 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string PasswordHash { get; private set; } = string.Empty;
 
     public bool IsLocked { get; private set; }
-    public UserRole Role { get; private set; } = UserRole.User;
+    public ICollection<UserRoleAssignment> RoleAssignments { get; private set; } = [];
 
     public ICollection<UserSession> Sessions { get; private set; } = [];
 
@@ -101,17 +102,6 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         AuditState.UpdateAudit();
     }
 
-    public void UpdateRole(UserRole newRole)
-    {
-        if (!Enum.IsDefined(newRole))
-            throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(newRole));
-
-        if (newRole == Role) return;
-
-        Role = newRole;
-        AuditState.UpdateAudit();
-    }
-
     public void Lock()
     {
         if (IsLocked) return;
@@ -127,4 +117,35 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         IsLocked = false;
         AuditState.UpdateAudit();
     }
+
+    public void AssignRole(Guid roleId, Guid assignedByUserId, DateTime? expiresAtUtc = null)
+    {
+        bool alreadyActive = RoleAssignments.Any(
+            assignment => assignment.RoleId == roleId && assignment.IsActive && !assignment.IsExpired()
+        );
+
+        if (alreadyActive) return;
+
+        RoleAssignments.Add(new UserRoleAssignment(Id, roleId, assignedByUserId, expiresAtUtc));
+        AuditState.UpdateAudit();
+    }
+
+    public void RevokeRole(Guid roleId)
+    {
+        UserRoleAssignment? activeAssignment = RoleAssignments.FirstOrDefault(
+            assignment => assignment.RoleId == roleId && assignment.IsActive
+        );
+
+        if (activeAssignment is null) return;
+
+        activeAssignment.Deactivate();
+        AuditState.UpdateAudit();
+    }
+
+    public bool HasRole(string roleKey)
+        => RoleAssignments.Any(
+            assignment => assignment.IsActive &&
+                !assignment.IsExpired() &&
+                assignment.Role.Key.Equals(roleKey, StringComparison.OrdinalIgnoreCase)
+        );
 }

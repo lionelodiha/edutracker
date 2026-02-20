@@ -4,34 +4,13 @@ using EduTracker.Domain.Entities.Organizations;
 
 namespace EduTracker.Domain.Entities.Academics;
 
-public sealed class Assignment : IEntity, IAuditable
+public sealed class Assessment : IEntity, IAuditable
 {
     public readonly AuditState AuditState = new();
 
-    private Assignment() { }
+    private Assessment() { }
 
-    public Assignment(Guid classId, string title, double maxScore, DateTime? dueDate)
-    {
-        if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Assignment title is required.", nameof(title));
-
-        if (maxScore <= 0)
-            throw new ArgumentOutOfRangeException(nameof(maxScore), "Max score must be greater than zero.");
-
-        OrganizationId = Guid.Empty;
-        ClassId = classId;
-        ClassOfferingId = null;
-        GradingComponentId = null;
-        Title = title.Trim();
-        MaxScore = maxScore;
-        AssignedAtUtc = DateTime.UtcNow;
-        DueDate = dueDate;
-        DueAtUtc = dueDate;
-
-        AuditState.UpdateAudit();
-    }
-
-    public Assignment(
+    public Assessment(
         Guid organizationId,
         Guid classOfferingId,
         Guid gradingComponentId,
@@ -42,9 +21,6 @@ public sealed class Assignment : IEntity, IAuditable
         bool isPublished = false
     )
     {
-        if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Assignment title is required.", nameof(title));
-
         if (maxScore <= 0)
             throw new ArgumentOutOfRangeException(nameof(maxScore), "Max score must be greater than zero.");
 
@@ -52,13 +28,11 @@ public sealed class Assignment : IEntity, IAuditable
             throw new ArgumentException("Due date cannot be earlier than assigned date.", nameof(dueAtUtc));
 
         OrganizationId = organizationId;
-        ClassId = Guid.Empty;
         ClassOfferingId = classOfferingId;
         GradingComponentId = gradingComponentId;
-        Title = title.Trim();
+        SetTitle(title);
         MaxScore = maxScore;
         AssignedAtUtc = assignedAtUtc;
-        DueDate = dueAtUtc;
         DueAtUtc = dueAtUtc;
         IsPublished = isPublished;
 
@@ -73,23 +47,37 @@ public sealed class Assignment : IEntity, IAuditable
     public Guid OrganizationId { get; private set; }
     public Organization Organization { get; private set; } = null!;
 
-    public Guid ClassId { get; private set; }
-    public Class Class { get; private set; } = null!;
+    public Guid ClassOfferingId { get; private set; }
+    public ClassOffering ClassOffering { get; private set; } = null!;
 
-    public Guid? ClassOfferingId { get; private set; }
-    public ClassOffering? ClassOffering { get; private set; }
-
-    public Guid? GradingComponentId { get; private set; }
-    public GradingComponent? GradingComponent { get; private set; }
+    public Guid GradingComponentId { get; private set; }
+    public GradingComponent GradingComponent { get; private set; } = null!;
 
     public string Title { get; private set; } = string.Empty;
     public double MaxScore { get; private set; }
     public DateTime AssignedAtUtc { get; private set; }
-    public DateTime? DueDate { get; private set; }
     public DateTime? DueAtUtc { get; private set; }
     public bool IsPublished { get; private set; }
 
     public ICollection<Grade> Grades { get; private set; } = [];
+
+    public void SetTitle(string newTitle)
+    {
+        if (string.IsNullOrWhiteSpace(newTitle))
+            throw new ArgumentException("Assessment title is required.", nameof(newTitle));
+
+        Title = newTitle.Trim();
+        AuditState.UpdateAudit();
+    }
+
+    public void UpdateMaxScore(double maxScore)
+    {
+        if (maxScore <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maxScore), "Max score must be greater than zero.");
+
+        MaxScore = maxScore;
+        AuditState.UpdateAudit();
+    }
 
     public void UpdateDueDate(DateTime? dueAtUtc)
     {
@@ -97,7 +85,6 @@ public sealed class Assignment : IEntity, IAuditable
             throw new ArgumentException("Due date cannot be earlier than assigned date.", nameof(dueAtUtc));
 
         DueAtUtc = dueAtUtc;
-        DueDate = dueAtUtc;
         AuditState.UpdateAudit();
     }
 
@@ -106,6 +93,14 @@ public sealed class Assignment : IEntity, IAuditable
         if (IsPublished) return;
 
         IsPublished = true;
+        AuditState.UpdateAudit();
+    }
+
+    public void Unpublish()
+    {
+        if (!IsPublished) return;
+
+        IsPublished = false;
         AuditState.UpdateAudit();
     }
 }

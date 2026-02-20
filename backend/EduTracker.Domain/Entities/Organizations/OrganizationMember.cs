@@ -1,5 +1,6 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
+using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Domain.Entities.Organizations;
@@ -10,12 +11,10 @@ public sealed class OrganizationMember : IEntity, IAuditable
 
     private OrganizationMember() { }
 
-    public OrganizationMember(Guid organizationId, Guid userId, OrganizationMemberRole role, OrganizationMemberStatus status)
+    public OrganizationMember(Guid organizationId, Guid userId, OrganizationMemberStatus status)
     {
         OrganizationId = organizationId;
         UserId = userId;
-
-        UpdateRole(role);
         UpdateStatus(status);
 
         AuditState.UpdateAudit();
@@ -32,19 +31,8 @@ public sealed class OrganizationMember : IEntity, IAuditable
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
-    public OrganizationMemberRole Role { get; private set; }
     public OrganizationMemberStatus Status { get; private set; }
-
-    public void UpdateRole(OrganizationMemberRole newRole)
-    {
-        if (!Enum.IsDefined(newRole))
-            throw new ArgumentException("Invalid organization role.", nameof(newRole));
-
-        if (newRole == Role) return;
-
-        Role = newRole;
-        AuditState.UpdateAudit();
-    }
+    public ICollection<OrganizationMemberRoleAssignment> RoleAssignments { get; private set; } = [];
 
     public void UpdateStatus(OrganizationMemberStatus newStatus)
     {
@@ -56,4 +44,35 @@ public sealed class OrganizationMember : IEntity, IAuditable
         Status = newStatus;
         AuditState.UpdateAudit();
     }
+
+    public void AssignRole(Guid roleId, Guid assignedByUserId, DateTime? expiresAtUtc = null)
+    {
+        bool alreadyActive = RoleAssignments.Any(
+            assignment => assignment.RoleId == roleId && assignment.IsActive && !assignment.IsExpired()
+        );
+
+        if (alreadyActive) return;
+
+        RoleAssignments.Add(new OrganizationMemberRoleAssignment(Id, roleId, assignedByUserId, expiresAtUtc));
+        AuditState.UpdateAudit();
+    }
+
+    public void RevokeRole(Guid roleId)
+    {
+        OrganizationMemberRoleAssignment? activeAssignment = RoleAssignments.FirstOrDefault(
+            assignment => assignment.RoleId == roleId && assignment.IsActive
+        );
+
+        if (activeAssignment is null) return;
+
+        activeAssignment.Deactivate();
+        AuditState.UpdateAudit();
+    }
+
+    public bool HasRole(string roleKey)
+        => RoleAssignments.Any(
+            assignment => assignment.IsActive &&
+                !assignment.IsExpired() &&
+                assignment.Role.Key.Equals(roleKey, StringComparison.OrdinalIgnoreCase)
+        );
 }
