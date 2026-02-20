@@ -15,10 +15,10 @@ public sealed class UserSensitive : ISensitiveData
         Email = email;
     }
 
-    public string FirstName { get; private set; } = string.Empty;
+    public string FirstName { get; private set; }
     public string? MiddleName { get; private set; }
-    public string LastName { get; private set; } = string.Empty;
-    public string Email { get; private set; } = string.Empty;
+    public string LastName { get; private set; }
+    public string Email { get; private set; }
 
     public static UserSensitive Create(string firstName, string? middleName, string lastName, string email)
     {

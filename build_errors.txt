@@ -1,0 +1,17 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  EduTracker.Domain -> c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Domain\bin\Debug\net10.0\EduTracker.Domain.dll
+  EduTracker.Persistence -> c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Persistence\bin\Debug\net10.0\EduTracker.Persistence.dll
+  EduTracker.Application -> c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Application\bin\Debug\net10.0\EduTracker.Application.dll
+  EduTracker.Infrastructure -> c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Infrastructure\bin\Debug\net10.0\EduTracker.Infrastructure.dll
+c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\Endpoints\Users\Handlers\DemoteUser\DemoteUserEndpointHandler.cs(4,45): error CS0234: The type or namespace name 'DemoteUser' does not exist in the namespace 'EduTracker.Application.Features.Users' (are you missing an assembly reference?) [c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\EduTracker.Api.csproj]
+c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\Endpoints\Users\Handlers\PromoteUser\PromoteUserEndpointHandler.cs(4,45): error CS0234: The type or namespace name 'PromoteUser' does not exist in the namespace 'EduTracker.Application.Features.Users' (are you missing an assembly reference?) [c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\EduTracker.Api.csproj]
+
+Build FAILED.
+
+c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\Endpoints\Users\Handlers\DemoteUser\DemoteUserEndpointHandler.cs(4,45): error CS0234: The type or namespace name 'DemoteUser' does not exist in the namespace 'EduTracker.Application.Features.Users' (are you missing an assembly reference?) [c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\EduTracker.Api.csproj]
+c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\Endpoints\Users\Handlers\PromoteUser\PromoteUserEndpointHandler.cs(4,45): error CS0234: The type or namespace name 'PromoteUser' does not exist in the namespace 'EduTracker.Application.Features.Users' (are you missing an assembly reference?) [c:\Users\awugo\Documents\Projects\edutracker\backend\EduTracker.Api\EduTracker.Api.csproj]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:03.22

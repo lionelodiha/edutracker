@@ -1,8 +1,7 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
-using EduTracker.Domain.Entities.UserSessions;
-using EduTracker.Domain.Enums;
+using EduTracker.Domain.Entities.Security;
 
 namespace EduTracker.Domain.Entities.Users;
 
@@ -18,6 +17,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         SetUserName(userName);
         SetEmailHash(emailHash);
         SetPasswordHash(passwordHash);
+
+        AuditState.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -32,8 +33,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string EmailHash { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
 
-    public bool IsLocked { get; private set; } = false;
-    public SystemRole Role { get; private set; } = SystemRole.User;
+    public bool IsLocked { get; private set; }
+    public ICollection<UserRoleAssignment> RoleAssignments { get; private set; } = [];
 
     public ICollection<UserSession> Sessions { get; private set; } = [];
 
@@ -51,60 +52,53 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public void SetSensitiveData(UserSensitive data) => SensitiveDataState.SetSensitiveData(data);
     public void ClearSensitiveData() => SensitiveDataState.ClearSensitiveData();
 
-    public void SetUserName(string userName)
+    public void SetUserName(string newUserName)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("UserName cannot be null or empty.", nameof(userName));
+        if (string.IsNullOrWhiteSpace(newUserName))
+            throw new ArgumentException("UserName cannot be null or empty.", nameof(newUserName));
 
-        if (userName.Length < UserLimits.UserNameMinLength || userName.Length > UserLimits.UserNameMaxLength)
+        int length = newUserName.Length;
+
+        if (length < UserLimits.UserNameMinLength || length > UserLimits.UserNameMaxLength)
             throw new ArgumentException(
                 $"UserName must be between {UserLimits.UserNameMinLength} and {UserLimits.UserNameMaxLength} characters.",
-                nameof(userName)
+                nameof(newUserName)
             );
 
-        if (!UserLimits.UserNameRegex().IsMatch(userName))
-            throw new ArgumentException("UserName contains invalid characters.", nameof(userName));
+        if (!UserLimits.UserNameRegex().IsMatch(newUserName))
+            throw new ArgumentException("UserName contains invalid characters.", nameof(newUserName));
 
-        UserName = userName;
+        UserName = newUserName;
         AuditState.UpdateAudit();
     }
 
-    public void SetEmailHash(string emailHash)
+    public void SetEmailHash(string newEmailHash)
     {
-        if (string.IsNullOrWhiteSpace(emailHash))
-            throw new ArgumentException("EmailHash cannot be null or empty.", nameof(emailHash));
+        if (string.IsNullOrWhiteSpace(newEmailHash))
+            throw new ArgumentException("EmailHash cannot be null or empty.", nameof(newEmailHash));
 
-        if (emailHash.Length is not UserLimits.EmailHashLength)
+        if (newEmailHash.Length is not UserLimits.EmailHashLength)
             throw new ArgumentException(
                 $"EmailHash must be exactly {UserLimits.EmailHashLength} characters.",
-                nameof(emailHash)
+                nameof(newEmailHash)
             );
 
-        EmailHash = emailHash;
+        EmailHash = newEmailHash;
         AuditState.UpdateAudit();
     }
 
-    public void SetPasswordHash(string passwordHash)
+    public void SetPasswordHash(string newPasswordHash)
     {
-        if (string.IsNullOrWhiteSpace(passwordHash))
-            throw new ArgumentException("PasswordHash cannot be null or empty.", nameof(passwordHash));
+        if (string.IsNullOrWhiteSpace(newPasswordHash))
+            throw new ArgumentException("PasswordHash cannot be null or empty.", nameof(newPasswordHash));
 
-        if (passwordHash.Length is not UserLimits.PasswordHashLength)
+        if (newPasswordHash.Length is not UserLimits.PasswordHashLength)
             throw new ArgumentException(
                 $"PasswordHash must be exactly {UserLimits.PasswordHashLength} characters.",
-                nameof(passwordHash)
+                nameof(newPasswordHash)
             );
 
-        PasswordHash = passwordHash;
-        AuditState.UpdateAudit();
-    }
-
-    public void UpdateRole(SystemRole role)
-    {
-        if (!Enum.IsDefined(role))
-            throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(role));
-
-        Role = role;
+        PasswordHash = newPasswordHash;
         AuditState.UpdateAudit();
     }
 
@@ -123,4 +117,35 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         IsLocked = false;
         AuditState.UpdateAudit();
     }
+
+    public void AssignRole(Guid roleId, Guid assignedByUserId, DateTime? expiresAtUtc = null)
+    {
+        bool alreadyActive = RoleAssignments.Any(
+            assignment => assignment.RoleId == roleId && assignment.IsActive && !assignment.IsExpired()
+        );
+
+        if (alreadyActive) return;
+
+        RoleAssignments.Add(new UserRoleAssignment(Id, roleId, assignedByUserId, expiresAtUtc));
+        AuditState.UpdateAudit();
+    }
+
+    public void RevokeRole(Guid roleId)
+    {
+        UserRoleAssignment? activeAssignment = RoleAssignments.FirstOrDefault(
+            assignment => assignment.RoleId == roleId && assignment.IsActive
+        );
+
+        if (activeAssignment is null) return;
+
+        activeAssignment.Deactivate();
+        AuditState.UpdateAudit();
+    }
+
+    public bool HasRole(string roleKey)
+        => RoleAssignments.Any(
+            assignment => assignment.IsActive &&
+                !assignment.IsExpired() &&
+                assignment.Role.Key.Equals(roleKey, StringComparison.OrdinalIgnoreCase)
+        );
 }

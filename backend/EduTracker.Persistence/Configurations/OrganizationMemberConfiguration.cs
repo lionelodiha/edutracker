@@ -21,15 +21,8 @@ internal sealed class OrganizationMemberConfiguration : IEntityTypeConfiguration
                 .IsRequired();
         });
 
-        builder.Property(m => m.Role)
-            .HasConversion<string>()
-            .IsRequired();
-
         builder.Property(m => m.Status)
             .HasConversion<string>()
-            .IsRequired();
-
-        builder.Property(m => m.JoinedAt)
             .IsRequired();
 
         builder.HasIndex(m => new { m.OrganizationId, m.UserId })
@@ -37,12 +30,17 @@ internal sealed class OrganizationMemberConfiguration : IEntityTypeConfiguration
 
         builder.HasIndex(m => m.OrganizationId);
         builder.HasIndex(m => m.UserId);
-        builder.HasIndex(m => new { m.OrganizationId, m.Role });
 
         builder.HasOne(m => m.User)
             .WithMany()
             .HasForeignKey(m => m.UserId)
             .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        builder.HasMany(m => m.RoleAssignments)
+            .WithOne(r => r.OrganizationMember)
+            .HasForeignKey(r => r.OrganizationMemberId)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
     }
 }

@@ -4,6 +4,7 @@ using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Grades.Models;
 using EduTracker.Application.Models;
+using EduTracker.Domain.Entities.Security;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -27,14 +28,16 @@ public sealed class GetStudentGradesQueryHandler(
             throw ResponseCatalog.Organization.MemberNotFound.ToException();
 
         OrganizationMember? actor = await db.OrganizationMembers
+            .Include(m => m.RoleAssignments)
+            .ThenInclude(ra => ra.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.OrganizationId == student.OrganizationId && m.UserId == message.ActorId.Value, cancellationToken);
 
         if (actor is null || actor.Status != OrganizationMemberStatus.Active)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
-        bool canView = actor.Role == OrganizationMemberRole.Admin ||
-            actor.Role == OrganizationMemberRole.Teacher ||
+        bool canView = actor.HasRole(RoleKeys.OrganizationAdmin) ||
+            actor.HasRole(RoleKeys.Teacher) ||
             actor.Id == student.Id;
 
         if (!canView)

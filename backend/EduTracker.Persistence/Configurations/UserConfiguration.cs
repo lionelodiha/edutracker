@@ -51,8 +51,10 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.IsLocked)
             .IsRequired();
 
-        builder.Property(u => u.Role)
-            .HasConversion<string>()
+        builder.HasMany(u => u.RoleAssignments)
+            .WithOne(r => r.User)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
         builder.HasMany(u => u.Sessions)

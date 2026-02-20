@@ -23,6 +23,19 @@ public sealed class Class : IEntity, IAuditable
         TeacherMemberId = teacherMemberId;
         Term = term.Trim();
         Year = year;
+        Name = $"{Term} {Year}";
+        Active = true;
+
+        AuditState.UpdateAudit();
+    }
+
+    public Class(Guid organizationId, string name, string? level = null, string? stream = null, bool active = true)
+    {
+        OrganizationId = organizationId;
+        SetName(name);
+        Level = string.IsNullOrWhiteSpace(level) ? null : level.Trim();
+        Stream = string.IsNullOrWhiteSpace(stream) ? null : stream.Trim();
+        Active = active;
 
         AuditState.UpdateAudit();
     }
@@ -41,15 +54,46 @@ public sealed class Class : IEntity, IAuditable
     public Guid TeacherMemberId { get; private set; }
     public OrganizationMember TeacherMember { get; private set; } = null!;
 
+    public string Name { get; private set; } = string.Empty;
+    public string? Level { get; private set; }
+    public string? Stream { get; private set; }
+    public bool Active { get; private set; } = true;
+
     public string Term { get; private set; } = string.Empty;
     public int Year { get; private set; }
 
     public ICollection<ClassEnrollment> Enrollments { get; private set; } = [];
     public ICollection<Assignment> Assignments { get; private set; } = [];
+    public ICollection<ClassOffering> Offerings { get; private set; } = [];
 
     public void UpdateTeacher(Guid teacherMemberId)
     {
         TeacherMemberId = teacherMemberId;
+        AuditState.UpdateAudit();
+    }
+
+    public void SetName(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Class name is required.", nameof(newName));
+
+        Name = newName.Trim();
+        AuditState.UpdateAudit();
+    }
+
+    public void UpdateProfile(string name, string? level, string? stream)
+    {
+        SetName(name);
+        Level = string.IsNullOrWhiteSpace(level) ? null : level.Trim();
+        Stream = string.IsNullOrWhiteSpace(stream) ? null : stream.Trim();
+        AuditState.UpdateAudit();
+    }
+
+    public void SetActive(bool active)
+    {
+        if (Active == active) return;
+
+        Active = active;
         AuditState.UpdateAudit();
     }
 }

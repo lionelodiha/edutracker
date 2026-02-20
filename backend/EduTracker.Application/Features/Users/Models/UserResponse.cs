@@ -8,5 +8,5 @@ public sealed record UserResponse(
     string FirstName,
     string? MiddleName,
     string LastName,
-    SystemRole Role
+    IReadOnlyList<string> Roles
 );
