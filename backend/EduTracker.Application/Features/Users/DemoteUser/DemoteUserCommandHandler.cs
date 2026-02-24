@@ -5,7 +5,6 @@ using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,12 +24,12 @@ public sealed class DemoteUserCommandHandler(
             CacheKeys.UserAuthenticationState(message.ActorId.Value)
         );
 
-        SystemRole? actorRole = cachedUserAuth?.Role;
+        UserRole? actorRole = cachedUserAuth?.Role;
 
         actorRole ??= await db.Users
             .AsNoTracking()
             .Where(u => u.Id == message.ActorId)
-            .Select(u => (SystemRole?)u.Role)
+            .Select(u => (UserRole?)u.Role)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (actorRole is null)
@@ -39,22 +38,22 @@ public sealed class DemoteUserCommandHandler(
         if (message.ActorId == message.TargetId)
             throw ResponseCatalog.Authorization.CannotActOnSelf.ToException();
 
-        if (actorRole is not SystemRole.SuperAdmin)
+        if (actorRole is not UserRole.SuperAdmin)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         User? targetUser = await db.Users
             .FirstOrDefaultAsync(u => u.Id == message.TargetId, cancellationToken)
             ?? throw ResponseCatalog.User.NotFound.ToException();
 
-        SystemRole newRole;
+        UserRole newRole;
 
-        if (targetUser.Role is SystemRole.SuperAdmin)
+        if (targetUser.Role is UserRole.SuperAdmin)
         {
             throw ResponseCatalog.Authorization.CannotDemoteSuperAdmin.ToException();
         }
-        else if (targetUser.Role is SystemRole.Admin)
+        else if (targetUser.Role is UserRole.Admin)
         {
-            newRole = SystemRole.User;
+            newRole = UserRole.User;
         }
         else
         {

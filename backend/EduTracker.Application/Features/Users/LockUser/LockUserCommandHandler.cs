@@ -6,7 +6,6 @@ using EduTracker.Application.Features.Users.Models;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,18 +22,18 @@ public sealed class LockUserCommandHandler(
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
         var cachedUser = await cacheService.GetAsync<UserResponse>(CacheKeys.UserProfileById(request.ActorId.Value));
-        SystemRole? actorRole = cachedUser?.Role;
+        UserRole? actorRole = cachedUser?.Role;
 
         actorRole ??= await db.Users
             .AsNoTracking()
             .Where(u => u.Id == request.ActorId)
-            .Select(u => (SystemRole?)u.Role)
+            .Select(u => (UserRole?)u.Role)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (actorRole is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        if (actorRole is SystemRole.User)
+        if (actorRole is UserRole.User)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         if (request.ActorId == request.TargetId)
@@ -44,10 +43,10 @@ public sealed class LockUserCommandHandler(
             .FirstOrDefaultAsync(u => u.Id == request.TargetId, cancellationToken)
             ?? throw ResponseCatalog.User.NotFound.ToException();
 
-        if (targetUser.Role is SystemRole.SuperAdmin)
+        if (targetUser.Role is UserRole.SuperAdmin)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
-        if (actorRole is SystemRole.Admin && targetUser.Role is SystemRole.Admin)
+        if (actorRole is UserRole.Admin && targetUser.Role is UserRole.Admin)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         if (targetUser.IsLocked)
