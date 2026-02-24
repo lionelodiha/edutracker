@@ -29,6 +29,18 @@ using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000") // your frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // if you need cookies/auth
+    });
+});
+
 builder.Services.AddPersistenceServices(builder.Configuration.GetConnectionString("Database"));
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices([typeof(IMediator).Assembly]);
@@ -59,6 +71,8 @@ builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); 
 
 WebApplication app = builder.Build();
 
+app.UseCors("AllowFrontend");
+
 using (IServiceScope scope = app.Services.CreateScope())
 {
     SuperAdminSeedOptions options = scope.ServiceProvider
@@ -85,7 +99,7 @@ if (app.Environment.IsDevelopment())
 
     app.MapScalarApiReference(options =>
     {
-        options.Title = "EduTracker API Gateway";
+        options.Title = "EduTracker API";
         options.DefaultHttpClient = new(ScalarTarget.Node, ScalarClient.Fetch);
     });
 }

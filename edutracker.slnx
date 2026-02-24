@@ -6,7 +6,7 @@
     <File Path="Directory.Packages.props" />
   </Folder>
 
-  <Folder Name="/src/">
+  <Folder Name="/backend/">
     <Project Path="backend/EduTracker.Api/EduTracker.Api.csproj" />
     <Project Path="backend/EduTracker.Application/EduTracker.Application.csproj" />
     <Project Path="backend/EduTracker.Domain/EduTracker.Domain.csproj" />
