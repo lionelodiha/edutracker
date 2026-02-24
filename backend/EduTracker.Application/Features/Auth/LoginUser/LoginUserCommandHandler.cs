@@ -10,7 +10,7 @@ using EduTracker.Application.Features.Auth.Models;
 using EduTracker.Application.Helpers;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
-using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Entities.Users;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

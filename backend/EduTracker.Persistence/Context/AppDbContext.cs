@@ -1,7 +1,6 @@
 using EduTracker.Domain.Entities.Academics;
 using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Entities.UserSessions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Persistence.Context;

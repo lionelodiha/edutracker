@@ -6,7 +6,6 @@ using EduTracker.Application.Features.Users.Models;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;

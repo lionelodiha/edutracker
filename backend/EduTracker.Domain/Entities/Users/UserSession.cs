@@ -1,8 +1,7 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Entities.Users;
 
-namespace EduTracker.Domain.Entities.UserSessions;
+namespace EduTracker.Domain.Entities.Users;
 
 public sealed class UserSession : IEntity, IAuditable
 {

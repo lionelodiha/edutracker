@@ -1,7 +1,6 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
-using EduTracker.Domain.Entities.UserSessions;
 using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Users;
