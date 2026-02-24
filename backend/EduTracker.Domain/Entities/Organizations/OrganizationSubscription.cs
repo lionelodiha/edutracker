@@ -1,94 +1,90 @@
-// using EduTracker.Domain.Abstractions;
-// using EduTracker.Domain.Components.Auditing;
-// using EduTracker.Domain.Entities.Users;
+using EduTracker.Domain.Abstractions;
+using EduTracker.Domain.Components.Auditing;
 
-// namespace EduTracker.Domain.Entities.Organizations;
+namespace EduTracker.Domain.Entities.Organizations;
 
-// public sealed class OrganizationSubscription : IEntity, IAuditable
-// {
-//     public readonly AuditState AuditState = new();
+public sealed class OrganizationSubscription : IEntity, IAuditable
+{
+    public readonly AuditState AuditState = new();
+    private OrganizationSubscription() { }
 
-//     private OrganizationSubscription() { }
+    public OrganizationSubscription(
+        Guid organizationId,
+        Guid planId,
+        DateTime startsAt,
+        DateTime? endsAt,
+        bool autoRenew)
+    {
+        Id = Guid.CreateVersion7();
+        OrganizationId = organizationId;
+        PlanId = planId;
+        StartsAt = startsAt;
+        EndsAt = endsAt;
+        AutoRenew = autoRenew;
+    }
 
-//     public OrganizationSubscription(
-//         Guid organizationId,
-//         Guid ownerUserId,
-//         SubscriptionPlan plan,
-//         SubscriptionStatus status,
-//         DateTime currentPeriodStart,
-//         DateTime currentPeriodEnd,
-//         DateTime? trialEndsAt = null
-//     )
-//     {
-//         if (!Enum.IsDefined(plan))
-//             throw new ArgumentException("Invalid subscription plan.", nameof(plan));
+    public Guid Id { get; private set; }
 
-//         if (!Enum.IsDefined(status))
-//             throw new ArgumentException("Invalid subscription status.", nameof(status));
+    public Guid OrganizationId { get; private set; }
+    public Guid PlanId { get; private set; }
 
-//         if (currentPeriodEnd <= currentPeriodStart)
-//             throw new ArgumentException("Current period end must be after current period start.", nameof(currentPeriodEnd));
+    public DateTime StartsAt { get; private set; }
+    public DateTime? EndsAt { get; private set; }
 
-//         OrganizationId = organizationId;
-//         OwnerUserId = ownerUserId;
-//         Plan = plan;
-//         Status = status;
-//         TrialEndsAt = trialEndsAt;
-//         CurrentPeriodStart = currentPeriodStart;
-//         CurrentPeriodEnd = currentPeriodEnd;
+    // Determines if the system should create a renewal when period ends
+    public bool AutoRenew { get; private set; }
 
-//         AuditState.UpdateAudit();
-//     }
+    // User intent — tells us the subscription was cancelled
+    public DateTime? CancelledAt { get; private set; }
 
-//     public Guid Id { get; private set; } = Guid.CreateVersion7();
+    public DateTime CreatedAt => throw new NotImplementedException();
 
-//     public DateTime CreatedAt => AuditState.CreatedAt;
-//     public DateTime UpdatedAt => AuditState.UpdatedAt;
+    public DateTime UpdatedAt => throw new NotImplementedException();
 
-//     public Guid OrganizationId { get; private set; }
-//     public Organization Organization { get; private set; } = null!;
+    // --------------------------------------------
+    // Derived State (No Stored Status Enum)
+    // --------------------------------------------
 
-//     public Guid OwnerUserId { get; private set; }
-//     public User OwnerUser { get; private set; } = null!;
+    public bool IsActive()
+    {
+        var now = DateTime.UtcNow;
 
-//     public SubscriptionPlan Plan { get; private set; }
-//     public SubscriptionStatus Status { get; private set; }
+        return StartsAt <= now &&
+               (!EndsAt.HasValue || now < EndsAt.Value);
+    }
 
-//     public DateTime? TrialEndsAt { get; private set; }
-//     public DateTime CurrentPeriodStart { get; private set; }
-//     public DateTime CurrentPeriodEnd { get; private set; }
+    public bool IsExpired()
+    {
+        return EndsAt.HasValue &&
+               DateTime.UtcNow >= EndsAt.Value;
+    }
 
-//     public void UpdatePlan(SubscriptionPlan plan)
-//     {
-//         if (!Enum.IsDefined(plan))
-//             throw new ArgumentException("Invalid subscription plan.", nameof(plan));
+    public bool IsCancelled()
+    {
+        return CancelledAt.HasValue;
+    }
 
-//         Plan = plan;
-//         AuditState.UpdateAudit();
-//     }
+    // --------------------------------------------
+    // Behavior
+    // --------------------------------------------
 
-//     public void UpdateStatus(SubscriptionStatus status)
-//     {
-//         if (!Enum.IsDefined(status))
-//             throw new ArgumentException("Invalid subscription status.", nameof(status));
+    public void Cancel(DateTime cancelledAt, DateTime periodEnd)
+    {
+        if (CancelledAt.HasValue)
+            return;
 
-//         Status = status;
-//         AuditState.UpdateAudit();
-//     }
+        CancelledAt = cancelledAt;
+        AutoRenew = false;
 
-//     public void UpdatePeriod(DateTime start, DateTime end)
-//     {
-//         if (end <= start)
-//             throw new ArgumentException("Current period end must be after current period start.", nameof(end));
+        // Subscription remains active until end of billing cycle
+        EndsAt = periodEnd;
+    }
 
-//         CurrentPeriodStart = start;
-//         CurrentPeriodEnd = end;
-//         AuditState.UpdateAudit();
-//     }
+    public void DisableAutoRenew()
+    {
+        if (!AutoRenew) return;
 
-//     public void UpdateTrial(DateTime? trialEndsAt)
-//     {
-//         TrialEndsAt = trialEndsAt;
-//         AuditState.UpdateAudit();
-//     }
-// }
+        AutoRenew = false;
+        AuditState.UpdateAudit();
+    }
+}

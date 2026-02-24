@@ -30,10 +30,6 @@ public sealed class Organization : IEntity, IAuditable
     public Guid OwnerUserId { get; private set; }
     public User OwnerUser { get; private set; } = null!;
 
-    public ICollection<OrganizationMember> Members { get; private set; } = [];
-    // public ICollection<OrganizationSubscription> Subscriptions { get; private set; } = [];
-    // public ICollection<PaymentMethod> PaymentMethods { get; private set; } = [];
-
     public void SetName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
