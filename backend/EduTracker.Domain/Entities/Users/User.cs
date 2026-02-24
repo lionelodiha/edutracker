@@ -35,8 +35,6 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public bool IsLocked { get; private set; } = false;
     public UserRole Role { get; private set; } = UserRole.User;
 
-    public ICollection<UserSession> Sessions { get; private set; } = [];
-
     public void SetEncryptedData(byte[] newData)
     {
         ArgumentNullException.ThrowIfNull(newData);
