@@ -16,6 +16,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         SetUserName(userName);
         SetEmailHash(emailHash);
         SetPasswordHash(passwordHash);
+
+        AuditState.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();

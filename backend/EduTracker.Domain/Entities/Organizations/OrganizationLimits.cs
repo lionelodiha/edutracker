@@ -7,6 +7,6 @@ public static partial class OrganizationLimits
     public const int NameMinLength = 3;
     public const int NameMaxLength = 50;
 
-    [GeneratedRegex(@"^[a-zA-Z0-9\s\-\.\'\&\,\(\)\/]+$")]
+    [GeneratedRegex(@"^[a-zA-Z0-9\-\.\'\&\,\(\)\/]+(?:\s[a-zA-Z0-9\-\.\'\&\,\(\)\/]+)*$")]
     public static partial Regex NameRegex();
 }
