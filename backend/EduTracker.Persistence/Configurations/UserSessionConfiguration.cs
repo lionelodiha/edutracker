@@ -21,10 +21,18 @@ internal sealed class UserSessionConfiguration : IEntityTypeConfiguration<UserSe
                 .IsRequired();
         });
 
-        builder.HasIndex(us => us.UserId);
-
         builder.Property(us => us.UserId)
             .IsRequired();
+
+        builder.HasOne(us => us.User)
+            .WithMany()
+            .HasForeignKey(us => us.UserId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        builder.HasIndex(us => us.UserId);
+
+        builder.HasIndex(us => new { us.UserId, us.IsRevoked });
 
         builder.Property(us => us.RememberMe)
             .IsRequired();
@@ -34,6 +42,8 @@ internal sealed class UserSessionConfiguration : IEntityTypeConfiguration<UserSe
 
         builder.Property(us => us.ExpiresAt)
             .IsRequired();
+
+        builder.HasIndex(us => us.ExpiresAt);
 
         builder.Property(us => us.AbsoluteExpiresAt)
             .IsRequired();

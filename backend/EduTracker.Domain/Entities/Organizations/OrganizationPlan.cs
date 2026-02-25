@@ -8,7 +8,7 @@ public sealed class OrganizationPlan : IEntity
 
     public OrganizationPlan(string name)
     {
-        Name = name;
+        SetName(name);
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -19,6 +19,23 @@ public sealed class OrganizationPlan : IEntity
 
     public bool HasAdvancedReports { get; private set; }
     public bool HasApiAccess { get; private set; }
+
+    public void SetName(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Plan name is required.", nameof(newName));
+
+        if (newName.Length < OrganizationLimits.PlanNameMinLength || newName.Length > OrganizationLimits.PlanNameMaxLength)
+            throw new ArgumentException(
+                $"Plan name must be between {OrganizationLimits.PlanNameMinLength} and {OrganizationLimits.PlanNameMaxLength} characters.",
+                nameof(newName)
+            );
+
+        if (!OrganizationLimits.PlanNameRegex().IsMatch(newName))
+            throw new ArgumentException("Plan name contains invalid characters.", nameof(newName));
+
+        Name = newName;
+    }
 
     public bool IsStudentLimitReached(int activeStudents)
     {

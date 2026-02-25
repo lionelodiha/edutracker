@@ -13,15 +13,9 @@ public sealed class OrganizationPaymentMethod : IEntity, IAuditable, IHasSensiti
 
     public OrganizationPaymentMethod(Guid organizationId, string provider, string brand, bool isDefault)
     {
-        if (string.IsNullOrWhiteSpace(provider))
-            throw new ArgumentException("Provider is required.", nameof(provider));
-
-        if (string.IsNullOrWhiteSpace(brand))
-            throw new ArgumentException("Brand is required.", nameof(brand));
-
         OrganizationId = organizationId;
-        Provider = provider.Trim();
-        Brand = brand.Trim();
+        Provider = ValidateProvider(provider);
+        Brand = ValidateBrand(brand);
         IsDefault = isDefault;
 
         AuditState.UpdateAudit();
@@ -46,7 +40,7 @@ public sealed class OrganizationPaymentMethod : IEntity, IAuditable, IHasSensiti
     {
         ArgumentNullException.ThrowIfNull(newData);
 
-        if (newData.Length is 0)
+        if (newData.Length == 0)
             throw new ArgumentException("Data cannot be empty.", nameof(newData));
 
         SensitiveDataState.SetEncryptedData(newData);
@@ -66,12 +60,45 @@ public sealed class OrganizationPaymentMethod : IEntity, IAuditable, IHasSensiti
 
     public void UpdateBrand(string brand)
     {
+        string validatedBrand = ValidateBrand(brand);
+
+        if (Brand == validatedBrand) return;
+
+        Brand = validatedBrand;
+        AuditState.UpdateAudit();
+    }
+
+    private static string ValidateProvider(string provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider))
+            throw new ArgumentException("Provider is required.", nameof(provider));
+
+        if (provider.Length > OrganizationLimits.ProviderMaxLength)
+            throw new ArgumentException(
+                $"Provider cannot exceed {OrganizationLimits.ProviderMaxLength} characters.",
+                nameof(provider)
+            );
+
+        if (!OrganizationLimits.ProviderRegex().IsMatch(provider))
+            throw new ArgumentException("Provider contains invalid characters.", nameof(provider));
+
+        return provider;
+    }
+
+    private static string ValidateBrand(string brand)
+    {
         if (string.IsNullOrWhiteSpace(brand))
             throw new ArgumentException("Brand is required.", nameof(brand));
 
-        if (Brand == brand.Trim()) return;
+        if (brand.Length < OrganizationLimits.BrandMinLength || brand.Length > OrganizationLimits.BrandMaxLength)
+            throw new ArgumentException(
+                $"Brand must be between {OrganizationLimits.BrandMinLength} and {OrganizationLimits.BrandMaxLength} characters.",
+                nameof(brand)
+            );
 
-        Brand = brand.Trim();
-        AuditState.UpdateAudit();
+        if (!OrganizationLimits.BrandRegex().IsMatch(brand))
+            throw new ArgumentException("Brand contains invalid characters.", nameof(brand));
+
+        return brand;
     }
 }
