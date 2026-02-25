@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Application.Features.Auth.RegisterUser;
 
-public sealed class RegisterUserCommandHandler(
+internal sealed class RegisterUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService,
     IOptions<CacheTimeToLiveOptions> cacheTtlOptions,

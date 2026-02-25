@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Application.Features.Auth.RefreshSession;
 
-public sealed class RefreshSessionCommandHandler(
+internal sealed class RefreshSessionCommandHandler(
     AppDbContext db,
     ICacheService cacheService,
     IOptions<CacheTimeToLiveOptions> cacheTtlOptions,

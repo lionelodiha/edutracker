@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.LogoutUser;
 
-public sealed class LogoutUserCommandHandler(
+internal sealed class LogoutUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<LogoutUserCommand, OperationResult<object>>

@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Application.Features.Auth.LoginUser;
 
-public sealed class LoginUserCommandHandler(
+internal sealed class LoginUserCommandHandler(
     AppDbContext db,
     IHashingService hashingService,
     ICacheService cacheService,

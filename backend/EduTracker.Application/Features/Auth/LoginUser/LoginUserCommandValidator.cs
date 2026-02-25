@@ -3,7 +3,7 @@ using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Features.Auth.LoginUser;
 
-public sealed class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
+internal sealed class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
 {
     public LoginUserCommandValidator()
     {
