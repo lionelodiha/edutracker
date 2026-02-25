@@ -12,7 +12,7 @@ public sealed class OrganizationPlan : IEntity, IAuditable
     public OrganizationPlan(string name, int? maxStudents = null, bool hasAdvancedReports = false, bool hasApiAccess = false)
     {
         Name = ValidateName(name);
-        MaxStudents = maxStudents;
+        MaxStudents = ValidateMaxStudents(maxStudents);
         HasAdvancedReports = hasAdvancedReports;
         HasApiAccess = hasApiAccess;
 
@@ -41,11 +41,13 @@ public sealed class OrganizationPlan : IEntity, IAuditable
         AuditState.UpdateAudit();
     }
 
-    public void SetMaxStudents(int? maxStudents)
+    public void SetMaxStudents(int? newMaxStudents)
     {
-        if (MaxStudents == maxStudents) return;
+        int? validatedMaxStudents = ValidateMaxStudents(newMaxStudents);
 
-        MaxStudents = maxStudents;
+        if (MaxStudents == validatedMaxStudents) return;
+
+        MaxStudents = validatedMaxStudents;
         AuditState.UpdateAudit();
     }
 
@@ -88,5 +90,13 @@ public sealed class OrganizationPlan : IEntity, IAuditable
             throw new ArgumentException("Plan name contains invalid characters.", nameof(name));
 
         return name;
+    }
+
+    private static int? ValidateMaxStudents(int? maxStudents)
+    {
+        if (maxStudents.HasValue && maxStudents.Value <= 0)
+            throw new ArgumentException("Max students must be greater than zero.", nameof(maxStudents));
+
+        return maxStudents;
     }
 }
