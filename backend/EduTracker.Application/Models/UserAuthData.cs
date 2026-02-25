@@ -1,3 +1,5 @@
+using EduTracker.Domain.Entities.Users;
+
 namespace EduTracker.Application.Models;
 
 public sealed record UserAuthData(

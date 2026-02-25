@@ -2,7 +2,7 @@ using EduTracker.Application.Features.Subscriptions.Models;
 
 namespace EduTracker.Application.Extensions.Entities;
 
-internal static class SubscriptionExtensions
+internal static class OrganizationSubscriptionExtensions
 {
     extension(OrganizationSubscription subscription)
     {
