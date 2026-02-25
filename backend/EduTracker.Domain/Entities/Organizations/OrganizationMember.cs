@@ -34,23 +34,38 @@ public sealed class OrganizationMember : IEntity, IAuditable
 
     public void UpdateRole(OrganizationMemberRole newRole)
     {
-        if (!Enum.IsDefined(newRole))
-            throw new ArgumentException("Invalid organization role.", nameof(newRole));
+        OrganizationMemberRole validatedRole = ValidateRole(newRole);
 
-        if (Role == newRole) return;
+        if (Role == validatedRole) return;
 
-        Role = newRole;
+        Role = validatedRole;
         AuditState.UpdateAudit();
     }
 
     public void UpdateStatus(OrganizationMemberStatus newStatus)
     {
-        if (!Enum.IsDefined(newStatus))
-            throw new ArgumentException("Invalid organization member status.", nameof(newStatus));
+        OrganizationMemberStatus validatedStatus = ValidateStatus(newStatus);
 
-        if (Status == newStatus) return;
+        if (Status == validatedStatus) return;
 
-        Status = newStatus;
+        Status = validatedStatus;
         AuditState.UpdateAudit();
     }
+
+    private static OrganizationMemberRole ValidateRole(OrganizationMemberRole role)
+    {
+        if (!Enum.IsDefined(role))
+            throw new ArgumentException("Invalid organization role.", nameof(role));
+
+        return role;
+    }
+
+    private static OrganizationMemberStatus ValidateStatus(OrganizationMemberStatus status)
+    {
+        if (!Enum.IsDefined(status))
+            throw new ArgumentException("Invalid organization member status.", nameof(status));
+
+        return status;
+    }
 }
+

@@ -12,8 +12,7 @@ public sealed class Organization : IEntity, IAuditable
 
     public Organization(string name, Guid ownerUserId)
     {
-        SetName(name);
-
+        Name = ValidateName(name);
         OwnerUserId = ownerUserId;
 
         AuditState.UpdateAudit();
@@ -32,21 +31,11 @@ public sealed class Organization : IEntity, IAuditable
 
     public void SetName(string newName)
     {
-        if (string.IsNullOrWhiteSpace(newName))
-            throw new ArgumentException("Organization name is required.", nameof(newName));
+        string validatedName = ValidateName(newName);
 
-        int nameLength = newName.Length;
+        if (Name == validatedName) return;
 
-        if (nameLength < OrganizationLimits.NameMinLength || nameLength > OrganizationLimits.NameMaxLength)
-            throw new ArgumentException(
-                $"Organization name must be between {OrganizationLimits.NameMinLength} and {OrganizationLimits.NameMaxLength} characters.",
-                nameof(newName)
-            );
-
-        if (!OrganizationLimits.NameRegex().IsMatch(newName))
-            throw new ArgumentException("Organization name contains invalid characters.", nameof(newName));
-
-        Name = newName;
+        Name = validatedName;
         AuditState.UpdateAudit();
     }
 
@@ -65,4 +54,22 @@ public sealed class Organization : IEntity, IAuditable
         IsLocked = false;
         AuditState.UpdateAudit();
     }
+
+    private static string ValidateName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Organization name is required.", nameof(name));
+
+        if (name.Length < OrganizationLimits.NameMinLength || name.Length > OrganizationLimits.NameMaxLength)
+            throw new ArgumentException(
+                $"Organization name must be between {OrganizationLimits.NameMinLength} and {OrganizationLimits.NameMaxLength} characters.",
+                nameof(name)
+            );
+
+        if (!OrganizationLimits.NameRegex().IsMatch(name))
+            throw new ArgumentException("Organization name contains invalid characters.", nameof(name));
+
+        return name;
+    }
 }
+

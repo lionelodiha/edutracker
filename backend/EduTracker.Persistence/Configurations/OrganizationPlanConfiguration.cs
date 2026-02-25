@@ -10,6 +10,17 @@ internal sealed class OrganizationPlanConfiguration : IEntityTypeConfiguration<O
     {
         builder.HasKey(p => p.Id);
 
+        builder.OwnsOne(p => p.AuditState, audit =>
+        {
+            audit.Property(a => a.CreatedAt)
+                .HasColumnName("CreatedAt")
+                .IsRequired();
+
+            audit.Property(a => a.UpdatedAt)
+                .HasColumnName("UpdatedAt")
+                .IsRequired();
+        });
+
         builder.Property(p => p.Name)
             .HasMaxLength(OrganizationLimits.PlanNameMaxLength)
             .IsRequired();

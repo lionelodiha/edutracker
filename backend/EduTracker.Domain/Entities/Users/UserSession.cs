@@ -11,21 +11,12 @@ public sealed class UserSession : IEntity, IAuditable
 
     public UserSession(Guid userId, bool rememberMe, TimeSpan slidingLifetime, TimeSpan absoluteLifetime)
     {
-        if (slidingLifetime <= TimeSpan.Zero)
-            throw new ArgumentException("Sliding lifetime must be positive.", nameof(slidingLifetime));
-
-        if (absoluteLifetime < slidingLifetime)
-            throw new ArgumentException(
-                "Absolute lifetime must be greater than or equal to sliding lifetime.",
-                nameof(absoluteLifetime)
-            );
-
-        DateTime now = DateTime.UtcNow;
+        (DateTime expiresAt, DateTime absoluteExpiresAt) = ValidateLifetimes(slidingLifetime, absoluteLifetime);
 
         UserId = userId;
         RememberMe = rememberMe;
-        ExpiresAt = now.Add(slidingLifetime);
-        AbsoluteExpiresAt = now.Add(absoluteLifetime);
+        ExpiresAt = expiresAt;
+        AbsoluteExpiresAt = absoluteExpiresAt;
 
         AuditState.UpdateAudit();
     }
@@ -94,5 +85,21 @@ public sealed class UserSession : IEntity, IAuditable
         IsRevoked = true;
         RevokedAt = DateTime.UtcNow;
         AuditState.UpdateAudit();
+    }
+
+    private static (DateTime, DateTime) ValidateLifetimes(TimeSpan slidingLifetime, TimeSpan absoluteLifetime)
+    {
+        if (slidingLifetime <= TimeSpan.Zero)
+            throw new ArgumentException("Sliding lifetime must be positive.", nameof(slidingLifetime));
+
+        if (absoluteLifetime < slidingLifetime)
+            throw new ArgumentException(
+                "Absolute lifetime must be greater than or equal to sliding lifetime.",
+                nameof(absoluteLifetime)
+            );
+
+        DateTime now = DateTime.UtcNow;
+
+        return (now.Add(slidingLifetime), now.Add(absoluteLifetime));
     }
 }
