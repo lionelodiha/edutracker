@@ -1,5 +1,3 @@
-using EduTracker.Domain.Enums;
-
 namespace EduTracker.Application.Features.Subscriptions.Models;
 
 public sealed record OrganizationSubscriptionResponse(

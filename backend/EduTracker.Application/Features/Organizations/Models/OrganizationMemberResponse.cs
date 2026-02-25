@@ -1,5 +1,3 @@
-using EduTracker.Domain.Enums;
-
 namespace EduTracker.Application.Features.Organizations.Models;
 
 public sealed record OrganizationMemberResponse(

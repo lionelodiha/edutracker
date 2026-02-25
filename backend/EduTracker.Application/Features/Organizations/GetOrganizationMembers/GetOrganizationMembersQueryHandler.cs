@@ -4,7 +4,6 @@ using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Organizations.Models;
 using EduTracker.Application.Models;
-using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
