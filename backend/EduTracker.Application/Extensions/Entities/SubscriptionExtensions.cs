@@ -11,12 +11,14 @@ internal static class OrganizationSubscriptionExtensions
             => new(
                 subscription.Id,
                 subscription.OrganizationId,
-                subscription.OwnerUserId,
-                subscription.Plan,
-                subscription.Status,
-                subscription.TrialEndsAt,
-                subscription.CurrentPeriodStart,
-                subscription.CurrentPeriodEnd
+                subscription.PlanId,
+                subscription.StartsAt,
+                subscription.EndsAt,
+                subscription.AutoRenew,
+                subscription.CancelledAt,
+                subscription.IsActive(),
+                subscription.IsExpired(),
+                subscription.IsCancelled()
             );
     }
 }

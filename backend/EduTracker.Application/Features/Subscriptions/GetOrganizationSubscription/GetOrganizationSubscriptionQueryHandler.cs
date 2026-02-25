@@ -4,12 +4,13 @@ using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Subscriptions.Models;
 using EduTracker.Application.Models;
+using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Subscriptions.GetOrganizationSubscription;
 
-public sealed class GetOrganizationSubscriptionQueryHandler(
+internal sealed class GetOrganizationSubscriptionQueryHandler(
     AppDbContext db
 ) : IHandler<GetOrganizationSubscriptionQuery, OperationResult<OrganizationSubscriptionResponse>>
 {

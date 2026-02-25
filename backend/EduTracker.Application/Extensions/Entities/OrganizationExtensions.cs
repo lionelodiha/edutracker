@@ -24,7 +24,7 @@ internal static class OrganizationExtensions
                 member.UserId,
                 member.Role,
                 member.Status,
-                member.JoinedAt
+                member.CreatedAt
             );
     }
 }

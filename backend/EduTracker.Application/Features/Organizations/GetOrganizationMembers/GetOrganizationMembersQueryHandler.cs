@@ -4,12 +4,13 @@ using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Organizations.Models;
 using EduTracker.Application.Models;
+using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Organizations.GetOrganizationMembers;
 
-public sealed class GetOrganizationMembersQueryHandler(
+internal sealed class GetOrganizationMembersQueryHandler(
     AppDbContext db
 ) : IHandler<GetOrganizationMembersQuery, OperationResult<IReadOnlyList<OrganizationMemberResponse>>>
 {

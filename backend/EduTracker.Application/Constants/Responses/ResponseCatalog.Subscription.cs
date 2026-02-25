@@ -44,5 +44,19 @@ internal static partial class ResponseCatalog
             Title: "An active subscription already exists for this organization.",
             Details: []
         );
+
+        public static readonly OperationFailureResponse PaymentMethodRequired = new(
+            Id: "SUB_PAYMENT_METHOD_REQUIRED",
+            StatusCode: HttpStatusCodes.BadRequest,
+            Title: "A default payment method is required to manage subscriptions.",
+            Details: []
+        );
+
+        public static readonly OperationFailureResponse PaymentFailed = new(
+            Id: "SUB_PAYMENT_FAILED",
+            StatusCode: HttpStatusCodes.BadRequest,
+            Title: "Subscription payment operation failed.",
+            Details: []
+        );
     }
 }

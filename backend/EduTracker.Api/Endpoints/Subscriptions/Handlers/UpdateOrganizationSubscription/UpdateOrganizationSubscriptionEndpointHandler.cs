@@ -23,9 +23,10 @@ internal static class UpdateOrganizationSubscriptionEndpointHandler
         UpdateOrganizationSubscriptionCommand command = new(
             ActorId: actorId,
             OrganizationId: id,
-            Plan: request.Plan,
-            CurrentPeriodStart: request.CurrentPeriodStart,
-            CurrentPeriodEnd: request.CurrentPeriodEnd
+            PlanId: request.PlanId,
+            StartsAt: request.StartsAt,
+            EndsAt: request.EndsAt,
+            AutoRenew: request.AutoRenew
         );
 
         OperationResult<object> result = await mediator.Send(command, cancellationToken);

@@ -3,10 +3,12 @@ namespace EduTracker.Application.Features.Subscriptions.Models;
 public sealed record OrganizationSubscriptionResponse(
     Guid Id,
     Guid OrganizationId,
-    Guid OwnerUserId,
-    SubscriptionPlan Plan,
-    SubscriptionStatus Status,
-    DateTime? TrialEndsAt,
-    DateTime CurrentPeriodStart,
-    DateTime CurrentPeriodEnd
+    Guid PlanId,
+    DateTime StartsAt,
+    DateTime? EndsAt,
+    bool AutoRenew,
+    DateTime? CancelledAt,
+    bool IsActive,
+    bool IsExpired,
+    bool IsCancelled
 );

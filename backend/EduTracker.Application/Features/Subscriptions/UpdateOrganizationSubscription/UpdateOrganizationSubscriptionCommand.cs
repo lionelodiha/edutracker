@@ -6,7 +6,8 @@ namespace EduTracker.Application.Features.Subscriptions.UpdateOrganizationSubscr
 public sealed record UpdateOrganizationSubscriptionCommand(
     Guid? ActorId,
     Guid OrganizationId,
-    SubscriptionPlan? Plan,
-    DateTime? CurrentPeriodStart,
-    DateTime? CurrentPeriodEnd
+    Guid? PlanId,
+    DateTime? StartsAt,
+    DateTime? EndsAt,
+    bool? AutoRenew
 ) : IMessage<OperationResult<object>>;
