@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Sessions.RevokeAllUserSessions;
 
-public sealed class RevokeAllUserSessionsCommandHandler(
+internal sealed class RevokeAllUserSessionsCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<RevokeAllUserSessionsCommand, OperationResult<object>>

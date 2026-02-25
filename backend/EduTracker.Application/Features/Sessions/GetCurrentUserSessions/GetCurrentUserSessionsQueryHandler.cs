@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Application.Features.Sessions.GetCurrentUserSessions;
 
-public sealed class GetCurrentUserSessionsQueryHandler(
+internal sealed class GetCurrentUserSessionsQueryHandler(
     AppDbContext db,
     ICacheService cacheService,
     IOptions<CacheTimeToLiveOptions> cacheTtlOptions
