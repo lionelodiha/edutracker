@@ -3,7 +3,7 @@ using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Features.Users.UpdateUserPassword;
 
-public sealed class UpdateUserPasswordCommandValidator : AbstractValidator<UpdateUserPasswordCommand>
+internal sealed class UpdateUserPasswordCommandValidator : AbstractValidator<UpdateUserPasswordCommand>
 {
     public UpdateUserPasswordCommandValidator()
     {

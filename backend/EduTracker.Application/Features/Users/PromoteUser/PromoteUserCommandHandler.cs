@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.PromoteUser;
 
-public sealed class PromoteUserCommandHandler(
+internal sealed class PromoteUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<PromoteUserCommand, OperationResult<object>>

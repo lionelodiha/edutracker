@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.LockUser;
 
-public sealed class LockUserCommandHandler(
+internal sealed class LockUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<LockUserCommand, OperationResult<object>>

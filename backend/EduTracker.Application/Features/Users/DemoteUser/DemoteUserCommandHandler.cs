@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.DemoteUser;
 
-public sealed class DemoteUserCommandHandler(
+internal sealed class DemoteUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<DemoteUserCommand, OperationResult<object>>

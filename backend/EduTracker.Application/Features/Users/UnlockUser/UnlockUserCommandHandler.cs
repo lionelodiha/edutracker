@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.UnlockUser;
 
-public sealed class UnlockUserCommandHandler(
+internal sealed class UnlockUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<UnlockUserCommand, OperationResult<object>>

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.UpdateUserPassword;
 
-public sealed class UpdateUserPasswordCommandHandler(
+internal sealed class UpdateUserPasswordCommandHandler(
     AppDbContext db,
     IHashingService hashingService,
     ICacheService cacheService

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.UpdateUser;
 
-public sealed class UpdateUserCommandHandler(
+internal sealed class UpdateUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService,
     IDataEncryptionService encryptionService
