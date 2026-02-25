@@ -3,7 +3,7 @@ using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Features.Seeders.SeedSuperAdmin;
 
-public sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuperAdminCommand>
+internal sealed class SeedSuperAdminCommandValidator : AbstractValidator<SeedSuperAdminCommand>
 {
     public SeedSuperAdminCommandValidator()
     {

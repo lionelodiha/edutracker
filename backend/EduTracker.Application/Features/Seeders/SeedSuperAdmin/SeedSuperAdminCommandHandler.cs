@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Seeders.SeedSuperAdmin;
 
-public sealed class SeedSuperAdminCommandHandler(
+internal sealed class SeedSuperAdminCommandHandler(
     AppDbContext db,
     IHashingService hashingService,
     IDataEncryptionService encryptionService
