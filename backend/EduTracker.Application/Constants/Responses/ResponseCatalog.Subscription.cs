@@ -47,14 +47,14 @@ internal static partial class ResponseCatalog
 
         public static readonly OperationFailureResponse PaymentMethodRequired = new(
             Id: "SUB_PAYMENT_METHOD_REQUIRED",
-            StatusCode: HttpStatusCodes.BadRequest,
+            StatusCode: 400,
             Title: "A default payment method is required to manage subscriptions.",
             Details: []
         );
 
         public static readonly OperationFailureResponse PaymentFailed = new(
             Id: "SUB_PAYMENT_FAILED",
-            StatusCode: HttpStatusCodes.BadRequest,
+            StatusCode: 400,
             Title: "Subscription payment operation failed.",
             Details: []
         );
