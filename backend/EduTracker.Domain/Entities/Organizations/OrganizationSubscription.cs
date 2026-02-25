@@ -8,76 +8,59 @@ public sealed class OrganizationSubscription : IEntity, IAuditable
     public readonly AuditState AuditState = new();
     private OrganizationSubscription() { }
 
-    public OrganizationSubscription(
-        Guid organizationId,
-        Guid planId,
-        DateTime startsAt,
-        DateTime? endsAt,
-        bool autoRenew)
+    public OrganizationSubscription(Guid organizationId, Guid planId, DateTime startsAt, DateTime? endsAt, bool autoRenew)
     {
-        Id = Guid.CreateVersion7();
         OrganizationId = organizationId;
         PlanId = planId;
+
         StartsAt = startsAt;
         EndsAt = endsAt;
         AutoRenew = autoRenew;
     }
 
-    public Guid Id { get; private set; }
+    public Guid Id { get; private set; } = Guid.CreateVersion7();
+
+    public DateTime CreatedAt => AuditState.CreatedAt;
+    public DateTime UpdatedAt => AuditState.UpdatedAt;
 
     public Guid OrganizationId { get; private set; }
+    public Organization Organization { get; private set; } = null!;
+
     public Guid PlanId { get; private set; }
+    public OrganizationPlan Plan { get; private set; } = null!;
 
     public DateTime StartsAt { get; private set; }
     public DateTime? EndsAt { get; private set; }
 
-    // Determines if the system should create a renewal when period ends
     public bool AutoRenew { get; private set; }
-
-    // User intent — tells us the subscription was cancelled
     public DateTime? CancelledAt { get; private set; }
-
-    public DateTime CreatedAt => throw new NotImplementedException();
-
-    public DateTime UpdatedAt => throw new NotImplementedException();
-
-    // --------------------------------------------
-    // Derived State (No Stored Status Enum)
-    // --------------------------------------------
 
     public bool IsActive()
     {
-        var now = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
 
-        return StartsAt <= now &&
-               (!EndsAt.HasValue || now < EndsAt.Value);
+        return StartsAt <= now && (!EndsAt.HasValue || now < EndsAt.Value);
     }
 
-    public bool IsExpired()
-    {
-        return EndsAt.HasValue &&
-               DateTime.UtcNow >= EndsAt.Value;
-    }
-
-    public bool IsCancelled()
-    {
-        return CancelledAt.HasValue;
-    }
-
-    // --------------------------------------------
-    // Behavior
-    // --------------------------------------------
+    public bool IsExpired() => EndsAt.HasValue && DateTime.UtcNow >= EndsAt.Value;
+    public bool IsCancelled() => CancelledAt.HasValue;
 
     public void Cancel(DateTime cancelledAt, DateTime periodEnd)
     {
-        if (CancelledAt.HasValue)
-            return;
+        if (CancelledAt.HasValue) return;
 
         CancelledAt = cancelledAt;
         AutoRenew = false;
 
-        // Subscription remains active until end of billing cycle
         EndsAt = periodEnd;
+    }
+
+    public void EnableAutoRenew()
+    {
+        if (AutoRenew) return;
+
+        AutoRenew = true;
+        AuditState.UpdateAudit();
     }
 
     public void DisableAutoRenew()

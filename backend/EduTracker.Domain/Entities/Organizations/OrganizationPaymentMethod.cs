@@ -1,52 +1,27 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
+using EduTracker.Domain.Components.Security;
 
 namespace EduTracker.Domain.Entities.Organizations;
 
-public sealed class OrganizationPaymentMethod : IEntity, IAuditable
+public sealed class OrganizationPaymentMethod : IEntity, IAuditable, IHasSensitiveData<OrganizationPaymentMethodSensitive>
 {
     public readonly AuditState AuditState = new();
+    public readonly SensitiveDataState<OrganizationPaymentMethodSensitive> SensitiveDataState = new();
 
     private OrganizationPaymentMethod() { }
 
-    public OrganizationPaymentMethod(
-        Guid organizationId,
-        string provider,
-        string providerCustomerId,
-        string providerPaymentMethodId,
-        string last4,
-        string brand,
-        int expMonth,
-        int expYear,
-        bool isDefault
-    )
+    public OrganizationPaymentMethod(Guid organizationId, string provider, string brand, bool isDefault)
     {
         if (string.IsNullOrWhiteSpace(provider))
             throw new ArgumentException("Provider is required.", nameof(provider));
 
-        if (string.IsNullOrWhiteSpace(providerCustomerId))
-            throw new ArgumentException("Provider customer id is required.", nameof(providerCustomerId));
-
-        if (string.IsNullOrWhiteSpace(providerPaymentMethodId))
-            throw new ArgumentException("Provider payment method id is required.", nameof(providerPaymentMethodId));
-
-        if (string.IsNullOrWhiteSpace(last4) || last4.Length != 4)
-            throw new ArgumentException("Last4 must be 4 digits.", nameof(last4));
-
-        if (expMonth is < 1 or > 12)
-            throw new ArgumentOutOfRangeException(nameof(expMonth), "ExpMonth must be between 1 and 12.");
-
-        if (expYear < 2000)
-            throw new ArgumentOutOfRangeException(nameof(expYear), "ExpYear is invalid.");
+        if (string.IsNullOrWhiteSpace(brand))
+            throw new ArgumentException("Brand is required.", nameof(brand));
 
         OrganizationId = organizationId;
         Provider = provider.Trim();
-        ProviderCustomerId = providerCustomerId.Trim();
-        ProviderPaymentMethodId = providerPaymentMethodId.Trim();
-        Last4 = last4.Trim();
         Brand = brand.Trim();
-        ExpMonth = expMonth;
-        ExpYear = expYear;
         IsDefault = isDefault;
 
         AuditState.UpdateAudit();
@@ -57,21 +32,46 @@ public sealed class OrganizationPaymentMethod : IEntity, IAuditable
     public DateTime CreatedAt => AuditState.CreatedAt;
     public DateTime UpdatedAt => AuditState.UpdatedAt;
 
+    public byte[] EncryptedData => SensitiveDataState.EncryptedData;
+    public OrganizationPaymentMethodSensitive? SensitiveData => SensitiveDataState.SensitiveData;
+
     public Guid OrganizationId { get; private set; }
     public Organization Organization { get; private set; } = null!;
 
     public string Provider { get; private set; } = string.Empty;
-    public string ProviderCustomerId { get; private set; } = string.Empty;
-    public string ProviderPaymentMethodId { get; private set; } = string.Empty;
-    public string Last4 { get; private set; } = string.Empty;
     public string Brand { get; private set; } = string.Empty;
-    public int ExpMonth { get; private set; }
-    public int ExpYear { get; private set; }
     public bool IsDefault { get; private set; }
+
+    public void SetEncryptedData(byte[] newData)
+    {
+        ArgumentNullException.ThrowIfNull(newData);
+
+        if (newData.Length is 0)
+            throw new ArgumentException("Data cannot be empty.", nameof(newData));
+
+        SensitiveDataState.SetEncryptedData(newData);
+        AuditState.UpdateAudit();
+    }
+
+    public void SetSensitiveData(OrganizationPaymentMethodSensitive data) => SensitiveDataState.SetSensitiveData(data);
+    public void ClearSensitiveData() => SensitiveDataState.ClearSensitiveData();
 
     public void SetDefault(bool isDefault)
     {
+        if (IsDefault == isDefault) return;
+
         IsDefault = isDefault;
+        AuditState.UpdateAudit();
+    }
+
+    public void UpdateBrand(string brand)
+    {
+        if (string.IsNullOrWhiteSpace(brand))
+            throw new ArgumentException("Brand is required.", nameof(brand));
+
+        if (Brand == brand.Trim()) return;
+
+        Brand = brand.Trim();
         AuditState.UpdateAudit();
     }
 }
