@@ -25,10 +25,14 @@ internal sealed class InviteOrganizationMemberCommandHandler(
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.OrganizationId == organization.Id && m.UserId == message.ActorId.Value, cancellationToken);
 
-        if (actor is null || actor.Status != OrganizationMemberStatus.Active || actor.Role != OrganizationMemberRole.Owner)
+        bool isActive = actor?.Status == OrganizationMemberStatus.Active;
+        bool isPrivilegedRole = actor?.Role is OrganizationMemberRole.Owner or OrganizationMemberRole.Moderator;
+
+        if (!isActive || !isPrivilegedRole)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         bool targetExists = await db.Users.AnyAsync(u => u.Id == message.UserId, cancellationToken);
+
         if (!targetExists)
             throw ResponseCatalog.User.NotFound.ToException();
 
@@ -42,7 +46,7 @@ internal sealed class InviteOrganizationMemberCommandHandler(
             organizationId: organization.Id,
             userId: message.UserId
         );
-        member.UpdateRole(message.Role);
+
         member.UpdateStatus(OrganizationMemberStatus.Pending);
 
         db.OrganizationMembers.Add(member);
