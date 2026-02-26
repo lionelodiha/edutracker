@@ -34,7 +34,7 @@ body,
 }
 
 body {
-  font-family: "IBM Plex Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: "Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background: linear-gradient(145deg, var(--bg), color-mix(in srgb, var(--bg) 85%, #7d7d7d 15%));
   color: var(--text);
 }
@@ -75,6 +75,7 @@ body {
 }
 
 .input-block {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 0;
@@ -91,6 +92,7 @@ body {
 }
 
 .btn-block {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   border: 1px solid var(--line);
   border-radius: 0;
   background: color-mix(in srgb, var(--panel) 70%, var(--bg) 30%);
@@ -113,6 +115,7 @@ body {
 }
 
 .response-terminal {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   margin: 0;
   border: 1px solid var(--line);
   border-radius: 0;
