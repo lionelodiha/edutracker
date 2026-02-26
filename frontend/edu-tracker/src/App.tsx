@@ -681,12 +681,12 @@ function App() {
           </button>
         </div>
 
-        <main className="grid min-h-[70vh] grid-cols-1 gap-4 lg:grid-cols-2">
+        <main className="grid min-h-[70vh] grid-cols-1 gap-4 lg:h-[calc(100vh-10rem)] lg:min-h-0 lg:grid-cols-2">
           <section
-            className={`panel ${activeMobilePanel === "response" ? "hidden md:block" : ""}`}
+            className={`panel flex min-h-0 flex-col ${activeMobilePanel === "response" ? "hidden md:flex" : ""}`}
           >
             <div className="panel-head">Playground</div>
-            <div className="panel-body space-y-4">
+            <div className="panel-body space-y-4 overflow-auto">
               <label className="field">
                 <span className="field-label">Base URL</span>
                 <input
@@ -821,10 +821,10 @@ function App() {
           </section>
 
           <section
-            className={`panel ${activeMobilePanel === "playground" ? "hidden md:block" : ""}`}
+            className={`panel flex min-h-0 flex-col ${activeMobilePanel === "playground" ? "hidden md:flex" : ""}`}
           >
             <div className="panel-head">Raw Response</div>
-            <div className="panel-body h-full">
+            <div className="panel-body flex min-h-0 flex-1 flex-col">
               <div className="mb-3 grid grid-cols-1 gap-2 border border-(--line) p-2 text-xs sm:grid-cols-3">
                 <div>
                   <div className="text-(--muted)">Status</div>
@@ -844,7 +844,7 @@ function App() {
                 </div>
               </div>
 
-              <pre className="response-terminal h-[55vh] overflow-auto text-xs md:h-[67vh]">
+              <pre className="response-terminal min-h-0 flex-1 overflow-auto text-xs">
 {responseText}
               </pre>
             </div>
