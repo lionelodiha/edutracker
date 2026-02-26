@@ -521,6 +521,7 @@ function App() {
   const [selectedOperationId, setSelectedOperationId] = useState(
     operationConfigs[0].id,
   );
+  const [searchQuery, setSearchQuery] = useState("");
   const [bodyInput, setBodyInput] = useState(operationConfigs[0].bodyTemplate ?? "");
   const [queryInput, setQueryInput] = useState(
     operationConfigs[0].queryTemplate ?? "",
@@ -545,6 +546,25 @@ function App() {
     [selectedOperationId],
   );
 
+  const filteredOperations = useMemo(() => {
+    const term = searchQuery.trim().toLowerCase();
+    if (!term) {
+      return operationConfigs;
+    }
+    return operationConfigs.filter((operation) =>
+      [
+        operation.id,
+        operation.label,
+        operation.route,
+        operation.method,
+        operation.side,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(term),
+    );
+  }, [searchQuery]);
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
@@ -555,6 +575,15 @@ function App() {
     setPathInput(selectedOperation.pathTemplate ?? "");
     setInputError(null);
   }, [selectedOperation]);
+
+  useEffect(() => {
+    if (filteredOperations.length === 0) {
+      return;
+    }
+    if (!filteredOperations.some((operation) => operation.id === selectedOperationId)) {
+      setSelectedOperationId(filteredOperations[0].id);
+    }
+  }, [filteredOperations, selectedOperationId]);
 
   const operationsBySide = useMemo(() => {
     const map: Record<Side, OperationConfig[]> = {
@@ -677,7 +706,9 @@ function App() {
                       type="button"
                       className={`btn-block ${selectedOperation.side === side ? "is-active" : ""}`}
                       onClick={() => {
-                        const firstOp = operationsBySide[side][0];
+                        const firstOp =
+                          filteredOperations.find((item) => item.side === side) ??
+                          operationsBySide[side][0];
                         if (firstOp) {
                           setSelectedOperationId(firstOp.id);
                         }
@@ -690,13 +721,29 @@ function App() {
               </div>
 
               <label className="field">
-                <span className="field-label">Operation</span>
+                <span className="field-label">Search Requests</span>
+                <input
+                  className="input-block"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by label, route, method, side, or id"
+                />
+              </label>
+
+              <label className="field">
+                <span className="field-label">
+                  Operation ({filteredOperations.length}/{operationConfigs.length})
+                </span>
+                {filteredOperations.length === 0 ? (
+                  <p className="mb-1 text-xs text-(--warn)">No matching requests found.</p>
+                ) : null}
                 <select
                   className="input-block"
-                  value={selectedOperation.id}
+                  value={selectedOperationId}
                   onChange={(e) => setSelectedOperationId(e.target.value)}
+                  disabled={filteredOperations.length === 0}
                 >
-                  {operationConfigs.map((operation) => (
+                  {filteredOperations.map((operation) => (
                     <option key={operation.id} value={operation.id}>
                       [{operation.side}] {operation.method} {operation.label}
                     </option>
