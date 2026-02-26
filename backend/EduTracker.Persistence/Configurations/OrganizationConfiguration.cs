@@ -10,8 +10,6 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
     {
         builder.HasKey(o => o.Id);
 
-        builder.HasIndex(o => o.Name);
-
         builder.OwnsOne(o => o.AuditState, audit =>
         {
             audit.Property(a => a.CreatedAt)
@@ -24,7 +22,13 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
         });
 
         builder.Property(o => o.Name)
-            .HasMaxLength(256)
+            .HasMaxLength(OrganizationLimits.NameMaxLength)
+            .IsRequired();
+
+        builder.HasIndex(o => o.Name)
+            .IsUnique();
+
+        builder.Property(o => o.IsLocked)
             .IsRequired();
 
         builder.Property(o => o.OwnerUserId)
@@ -36,34 +40,6 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        builder.HasMany(o => o.Members)
-            .WithOne(m => m.Organization)
-            .HasForeignKey(m => m.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-
-        builder.HasMany(o => o.Subscriptions)
-            .WithOne(s => s.Organization)
-            .HasForeignKey(s => s.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-
-        builder.HasMany(o => o.PaymentMethods)
-            .WithOne(p => p.Organization)
-            .HasForeignKey(p => p.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-
-        builder.HasMany(o => o.Courses)
-            .WithOne(c => c.Organization)
-            .HasForeignKey(c => c.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-
-        builder.HasMany(o => o.Classes)
-            .WithOne(c => c.Organization)
-            .HasForeignKey(c => c.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
+        builder.HasIndex(o => o.OwnerUserId);
     }
 }

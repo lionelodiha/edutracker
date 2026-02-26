@@ -30,4 +30,5 @@ public static partial class UserLimits
     public static partial Regex PasswordNoSpacesRegex();
 
     public const int IdentifierMaxLength = 254;
+    public const int RoleMaxLength = 20;
 }

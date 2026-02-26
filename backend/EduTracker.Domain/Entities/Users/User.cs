@@ -1,8 +1,6 @@
 ﻿using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Components.Security;
-using EduTracker.Domain.Entities.UserSessions;
-using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Users;
 
@@ -15,9 +13,11 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
 
     public User(string userName, string emailHash, string passwordHash)
     {
-        SetUserName(userName);
-        SetEmailHash(emailHash);
-        SetPasswordHash(passwordHash);
+        UserName = ValidateUserName(userName);
+        EmailHash = ValidateEmailHash(emailHash);
+        PasswordHash = ValidatePasswordHash(passwordHash);
+
+        AuditState.UpdateAudit();
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -33,78 +33,59 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string PasswordHash { get; private set; } = string.Empty;
 
     public bool IsLocked { get; private set; } = false;
-    public SystemRole Role { get; private set; } = SystemRole.User;
+    public UserRole Role { get; private set; } = UserRole.User;
 
-    public ICollection<UserSession> Sessions { get; private set; } = [];
-
-    public void SetEncryptedData(byte[] data)
+    public void SetEncryptedData(byte[] newData)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        ArgumentNullException.ThrowIfNull(newData);
 
-        if (data.Length is 0)
-            throw new ArgumentException("Data cannot be empty.", nameof(data));
+        if (newData.Length is 0)
+            throw new ArgumentException("Data cannot be empty.", nameof(newData));
 
-        SensitiveDataState.SetEncryptedData(data);
+        SensitiveDataState.SetEncryptedData(newData);
         AuditState.UpdateAudit();
     }
 
     public void SetSensitiveData(UserSensitive data) => SensitiveDataState.SetSensitiveData(data);
     public void ClearSensitiveData() => SensitiveDataState.ClearSensitiveData();
 
-    public void SetUserName(string userName)
+    public void SetUserName(string newUserName)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("UserName cannot be null or empty.", nameof(userName));
+        string validatedUserName = ValidateUserName(newUserName);
 
-        if (userName.Length < UserLimits.UserNameMinLength || userName.Length > UserLimits.UserNameMaxLength)
-            throw new ArgumentException(
-                $"UserName must be between {UserLimits.UserNameMinLength} and {UserLimits.UserNameMaxLength} characters.",
-                nameof(userName)
-            );
+        if (UserName == validatedUserName) return;
 
-        if (!UserLimits.UserNameRegex().IsMatch(userName))
-            throw new ArgumentException("UserName contains invalid characters.", nameof(userName));
-
-        UserName = userName;
+        UserName = validatedUserName;
         AuditState.UpdateAudit();
     }
 
-    public void SetEmailHash(string emailHash)
+    public void SetEmailHash(string newEmailHash)
     {
-        if (string.IsNullOrWhiteSpace(emailHash))
-            throw new ArgumentException("EmailHash cannot be null or empty.", nameof(emailHash));
+        string validatedEmailHash = ValidateEmailHash(newEmailHash);
 
-        if (emailHash.Length is not UserLimits.EmailHashLength)
-            throw new ArgumentException(
-                $"EmailHash must be exactly {UserLimits.EmailHashLength} characters.",
-                nameof(emailHash)
-            );
+        if (EmailHash == validatedEmailHash) return;
 
-        EmailHash = emailHash;
+        EmailHash = validatedEmailHash;
         AuditState.UpdateAudit();
     }
 
-    public void SetPasswordHash(string passwordHash)
+    public void SetPasswordHash(string newPasswordHash)
     {
-        if (string.IsNullOrWhiteSpace(passwordHash))
-            throw new ArgumentException("PasswordHash cannot be null or empty.", nameof(passwordHash));
+        string validatedPasswordHash = ValidatePasswordHash(newPasswordHash);
 
-        if (passwordHash.Length is not UserLimits.PasswordHashLength)
-            throw new ArgumentException(
-                $"PasswordHash must be exactly {UserLimits.PasswordHashLength} characters.",
-                nameof(passwordHash)
-            );
+        if (PasswordHash == validatedPasswordHash) return;
 
-        PasswordHash = passwordHash;
+        PasswordHash = validatedPasswordHash;
         AuditState.UpdateAudit();
     }
 
-    public void UpdateRole(SystemRole role)
+    public void UpdateRole(UserRole newRole)
     {
-        if (!Enum.IsDefined(role))
-            throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(role));
+        UserRole validatedRole = ValidateRole(newRole);
 
-        Role = role;
+        if (Role == validatedRole) return;
+
+        Role = validatedRole;
         AuditState.UpdateAudit();
     }
 
@@ -123,4 +104,58 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         IsLocked = false;
         AuditState.UpdateAudit();
     }
+
+    private static string ValidateUserName(string userName)
+    {
+        if (string.IsNullOrWhiteSpace(userName))
+            throw new ArgumentException("UserName cannot be null or empty.", nameof(userName));
+
+        if (userName.Length < UserLimits.UserNameMinLength || userName.Length > UserLimits.UserNameMaxLength)
+            throw new ArgumentException(
+                $"UserName must be between {UserLimits.UserNameMinLength} and {UserLimits.UserNameMaxLength} characters.",
+                nameof(userName)
+            );
+
+        if (!UserLimits.UserNameRegex().IsMatch(userName))
+            throw new ArgumentException("UserName contains invalid characters.", nameof(userName));
+
+        return userName;
+    }
+
+    private static string ValidateEmailHash(string emailHash)
+    {
+        if (string.IsNullOrWhiteSpace(emailHash))
+            throw new ArgumentException("EmailHash cannot be null or empty.", nameof(emailHash));
+
+        if (emailHash.Length is not UserLimits.EmailHashLength)
+            throw new ArgumentException(
+                $"EmailHash must be exactly {UserLimits.EmailHashLength} characters.",
+                nameof(emailHash)
+            );
+
+        return emailHash;
+    }
+
+    private static string ValidatePasswordHash(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new ArgumentException("PasswordHash cannot be null or empty.", nameof(passwordHash));
+
+        if (passwordHash.Length is not UserLimits.PasswordHashLength)
+            throw new ArgumentException(
+                $"PasswordHash must be exactly {UserLimits.PasswordHashLength} characters.",
+                nameof(passwordHash)
+            );
+
+        return passwordHash;
+    }
+
+    private static UserRole ValidateRole(UserRole role)
+    {
+        if (!Enum.IsDefined(role))
+            throw new ArgumentException("Invalid role can't be used to update the user role.", nameof(role));
+
+        return role;
+    }
 }
+

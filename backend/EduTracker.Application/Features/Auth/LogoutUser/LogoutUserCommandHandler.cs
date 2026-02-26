@@ -4,13 +4,13 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
-using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Entities.Users;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Auth.LogoutUser;
 
-public sealed class LogoutUserCommandHandler(
+internal sealed class LogoutUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<LogoutUserCommand, OperationResult<object>>

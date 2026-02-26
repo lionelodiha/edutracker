@@ -2,13 +2,13 @@ using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
-using EduTracker.Domain.Enums;
+using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Organizations.InviteOrganizationMember;
 
-public sealed class InviteOrganizationMemberCommandHandler(
+internal sealed class InviteOrganizationMemberCommandHandler(
     AppDbContext db
 ) : IHandler<InviteOrganizationMemberCommand, OperationResult<Guid>>
 {
@@ -25,10 +25,14 @@ public sealed class InviteOrganizationMemberCommandHandler(
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.OrganizationId == organization.Id && m.UserId == message.ActorId.Value, cancellationToken);
 
-        if (actor is null || actor.Status != OrganizationMemberStatus.Active || actor.Role != OrganizationMemberRole.Admin)
+        bool isActive = actor?.Status == OrganizationMemberStatus.Active;
+        bool isPrivilegedRole = actor?.Role is OrganizationMemberRole.Owner or OrganizationMemberRole.Moderator;
+
+        if (!isActive || !isPrivilegedRole)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         bool targetExists = await db.Users.AnyAsync(u => u.Id == message.UserId, cancellationToken);
+
         if (!targetExists)
             throw ResponseCatalog.User.NotFound.ToException();
 
@@ -40,10 +44,10 @@ public sealed class InviteOrganizationMemberCommandHandler(
 
         OrganizationMember member = new(
             organizationId: organization.Id,
-            userId: message.UserId,
-            role: message.Role,
-            status: OrganizationMemberStatus.Invited
+            userId: message.UserId
         );
+
+        member.UpdateStatus(OrganizationMemberStatus.Pending);
 
         db.OrganizationMembers.Add(member);
         await db.SaveChangesAsync(cancellationToken);

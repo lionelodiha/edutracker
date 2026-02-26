@@ -10,9 +10,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(u => u.Id);
 
-        builder.HasIndex(u => u.UserName)
-            .IsUnique();
-
         builder.OwnsOne(u => u.AuditState, audit =>
         {
             audit.Property(a => a.CreatedAt)
@@ -37,12 +34,15 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(UserLimits.UserNameMaxLength)
             .IsRequired();
 
-        builder.HasIndex(u => u.EmailHash)
+        builder.HasIndex(u => u.UserName)
             .IsUnique();
 
         builder.Property(u => u.EmailHash)
             .HasMaxLength(UserLimits.EmailHashLength)
             .IsRequired();
+
+        builder.HasIndex(u => u.EmailHash)
+            .IsUnique();
 
         builder.Property(u => u.PasswordHash)
             .HasMaxLength(UserLimits.PasswordHashLength)
@@ -53,12 +53,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.Role)
             .HasConversion<string>()
+            .HasMaxLength(UserLimits.RoleMaxLength)
             .IsRequired();
 
-        builder.HasMany(u => u.Sessions)
-            .WithOne(us => us.User)
-            .HasForeignKey(us => us.UserId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
+        builder.HasIndex(u => u.Role);
     }
 }

@@ -1,7 +1,6 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Organizations;
 
@@ -11,19 +10,10 @@ public sealed class OrganizationMember : IEntity, IAuditable
 
     private OrganizationMember() { }
 
-    public OrganizationMember(Guid organizationId, Guid userId, OrganizationMemberRole role, OrganizationMemberStatus status)
+    public OrganizationMember(Guid organizationId, Guid userId)
     {
-        if (!Enum.IsDefined(role))
-            throw new ArgumentException("Invalid organization role.", nameof(role));
-
-        if (!Enum.IsDefined(status))
-            throw new ArgumentException("Invalid organization member status.", nameof(status));
-
         OrganizationId = organizationId;
         UserId = userId;
-        Role = role;
-        Status = status;
-        JoinedAt = DateTime.UtcNow;
 
         AuditState.UpdateAudit();
     }
@@ -37,28 +27,45 @@ public sealed class OrganizationMember : IEntity, IAuditable
     public Organization Organization { get; private set; } = null!;
 
     public Guid UserId { get; private set; }
-    public User User { get; private set; } = null!;
+    public User? User { get; private set; }
 
-    public OrganizationMemberRole Role { get; private set; }
-    public OrganizationMemberStatus Status { get; private set; }
+    public OrganizationMemberRole Role { get; private set; } = OrganizationMemberRole.Member;
+    public OrganizationMemberStatus Status { get; private set; } = OrganizationMemberStatus.Active;
 
-    public DateTime JoinedAt { get; private set; }
+    public void UpdateRole(OrganizationMemberRole newRole)
+    {
+        OrganizationMemberRole validatedRole = ValidateRole(newRole);
 
-    public void UpdateRole(OrganizationMemberRole role)
+        if (Role == validatedRole) return;
+
+        Role = validatedRole;
+        AuditState.UpdateAudit();
+    }
+
+    public void UpdateStatus(OrganizationMemberStatus newStatus)
+    {
+        OrganizationMemberStatus validatedStatus = ValidateStatus(newStatus);
+
+        if (Status == validatedStatus) return;
+
+        Status = validatedStatus;
+        AuditState.UpdateAudit();
+    }
+
+    private static OrganizationMemberRole ValidateRole(OrganizationMemberRole role)
     {
         if (!Enum.IsDefined(role))
             throw new ArgumentException("Invalid organization role.", nameof(role));
 
-        Role = role;
-        AuditState.UpdateAudit();
+        return role;
     }
 
-    public void UpdateStatus(OrganizationMemberStatus status)
+    private static OrganizationMemberStatus ValidateStatus(OrganizationMemberStatus status)
     {
         if (!Enum.IsDefined(status))
             throw new ArgumentException("Invalid organization member status.", nameof(status));
 
-        Status = status;
-        AuditState.UpdateAudit();
+        return status;
     }
 }
+

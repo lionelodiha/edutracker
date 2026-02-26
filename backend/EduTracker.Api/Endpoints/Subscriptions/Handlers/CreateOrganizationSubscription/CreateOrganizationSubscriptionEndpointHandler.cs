@@ -24,10 +24,10 @@ internal static class CreateOrganizationSubscriptionEndpointHandler
         CreateOrganizationSubscriptionCommand command = new(
             ActorId: actorId,
             OrganizationId: id,
-            Plan: request.Plan,
-            TrialEndsAt: request.TrialEndsAt,
-            CurrentPeriodStart: request.CurrentPeriodStart,
-            CurrentPeriodEnd: request.CurrentPeriodEnd
+            PlanId: request.PlanId,
+            StartsAt: request.StartsAt,
+            EndsAt: request.EndsAt,
+            AutoRenew: request.AutoRenew
         );
 
         OperationResult<Guid> result = await mediator.Send(command, cancellationToken);

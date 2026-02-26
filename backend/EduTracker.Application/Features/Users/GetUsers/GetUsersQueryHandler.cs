@@ -16,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace EduTracker.Application.Features.Users.GetUsers;
 
-public sealed class GetUsersQueryHandler(
+internal sealed class GetUsersQueryHandler(
     AppDbContext db,
     ICacheService cacheService,
     IOptions<CacheTimeToLiveOptions> cacheTtlOptions,

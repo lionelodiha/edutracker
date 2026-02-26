@@ -9,7 +9,7 @@ internal interface IHasSensitiveData<TSensitive>
     TSensitive? SensitiveData { get; }
 
     void SetEncryptedData(byte[] data);
-
     void SetSensitiveData(TSensitive data);
+
     void ClearSensitiveData();
 }

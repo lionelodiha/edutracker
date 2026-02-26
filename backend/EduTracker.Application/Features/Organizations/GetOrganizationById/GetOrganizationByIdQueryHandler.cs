@@ -4,12 +4,13 @@ using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Features.Organizations.Models;
 using EduTracker.Application.Models;
+using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Organizations.GetOrganizationById;
 
-public sealed class GetOrganizationByIdQueryHandler(
+internal sealed class GetOrganizationByIdQueryHandler(
     AppDbContext db
 ) : IHandler<GetOrganizationByIdQuery, OperationResult<OrganizationResponse>>
 {
@@ -25,7 +26,7 @@ public sealed class GetOrganizationByIdQueryHandler(
         if (!isMember)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
-        var organization = await db.Organizations
+        Organization organization = await db.Organizations
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == message.OrganizationId, cancellationToken)
             ?? throw ResponseCatalog.Organization.NotFound.ToException();

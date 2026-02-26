@@ -1,44 +1,21 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 
 namespace EduTracker.Domain.Entities.Organizations;
 
 public sealed class OrganizationSubscription : IEntity, IAuditable
 {
     public readonly AuditState AuditState = new();
-
     private OrganizationSubscription() { }
 
-    public OrganizationSubscription(
-        Guid organizationId,
-        Guid ownerUserId,
-        SubscriptionPlan plan,
-        SubscriptionStatus status,
-        DateTime currentPeriodStart,
-        DateTime currentPeriodEnd,
-        DateTime? trialEndsAt = null
-    )
+    public OrganizationSubscription(Guid organizationId, Guid planId, DateTime startsAt, DateTime? endsAt, bool autoRenew)
     {
-        if (!Enum.IsDefined(plan))
-            throw new ArgumentException("Invalid subscription plan.", nameof(plan));
-
-        if (!Enum.IsDefined(status))
-            throw new ArgumentException("Invalid subscription status.", nameof(status));
-
-        if (currentPeriodEnd <= currentPeriodStart)
-            throw new ArgumentException("Current period end must be after current period start.", nameof(currentPeriodEnd));
-
         OrganizationId = organizationId;
-        OwnerUserId = ownerUserId;
-        Plan = plan;
-        Status = status;
-        TrialEndsAt = trialEndsAt;
-        CurrentPeriodStart = currentPeriodStart;
-        CurrentPeriodEnd = currentPeriodEnd;
+        PlanId = planId;
 
-        AuditState.UpdateAudit();
+        StartsAt = startsAt;
+        EndsAt = endsAt;
+        AutoRenew = autoRenew;
     }
 
     public Guid Id { get; private set; } = Guid.CreateVersion7();
@@ -49,47 +26,48 @@ public sealed class OrganizationSubscription : IEntity, IAuditable
     public Guid OrganizationId { get; private set; }
     public Organization Organization { get; private set; } = null!;
 
-    public Guid OwnerUserId { get; private set; }
-    public User OwnerUser { get; private set; } = null!;
+    public Guid PlanId { get; private set; }
+    public OrganizationPlan Plan { get; private set; } = null!;
 
-    public SubscriptionPlan Plan { get; private set; }
-    public SubscriptionStatus Status { get; private set; }
+    public DateTime StartsAt { get; private set; }
+    public DateTime? EndsAt { get; private set; }
 
-    public DateTime? TrialEndsAt { get; private set; }
-    public DateTime CurrentPeriodStart { get; private set; }
-    public DateTime CurrentPeriodEnd { get; private set; }
+    public bool AutoRenew { get; private set; }
+    public DateTime? CancelledAt { get; private set; }
 
-    public void UpdatePlan(SubscriptionPlan plan)
+    public bool IsActive()
     {
-        if (!Enum.IsDefined(plan))
-            throw new ArgumentException("Invalid subscription plan.", nameof(plan));
+        DateTime now = DateTime.UtcNow;
 
-        Plan = plan;
+        return StartsAt <= now && (!EndsAt.HasValue || now < EndsAt.Value);
+    }
+
+    public bool IsExpired() => EndsAt.HasValue && DateTime.UtcNow >= EndsAt.Value;
+    public bool IsCancelled() => CancelledAt.HasValue;
+
+    public void Cancel(DateTime cancelledAt, DateTime periodEnd)
+    {
+        if (CancelledAt.HasValue) return;
+
+        CancelledAt = cancelledAt;
+        AutoRenew = false;
+
+        EndsAt = periodEnd;
+    }
+
+    public void EnableAutoRenew()
+    {
+        if (AutoRenew) return;
+
+        AutoRenew = true;
         AuditState.UpdateAudit();
     }
 
-    public void UpdateStatus(SubscriptionStatus status)
+    public void DisableAutoRenew()
     {
-        if (!Enum.IsDefined(status))
-            throw new ArgumentException("Invalid subscription status.", nameof(status));
+        if (!AutoRenew) return;
 
-        Status = status;
-        AuditState.UpdateAudit();
-    }
-
-    public void UpdatePeriod(DateTime start, DateTime end)
-    {
-        if (end <= start)
-            throw new ArgumentException("Current period end must be after current period start.", nameof(end));
-
-        CurrentPeriodStart = start;
-        CurrentPeriodEnd = end;
-        AuditState.UpdateAudit();
-    }
-
-    public void UpdateTrial(DateTime? trialEndsAt)
-    {
-        TrialEndsAt = trialEndsAt;
+        AutoRenew = false;
         AuditState.UpdateAudit();
     }
 }

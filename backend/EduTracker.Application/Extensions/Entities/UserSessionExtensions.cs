@@ -1,6 +1,6 @@
 using EduTracker.Application.Features.Auth.Models;
 using EduTracker.Application.Models;
-using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Extensions.Entities;
 

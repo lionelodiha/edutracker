@@ -1,9 +1,9 @@
-using EduTracker.Domain.Enums;
+using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Models;
 
 public sealed record UserAuthData(
     Guid UserId,
-    SystemRole Role,
+    UserRole Role,
     bool IsLocked
 );

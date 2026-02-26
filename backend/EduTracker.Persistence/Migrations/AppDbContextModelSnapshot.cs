@@ -22,162 +22,27 @@ namespace EduTracker.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Assignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double>("MaxScore")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.ToTable("Assignments");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Class", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TeacherMemberId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Term")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("TeacherMemberId");
-
-                    b.HasIndex("OrganizationId", "Term", "Year");
-
-                    b.ToTable("Classes");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.ClassEnrollment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("EnrolledAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("StudentMemberId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentMemberId");
-
-                    b.HasIndex("ClassId", "StudentMemberId")
-                        .IsUnique();
-
-                    b.ToTable("ClassEnrollments");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Course", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId", "Name");
-
-                    b.ToTable("Courses");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Grade", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AssignmentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("GradedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("double precision");
-
-                    b.Property<Guid>("StudentMemberId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentMemberId");
-
-                    b.HasIndex("AssignmentId", "StudentMemberId")
-                        .IsUnique();
-
-                    b.ToTable("Grades");
-                });
-
             modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.Organization", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("OwnerUserId");
 
@@ -190,19 +55,18 @@ namespace EduTracker.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -215,51 +79,15 @@ namespace EduTracker.Persistence.Migrations
 
                     b.HasIndex("OrganizationId", "Role");
 
+                    b.HasIndex("OrganizationId", "Status");
+
                     b.HasIndex("OrganizationId", "UserId")
                         .IsUnique();
 
                     b.ToTable("OrganizationMembers");
                 });
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationSubscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CurrentPeriodEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CurrentPeriodStart")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("OwnerUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Plan")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("TrialEndsAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerUserId");
-
-                    b.HasIndex("OrganizationId", "Status");
-
-                    b.ToTable("OrganizationSubscriptions");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.PaymentMethod", b =>
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationPaymentMethod", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -270,19 +98,8 @@ namespace EduTracker.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("ExpMonth")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ExpYear")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Last4")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("character varying(4)");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
@@ -292,24 +109,121 @@ namespace EduTracker.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("ProviderCustomerId")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("ProviderPaymentMethodId")
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationId", "IsDefault");
+
+                    b.ToTable("OrganizationPaymentMethods");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("HasAdvancedReports")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasApiAccess")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MaxStudents")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("OrganizationPlans");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartsAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("PaymentMethods");
+                    b.HasIndex("PlanId");
+
+                    b.HasIndex("OrganizationId", "StartsAt");
+
+                    b.ToTable("OrganizationSubscriptions");
                 });
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.UserSessions.UserSession", b =>
+            modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EmailHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmailHash")
+                        .IsUnique();
+
+                    b.HasIndex("Role");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Users.UserSession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -335,250 +249,13 @@ namespace EduTracker.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExpiresAt");
+
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "IsRevoked");
+
                     b.ToTable("UserSessions");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("EmailHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("character varying(60)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmailHash")
-                        .IsUnique();
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Assignment", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Academics.Class", "Class")
-                        .WithMany("Assignments")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("AssignmentId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("AssignmentId");
-
-                            b1.ToTable("Assignments");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AssignmentId");
-                        });
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("Class");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Class", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Academics.Course", "Course")
-                        .WithMany("Classes")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
-                        .WithMany("Classes")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EduTracker.Domain.Entities.Organizations.OrganizationMember", "TeacherMember")
-                        .WithMany()
-                        .HasForeignKey("TeacherMemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("ClassId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("ClassId");
-
-                            b1.ToTable("Classes");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ClassId");
-                        });
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("TeacherMember");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.ClassEnrollment", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Academics.Class", "Class")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EduTracker.Domain.Entities.Organizations.OrganizationMember", "StudentMember")
-                        .WithMany()
-                        .HasForeignKey("StudentMemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("ClassEnrollmentId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("ClassEnrollmentId");
-
-                            b1.ToTable("ClassEnrollments");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ClassEnrollmentId");
-                        });
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("Class");
-
-                    b.Navigation("StudentMember");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Course", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
-                        .WithMany("Courses")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("CourseId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("CourseId");
-
-                            b1.ToTable("Courses");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CourseId");
-                        });
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Grade", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Academics.Assignment", "Assignment")
-                        .WithMany("Grades")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EduTracker.Domain.Entities.Organizations.OrganizationMember", "StudentMember")
-                        .WithMany()
-                        .HasForeignKey("StudentMemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("GradeId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("GradeId");
-
-                            b1.ToTable("Grades");
-
-                            b1.WithOwner()
-                                .HasForeignKey("GradeId");
-                        });
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("StudentMember");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.Organization", b =>
@@ -618,7 +295,7 @@ namespace EduTracker.Persistence.Migrations
             modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationMember", b =>
                 {
                     b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
-                        .WithMany("Members")
+                        .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -657,17 +334,97 @@ namespace EduTracker.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationSubscription", b =>
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationPaymentMethod", b =>
                 {
                     b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
-                        .WithMany("Subscriptions")
+                        .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EduTracker.Domain.Entities.Users.User", "OwnerUser")
+                    b.OwnsOne("EduTracker.Domain.Components.Security.SensitiveDataState<EduTracker.Domain.Entities.Organizations.OrganizationPaymentMethodSensitive>", "SensitiveDataState", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationPaymentMethodId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<byte[]>("EncryptedData")
+                                .IsRequired()
+                                .HasColumnType("bytea")
+                                .HasColumnName("Data");
+
+                            b1.HasKey("OrganizationPaymentMethodId");
+
+                            b1.ToTable("OrganizationPaymentMethods");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationPaymentMethodId");
+                        });
+
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationPaymentMethodId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("CreatedAt");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("UpdatedAt");
+
+                            b1.HasKey("OrganizationPaymentMethodId");
+
+                            b1.ToTable("OrganizationPaymentMethods");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationPaymentMethodId");
+                        });
+
+                    b.Navigation("AuditState");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("SensitiveDataState");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationPlan", b =>
+                {
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationPlanId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("CreatedAt");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("UpdatedAt");
+
+                            b1.HasKey("OrganizationPlanId");
+
+                            b1.ToTable("OrganizationPlans");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationPlanId");
+                        });
+
+                    b.Navigation("AuditState");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationSubscription", b =>
+                {
+                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany()
-                        .HasForeignKey("OwnerUserId")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EduTracker.Domain.Entities.Organizations.OrganizationPlan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -696,75 +453,7 @@ namespace EduTracker.Persistence.Migrations
 
                     b.Navigation("Organization");
 
-                    b.Navigation("OwnerUser");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.PaymentMethod", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
-                        .WithMany("PaymentMethods")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("PaymentMethodId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("PaymentMethodId");
-
-                            b1.ToTable("PaymentMethods");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PaymentMethodId");
-                        });
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.UserSessions.UserSession", b =>
-                {
-                    b.HasOne("EduTracker.Domain.Entities.Users.User", "User")
-                        .WithMany("Sessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
-                        {
-                            b1.Property<Guid>("UserSessionId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("CreatedAt");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamp with time zone")
-                                .HasColumnName("UpdatedAt");
-
-                            b1.HasKey("UserSessionId");
-
-                            b1.ToTable("UserSessions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserSessionId");
-                        });
-
-                    b.Navigation("AuditState");
-
-                    b.Navigation("User");
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
@@ -813,39 +502,38 @@ namespace EduTracker.Persistence.Migrations
                     b.Navigation("SensitiveDataState");
                 });
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Assignment", b =>
+            modelBuilder.Entity("EduTracker.Domain.Entities.Users.UserSession", b =>
                 {
-                    b.Navigation("Grades");
-                });
+                    b.HasOne("EduTracker.Domain.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Class", b =>
-                {
-                    b.Navigation("Assignments");
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("UserSessionId")
+                                .HasColumnType("uuid");
 
-                    b.Navigation("Enrollments");
-                });
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("CreatedAt");
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Course", b =>
-                {
-                    b.Navigation("Classes");
-                });
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("UpdatedAt");
 
-            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.Organization", b =>
-                {
-                    b.Navigation("Classes");
+                            b1.HasKey("UserSessionId");
 
-                    b.Navigation("Courses");
+                            b1.ToTable("UserSessions");
 
-                    b.Navigation("Members");
+                            b1.WithOwner()
+                                .HasForeignKey("UserSessionId");
+                        });
 
-                    b.Navigation("PaymentMethods");
+                    b.Navigation("AuditState");
 
-                    b.Navigation("Subscriptions");
-                });
-
-            modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
-                {
-                    b.Navigation("Sessions");
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

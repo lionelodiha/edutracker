@@ -21,15 +21,32 @@ internal sealed class OrganizationMemberConfiguration : IEntityTypeConfiguration
                 .IsRequired();
         });
 
+        builder.Property(m => m.OrganizationId)
+            .IsRequired();
+
+        builder.HasOne(m => m.Organization)
+            .WithMany()
+            .HasForeignKey(m => m.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        builder.Property(m => m.UserId)
+            .IsRequired();
+
+        builder.HasOne(m => m.User)
+            .WithMany()
+            .HasForeignKey(m => m.UserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
         builder.Property(m => m.Role)
             .HasConversion<string>()
+            .HasMaxLength(OrganizationLimits.MemberRoleMaxLength)
             .IsRequired();
 
         builder.Property(m => m.Status)
             .HasConversion<string>()
-            .IsRequired();
-
-        builder.Property(m => m.JoinedAt)
+            .HasMaxLength(OrganizationLimits.MemberStatusMaxLength)
             .IsRequired();
 
         builder.HasIndex(m => new { m.OrganizationId, m.UserId })
@@ -38,11 +55,6 @@ internal sealed class OrganizationMemberConfiguration : IEntityTypeConfiguration
         builder.HasIndex(m => m.OrganizationId);
         builder.HasIndex(m => m.UserId);
         builder.HasIndex(m => new { m.OrganizationId, m.Role });
-
-        builder.HasOne(m => m.User)
-            .WithMany()
-            .HasForeignKey(m => m.UserId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
+        builder.HasIndex(m => new { m.OrganizationId, m.Status });
     }
 }

@@ -3,7 +3,7 @@ using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Features.Users.GetUsers;
 
-public sealed class GetUsersQueryValidator : AbstractValidator<GetUsersQuery>
+internal sealed class GetUsersQueryValidator : AbstractValidator<GetUsersQuery>
 {
     private const int MaxPageSize = 100;
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Organizations.GetOrganizations;
 
-public sealed class GetOrganizationsQueryHandler(
+internal sealed class GetOrganizationsQueryHandler(
     AppDbContext db
 ) : IHandler<GetOrganizationsQuery, OperationResult<IReadOnlyList<OrganizationListItemResponse>>>
 {

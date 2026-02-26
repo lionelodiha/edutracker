@@ -21,28 +21,31 @@ internal sealed class OrganizationSubscriptionConfiguration : IEntityTypeConfigu
                 .IsRequired();
         });
 
-        builder.Property(s => s.Plan)
-            .HasConversion<string>()
+        builder.Property(s => s.OrganizationId)
             .IsRequired();
 
-        builder.Property(s => s.Status)
-            .HasConversion<string>()
-            .IsRequired();
-
-        builder.Property(s => s.TrialEndsAt);
-
-        builder.Property(s => s.CurrentPeriodStart)
-            .IsRequired();
-
-        builder.Property(s => s.CurrentPeriodEnd)
-            .IsRequired();
-
-        builder.HasIndex(s => new { s.OrganizationId, s.Status });
-
-        builder.HasOne(s => s.OwnerUser)
+        builder.HasOne(s => s.Organization)
             .WithMany()
-            .HasForeignKey(s => s.OwnerUserId)
+            .HasForeignKey(s => s.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        builder.Property(s => s.PlanId)
+            .IsRequired();
+
+        builder.HasOne(s => s.Plan)
+            .WithMany()
+            .HasForeignKey(s => s.PlanId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
+
+        builder.Property(s => s.StartsAt)
+            .IsRequired();
+
+        builder.Property(s => s.AutoRenew)
+            .IsRequired();
+
+        builder.HasIndex(s => s.OrganizationId);
+        builder.HasIndex(s => new { s.OrganizationId, s.StartsAt });
     }
 }

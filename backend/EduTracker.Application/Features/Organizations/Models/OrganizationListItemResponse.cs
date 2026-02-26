@@ -1,6 +1,6 @@
-using EduTracker.Domain.Enums;
-
 namespace EduTracker.Application.Features.Organizations.Models;
+
+using EduTracker.Domain.Entities.Organizations;
 
 public sealed record OrganizationListItemResponse(
     Guid OrganizationId,

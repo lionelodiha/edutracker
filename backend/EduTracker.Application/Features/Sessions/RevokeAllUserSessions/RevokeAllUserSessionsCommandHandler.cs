@@ -4,13 +4,13 @@ using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
-using EduTracker.Domain.Entities.UserSessions;
+using EduTracker.Domain.Entities.Users;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Sessions.RevokeAllUserSessions;
 
-public sealed class RevokeAllUserSessionsCommandHandler(
+internal sealed class RevokeAllUserSessionsCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<RevokeAllUserSessionsCommand, OperationResult<object>>

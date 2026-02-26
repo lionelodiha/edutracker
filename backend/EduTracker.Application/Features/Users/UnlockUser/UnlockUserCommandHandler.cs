@@ -5,13 +5,12 @@ using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Users.UnlockUser;
 
-public sealed class UnlockUserCommandHandler(
+internal sealed class UnlockUserCommandHandler(
     AppDbContext db,
     ICacheService cacheService
 ) : IHandler<UnlockUserCommand, OperationResult<object>>
@@ -25,18 +24,18 @@ public sealed class UnlockUserCommandHandler(
             CacheKeys.UserAuthenticationState(message.ActorId.Value)
         );
 
-        SystemRole? actorRole = cachedUserAuth?.Role;
+        UserRole? actorRole = cachedUserAuth?.Role;
 
         actorRole ??= await db.Users
             .AsNoTracking()
             .Where(u => u.Id == message.ActorId)
-            .Select(u => (SystemRole?)u.Role)
+            .Select(u => (UserRole?)u.Role)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (actorRole is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        if (actorRole is SystemRole.User)
+        if (actorRole is UserRole.User)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
         User targetUser = await db.Users

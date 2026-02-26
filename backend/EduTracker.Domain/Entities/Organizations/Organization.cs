@@ -1,6 +1,5 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
-using EduTracker.Domain.Entities.Academics;
 using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Domain.Entities.Organizations;
@@ -13,8 +12,9 @@ public sealed class Organization : IEntity, IAuditable
 
     public Organization(string name, Guid ownerUserId)
     {
-        SetName(name);
+        Name = ValidateName(name);
         OwnerUserId = ownerUserId;
+
         AuditState.UpdateAudit();
     }
 
@@ -24,22 +24,52 @@ public sealed class Organization : IEntity, IAuditable
     public DateTime UpdatedAt => AuditState.UpdatedAt;
 
     public string Name { get; private set; } = string.Empty;
+    public bool IsLocked { get; private set; } = false;
 
     public Guid OwnerUserId { get; private set; }
     public User OwnerUser { get; private set; } = null!;
 
-    public ICollection<OrganizationMember> Members { get; private set; } = [];
-    public ICollection<OrganizationSubscription> Subscriptions { get; private set; } = [];
-    public ICollection<PaymentMethod> PaymentMethods { get; private set; } = [];
-    public ICollection<Course> Courses { get; private set; } = [];
-    public ICollection<Class> Classes { get; private set; } = [];
+    public void SetName(string newName)
+    {
+        string validatedName = ValidateName(newName);
 
-    public void SetName(string name)
+        if (Name == validatedName) return;
+
+        Name = validatedName;
+        AuditState.UpdateAudit();
+    }
+
+    public void Lock()
+    {
+        if (IsLocked) return;
+
+        IsLocked = true;
+        AuditState.UpdateAudit();
+    }
+
+    public void Unlock()
+    {
+        if (!IsLocked) return;
+
+        IsLocked = false;
+        AuditState.UpdateAudit();
+    }
+
+    private static string ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Organization name is required.", nameof(name));
 
-        Name = name.Trim();
-        AuditState.UpdateAudit();
+        if (name.Length < OrganizationLimits.NameMinLength || name.Length > OrganizationLimits.NameMaxLength)
+            throw new ArgumentException(
+                $"Organization name must be between {OrganizationLimits.NameMinLength} and {OrganizationLimits.NameMaxLength} characters.",
+                nameof(name)
+            );
+
+        if (!OrganizationLimits.NameRegex().IsMatch(name))
+            throw new ArgumentException("Organization name contains invalid characters.", nameof(name));
+
+        return name;
     }
 }
+

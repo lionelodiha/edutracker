@@ -6,13 +6,12 @@ using EduTracker.Application.Helpers;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Users;
-using EduTracker.Domain.Enums;
 using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTracker.Application.Features.Seeders.SeedSuperAdmin;
 
-public sealed class SeedSuperAdminCommandHandler(
+internal sealed class SeedSuperAdminCommandHandler(
     AppDbContext db,
     IHashingService hashingService,
     IDataEncryptionService encryptionService
@@ -21,7 +20,7 @@ public sealed class SeedSuperAdminCommandHandler(
     public async Task<OperationResult<object>> Handle(SeedSuperAdminCommand message, CancellationToken cancellationToken = default)
     {
         bool superAdminExists = await db.Users
-            .AnyAsync(u => u.Role == SystemRole.SuperAdmin, cancellationToken);
+            .AnyAsync(u => u.Role == UserRole.SuperAdmin, cancellationToken);
 
         if (superAdminExists)
             return ResponseCatalog.System.SuperAdminSeeded.ToOperationResult();
@@ -54,7 +53,7 @@ public sealed class SeedSuperAdminCommandHandler(
         );
 
         superAdmin.SetEncryptedData(encryptedData);
-        superAdmin.UpdateRole(SystemRole.SuperAdmin);
+        superAdmin.UpdateRole(UserRole.SuperAdmin);
 
         db.Users.Add(superAdmin);
         await db.SaveChangesAsync(cancellationToken);

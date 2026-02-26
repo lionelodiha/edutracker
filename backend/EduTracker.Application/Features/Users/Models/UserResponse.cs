@@ -1,4 +1,4 @@
-using EduTracker.Domain.Enums;
+using EduTracker.Domain.Entities.Users;
 
 namespace EduTracker.Application.Features.Users.Models;
 
@@ -8,5 +8,5 @@ public sealed record UserResponse(
     string FirstName,
     string? MiddleName,
     string LastName,
-    SystemRole Role
+    UserRole Role
 );
