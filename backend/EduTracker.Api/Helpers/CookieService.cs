@@ -8,7 +8,7 @@ internal static class CookieHelper
         {
             HttpOnly = httpOnly,
             Secure = secure,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = expiresUtc,
             Path = path,
         };
@@ -28,7 +28,7 @@ internal static class CookieHelper
         {
             Path = path,
             Expires = DateTime.UnixEpoch,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
         };
 
         if (!string.IsNullOrWhiteSpace(domain))
