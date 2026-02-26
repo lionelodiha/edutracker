@@ -133,7 +133,8 @@ const operationConfigs: OperationConfig[] = [
       null,
       2,
     ),
-    run: ({ path }) => revokeCurrentUserSessionEndpointHandler({ path: path as never }),
+    run: ({ path }) =>
+      revokeCurrentUserSessionEndpointHandler({ path: path as never }),
   },
   {
     id: "me",
@@ -170,7 +171,8 @@ const operationConfigs: OperationConfig[] = [
       null,
       2,
     ),
-    run: ({ body }) => updateCurrentUserEndpointHandler({ body: body as never }),
+    run: ({ body }) =>
+      updateCurrentUserEndpointHandler({ body: body as never }),
   },
   {
     id: "get_user_by_id",
@@ -275,7 +277,8 @@ const operationConfigs: OperationConfig[] = [
     method: "POST",
     route: "/api/organizations",
     bodyTemplate: JSON.stringify({ name: "Acme Academy" }, null, 2),
-    run: ({ body }) => createOrganizationEndpointHandler({ body: body as never }),
+    run: ({ body }) =>
+      createOrganizationEndpointHandler({ body: body as never }),
   },
   {
     id: "get_org_by_id",
@@ -289,7 +292,8 @@ const operationConfigs: OperationConfig[] = [
       null,
       2,
     ),
-    run: ({ path }) => getOrganizationByIdEndpointHandler({ path: path as never }),
+    run: ({ path }) =>
+      getOrganizationByIdEndpointHandler({ path: path as never }),
   },
   {
     id: "invite_org_member",
@@ -312,7 +316,10 @@ const operationConfigs: OperationConfig[] = [
       2,
     ),
     run: ({ body, path }) =>
-      inviteOrganizationMemberEndpointHandler({ body: body as never, path: path as never }),
+      inviteOrganizationMemberEndpointHandler({
+        body: body as never,
+        path: path as never,
+      }),
   },
   {
     id: "update_org_member_role",
@@ -348,7 +355,8 @@ const operationConfigs: OperationConfig[] = [
       null,
       2,
     ),
-    run: ({ path }) => getOrganizationMembersEndpointHandler({ path: path as never }),
+    run: ({ path }) =>
+      getOrganizationMembersEndpointHandler({ path: path as never }),
   },
   {
     id: "get_org_subscription",
@@ -522,11 +530,15 @@ function App() {
     operationConfigs[0].id,
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [bodyInput, setBodyInput] = useState(operationConfigs[0].bodyTemplate ?? "");
+  const [bodyInput, setBodyInput] = useState(
+    operationConfigs[0].bodyTemplate ?? "",
+  );
   const [queryInput, setQueryInput] = useState(
     operationConfigs[0].queryTemplate ?? "",
   );
-  const [pathInput, setPathInput] = useState(operationConfigs[0].pathTemplate ?? "");
+  const [pathInput, setPathInput] = useState(
+    operationConfigs[0].pathTemplate ?? "",
+  );
   const [responseText, setResponseText] = useState(
     "No request yet. Configure request and run.",
   );
@@ -535,14 +547,16 @@ function App() {
     ok: "-",
     requestUrl: "-",
   });
-  const [activeMobilePanel, setActiveMobilePanel] = useState<"playground" | "response">(
-    "playground",
-  );
+  const [activeMobilePanel, setActiveMobilePanel] = useState<
+    "playground" | "response"
+  >("playground");
   const [isRunning, setIsRunning] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
 
   const selectedOperation = useMemo(
-    () => operationConfigs.find((item) => item.id === selectedOperationId) ?? operationConfigs[0],
+    () =>
+      operationConfigs.find((item) => item.id === selectedOperationId) ??
+      operationConfigs[0],
     [selectedOperationId],
   );
 
@@ -580,7 +594,11 @@ function App() {
     if (filteredOperations.length === 0) {
       return;
     }
-    if (!filteredOperations.some((operation) => operation.id === selectedOperationId)) {
+    if (
+      !filteredOperations.some(
+        (operation) => operation.id === selectedOperationId,
+      )
+    ) {
       setSelectedOperationId(filteredOperations[0].id);
     }
   }, [filteredOperations, selectedOperationId]);
@@ -621,9 +639,12 @@ function App() {
       const maybeResponse = result?.response;
       const maybeRequest = result?.request;
       const payload =
-        result && typeof result === "object" && "error" in result && result.error
+        result &&
+        typeof result === "object" &&
+        "error" in result &&
+        result.error
           ? { error: result.error, data: result.data }
-          : result?.data ?? result;
+          : (result?.data ?? result);
 
       setResponseMeta({
         status: maybeResponse?.status ? String(maybeResponse.status) : "-",
@@ -653,13 +674,17 @@ function App() {
       <div className="mx-auto max-w-360">
         <header className="mb-4 flex flex-col gap-3 border border-(--line) bg-(--panel) p-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-wide">API Client Playground</h1>
+            <h1 className="text-xl font-semibold tracking-wide">
+              API Client Playground
+            </h1>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               className="btn-block"
-              onClick={() => setTheme((curr) => (curr === "dark" ? "light" : "dark"))}
+              onClick={() =>
+                setTheme((curr) => (curr === "dark" ? "light" : "dark"))
+              }
             >
               Theme: {theme}
             </button>
@@ -707,8 +732,9 @@ function App() {
                       className={`btn-block ${selectedOperation.side === side ? "is-active" : ""}`}
                       onClick={() => {
                         const firstOp =
-                          filteredOperations.find((item) => item.side === side) ??
-                          operationsBySide[side][0];
+                          filteredOperations.find(
+                            (item) => item.side === side,
+                          ) ?? operationsBySide[side][0];
                         if (firstOp) {
                           setSelectedOperationId(firstOp.id);
                         }
@@ -732,10 +758,13 @@ function App() {
 
               <label className="field">
                 <span className="field-label">
-                  Operation ({filteredOperations.length}/{operationConfigs.length})
+                  Operation ({filteredOperations.length}/
+                  {operationConfigs.length})
                 </span>
                 {filteredOperations.length === 0 ? (
-                  <p className="mb-1 text-xs text-(--warn)">No matching requests found.</p>
+                  <p className="mb-1 text-xs text-(--warn)">
+                    No matching requests found.
+                  </p>
                 ) : null}
                 <select
                   className="input-block"
@@ -762,7 +791,9 @@ function App() {
                 </div>
                 <div>
                   <div>Route</div>
-                  <div className="break-all text-sm text-(--text)">{selectedOperation.route}</div>
+                  <div className="break-all text-sm text-(--text)">
+                    {selectedOperation.route}
+                  </div>
                 </div>
                 <div>
                   <div>Testing Side</div>
@@ -805,7 +836,9 @@ function App() {
                 </label>
               ) : null}
 
-              {inputError ? <p className="text-sm text-(--warn)">{inputError}</p> : null}
+              {inputError ? (
+                <p className="text-sm text-(--warn)">{inputError}</p>
+              ) : null}
 
               <div className="flex flex-wrap gap-2">
                 <button
@@ -825,27 +858,32 @@ function App() {
           >
             <div className="panel-head">Raw Response</div>
             <div className="panel-body flex min-h-0 flex-1 flex-col">
-              <div className="mb-3 grid grid-cols-1 gap-2 border border-(--line) p-2 text-xs sm:grid-cols-3">
+              <div className="mb-3 grid grid-cols-1 gap-2 border border-(--line) p-2 text-xs sm:grid-cols-[120px_120px_1fr]">
                 <div>
                   <div className="text-(--muted)">Status</div>
-                  <div className={`text-sm font-bold ${statusToneClass(responseMeta.status)}`}>
+                  <div
+                    className={`text-sm font-bold ${statusToneClass(responseMeta.status)}`}
+                  >
                     {responseMeta.status}
                   </div>
                 </div>
+
                 <div>
                   <div className="text-(--muted)">OK</div>
-                  <div className={`text-sm font-bold ${okToneClass(responseMeta.ok)}`}>
+                  <div
+                    className={`text-sm font-bold ${okToneClass(responseMeta.ok)}`}
+                  >
                     {responseMeta.ok.toUpperCase()}
                   </div>
                 </div>
-                <div className="sm:col-span-1">
+
+                <div>
                   <div className="text-(--muted)">URL</div>
                   <div className="break-all">{responseMeta.requestUrl}</div>
                 </div>
               </div>
-
               <pre className="response-terminal min-h-0 flex-1 overflow-auto text-xs">
-{responseText}
+                {responseText}
               </pre>
             </div>
           </section>
