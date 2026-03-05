@@ -6,7 +6,7 @@ namespace EduTracker.Domain.Entities.Organizations;
 
 public sealed class Organization : IEntity, IAuditable
 {
-    public readonly AuditState AuditState = new();
+    public AuditState AuditState { get; private set; } = new();
 
     private Organization() { }
 
@@ -72,4 +72,3 @@ public sealed class Organization : IEntity, IAuditable
         return name;
     }
 }
-

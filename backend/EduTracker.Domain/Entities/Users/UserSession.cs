@@ -5,7 +5,7 @@ namespace EduTracker.Domain.Entities.Users;
 
 public sealed class UserSession : IEntity, IAuditable
 {
-    public readonly AuditState AuditState = new();
+    public AuditState AuditState { get; private set; } = new();
 
     private UserSession() { }
 
