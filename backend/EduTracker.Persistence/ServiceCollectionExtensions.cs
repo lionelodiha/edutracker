@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString)
                     .EnableSensitiveDataLogging(false)
+                    .UseSnakeCaseNamingConvention()
             );
 
             return services;
