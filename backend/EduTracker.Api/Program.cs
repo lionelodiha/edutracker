@@ -9,6 +9,7 @@ using EduTracker.Api.Endpoints.Sessions;
 using EduTracker.Api.Endpoints.Subscriptions;
 using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
+using EduTracker.Api.Extensions.Cors;
 using EduTracker.Api.Extensions.OpenApi;
 using EduTracker.Api.Middleware;
 using EduTracker.Application;
@@ -25,17 +26,7 @@ using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:3000") // your frontend URL
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); // if you need cookies/auth
-    });
-});
+builder.Services.AddCustomCors(builder.Configuration);
 
 builder.Services.AddPersistenceServices(builder.Configuration.GetConnectionString("Database"));
 builder.Services.AddApplicationServices();
@@ -67,7 +58,7 @@ builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); 
 
 WebApplication app = builder.Build();
 
-app.UseCors("AllowFrontend");
+app.UseCustomCors();
 
 using (IServiceScope scope = app.Services.CreateScope())
 {
