@@ -6,8 +6,8 @@ namespace EduTracker.Domain.Entities.Users;
 
 public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
 {
-    public readonly AuditState AuditState = new();
-    public readonly SensitiveDataState<UserSensitive> SensitiveDataState = new();
+    public AuditState AuditState { get; private set; } = new();
+    public SensitiveDataState<UserSensitive> SensitiveDataState { get; private set; } = new();
 
     private User() { }
 
@@ -158,4 +158,3 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         return role;
     }
 }
-

@@ -5,7 +5,8 @@ namespace EduTracker.Domain.Entities.Organizations;
 
 public sealed class OrganizationSubscription : IEntity, IAuditable
 {
-    public readonly AuditState AuditState = new();
+    public AuditState AuditState { get; private set; } = new();
+
     private OrganizationSubscription() { }
 
     public OrganizationSubscription(Guid organizationId, Guid planId, DateTime startsAt, DateTime? endsAt, bool autoRenew)
@@ -38,7 +39,6 @@ public sealed class OrganizationSubscription : IEntity, IAuditable
     public bool IsActive()
     {
         DateTime now = DateTime.UtcNow;
-
         return StartsAt <= now && (!EndsAt.HasValue || now < EndsAt.Value);
     }
 
