@@ -13,11 +13,11 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.OwnsOne(u => u.AuditState, audit =>
         {
             audit.Property(a => a.CreatedAt)
-                .HasColumnName("CreatedAt")
+                .HasColumnName("created_at")
                 .IsRequired();
 
             audit.Property(a => a.UpdatedAt)
-                .HasColumnName("UpdatedAt")
+                .HasColumnName("updated_at")
                 .IsRequired();
         });
 

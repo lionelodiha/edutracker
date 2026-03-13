@@ -6,7 +6,8 @@ internal static class SessionHelper
     {
         TimeSpan remaining = expiresAtUtc - DateTime.UtcNow;
 
-        if (remaining <= TimeSpan.Zero) return TimeSpan.Zero;
+        if (remaining <= TimeSpan.Zero)
+            return TimeSpan.Zero;
 
         return remaining < maxTimeToLive ? remaining : maxTimeToLive;
     }

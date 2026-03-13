@@ -6,8 +6,8 @@ namespace EduTracker.Domain.Entities.Organizations;
 
 public sealed class OrganizationPaymentMethod : IEntity, IAuditable, IHasSensitiveData<OrganizationPaymentMethodSensitive>
 {
-    public readonly AuditState AuditState = new();
-    public readonly SensitiveDataState<OrganizationPaymentMethodSensitive> SensitiveDataState = new();
+    public AuditState AuditState { get; private set; } = new();
+    public SensitiveDataState<OrganizationPaymentMethodSensitive> SensitiveDataState { get; private set; } = new();
 
     private OrganizationPaymentMethod() { }
 

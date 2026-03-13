@@ -9,33 +9,22 @@ using EduTracker.Api.Endpoints.Sessions;
 using EduTracker.Api.Endpoints.Subscriptions;
 using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
+using EduTracker.Api.Extensions.Cors;
 using EduTracker.Api.Extensions.OpenApi;
+using EduTracker.Api.Extensions.Seeders;
 using EduTracker.Api.Middleware;
 using EduTracker.Application;
-using EduTracker.Application.Configurations.Seeders;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Features.Seeders.SeedSuperAdmin;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:3000") // your frontend URL
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); // if you need cookies/auth
-    });
-});
+builder.Services.AddCustomCors(builder.Configuration);
 
 builder.Services.AddPersistenceServices(builder.Configuration.GetConnectionString("Database"));
 builder.Services.AddApplicationServices();
@@ -67,27 +56,8 @@ builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); 
 
 WebApplication app = builder.Build();
 
-app.UseCors("AllowFrontend");
-
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    SuperAdminSeedOptions options = scope.ServiceProvider
-        .GetRequiredService<IOptions<SuperAdminSeedOptions>>()
-        .Value;
-
-    IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-    SeedSuperAdminCommand command = new(
-        options.FirstName,
-        options.MiddleName,
-        options.LastName,
-        options.UserName,
-        options.Email,
-        options.Password
-    );
-
-    await mediator.Send(command, CancellationToken.None);
-}
+app.UseCustomCors();
+await app.SeedSuperAdminAsync();
 
 if (app.Environment.IsDevelopment())
 {
