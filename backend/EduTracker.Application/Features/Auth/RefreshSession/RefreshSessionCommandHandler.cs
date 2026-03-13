@@ -61,8 +61,8 @@ internal sealed class RefreshSessionCommandHandler(
         if (session.ShouldRefresh(sessionOpts.ExpiryExtensionTriggerPercent))
         {
             TimeSpan extension = session.RememberMe
-                ? sessionOpts.ExtendedExpiryExtension
-                : sessionOpts.StandardExpiryExtension;
+                ? sessionOpts.ExtendedExpiryExtension.Duration
+                : sessionOpts.StandardExpiryExtension.Duration;
 
             session.ExtendSession(extension);
             await db.SaveChangesAsync(cancellationToken);
@@ -70,7 +70,7 @@ internal sealed class RefreshSessionCommandHandler(
             SessionData sessionData = session.ToSessionData();
             TimeSpan cacheTtl = SessionHelper.CalculateCacheTimeToLive(
                 sessionData.ExpiresAt,
-                cacheTtlOptions.Value.AuthSessionByIdTtl
+                cacheTtlOptions.Value.AuthSessionById.Ttl
             );
 
             await cacheService.SetAsync(cacheKey, sessionData, cacheTtl);
@@ -86,7 +86,7 @@ internal sealed class RefreshSessionCommandHandler(
         SessionData currentSessionData = session.ToSessionData();
         TimeSpan currentTtl = SessionHelper.CalculateCacheTimeToLive(
             currentSessionData.ExpiresAt,
-            cacheTtlOptions.Value.AuthSessionByIdTtl
+            cacheTtlOptions.Value.AuthSessionById.Ttl
         );
 
         await cacheService.SetAsync(cacheKey, currentSessionData, currentTtl);

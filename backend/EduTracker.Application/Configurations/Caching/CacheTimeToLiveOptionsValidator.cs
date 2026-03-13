@@ -6,21 +6,19 @@ internal sealed class CacheTimeToLiveOptionsValidator : IValidateOptions<CacheTi
 {
     public ValidateOptionsResult Validate(string? name, CacheTimeToLiveOptions options)
     {
-        if (options.AuthSessionByIdMinutes <= 0)
-            return ValidateOptionsResult.Fail(
-                "CacheTimeToLiveOptions:AuthSessionByIdMinutes must be greater than 0."
-            );
+        List<string> errors = [];
 
-        if (options.UserAuthenticationStateMinutes <= 0)
-            return ValidateOptionsResult.Fail(
-                "CacheTimeToLiveOptions:UserAuthenticationStateMinutes must be greater than 0."
-            );
+        if (options.AuthSessionById is null || options.AuthSessionById.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:AuthSessionById:Minutes must be greater than 0.");
 
-        if (options.UserProfileByIdMinutes <= 0)
-            return ValidateOptionsResult.Fail(
-                "CacheTimeToLiveOptions:UserProfileByIdMinutes must be greater than 0."
-            );
+        if (options.UserAuthenticationState is null || options.UserAuthenticationState.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:UserAuthenticationState:Minutes must be greater than 0.");
 
-        return ValidateOptionsResult.Success;
+        if (options.UserProfileById is null || options.UserProfileById.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:UserProfileById:Minutes must be greater than 0.");
+
+        return errors.Count is 0
+            ? ValidateOptionsResult.Success
+            : ValidateOptionsResult.Fail(errors);
     }
 }

@@ -5,8 +5,7 @@ namespace EduTracker.Application.Common.Responses;
 internal sealed record OperationOutcomeResponse(
     string Id,
     string Title,
-    ResponseDetail[] Details,
-    object? Data = default
+    ResponseDetail[] Details
 ) : BaseOperationResponse<OperationOutcomeResponse>(Id, Title, Details)
 {
     public OperationOutcomeResponse<T> As<T>() => new(Id, Title, Details);

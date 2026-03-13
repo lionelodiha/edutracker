@@ -24,12 +24,14 @@ public static class ServiceCollectionExtensions
                 .ValidateOnStart();
 
             services.AddSingleton<IValidateOptions<SessionLifetimeOptions>, SessionLifetimeOptionsValidator>();
-            services.AddScoped<SessionStateService>();
 
             services.AddOptions<SuperAdminSeedOptions>()
                 .BindConfiguration(nameof(SuperAdminSeedOptions))
                 .ValidateOnStart();
 
+            services.AddSingleton<IValidateOptions<SuperAdminSeedOptions>, SuperAdminSeedOptionsValidator>();
+
+            services.AddScoped<SessionStateService>();
             services.AddScoped<UserAuthenticationStateService>();
 
             return services;

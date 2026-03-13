@@ -69,7 +69,7 @@ internal sealed class GetCurrentUserSessionsQueryHandler(
                 await cacheService.SetAsync(
                     CacheKeys.SessionById(session.SessionId),
                     session,
-                    cacheTtlOptions.Value.AuthSessionByIdTtl
+                    cacheTtlOptions.Value.AuthSessionById.Ttl
                 );
             }
         }

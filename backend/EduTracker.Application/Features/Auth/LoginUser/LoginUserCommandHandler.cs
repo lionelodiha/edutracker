@@ -63,14 +63,14 @@ internal sealed class LoginUserCommandHandler(
         SessionLifetimeOptions sessionLifetimeOpts = sessionLifetimeOptions.Value;
 
         TimeSpan initialLifetime = message.RememberMe
-            ? sessionLifetimeOpts.ExtendedSessionDuration
-            : sessionLifetimeOpts.StandardSessionDuration;
+            ? sessionLifetimeOpts.ExtendedSessionDuration.Duration
+            : sessionLifetimeOpts.StandardSessionDuration.Duration;
 
         UserSession session = new(
             userId: userDto.Id,
             rememberMe: message.RememberMe,
             slidingLifetime: initialLifetime,
-            absoluteLifetime: sessionLifetimeOpts.AbsoluteSessionLimit
+            absoluteLifetime: sessionLifetimeOpts.AbsoluteSessionLimit.Duration
         );
 
         db.UserSessions.Add(session);
@@ -78,7 +78,7 @@ internal sealed class LoginUserCommandHandler(
 
         SessionData sessionData = session.ToSessionData();
         string cacheKey = CacheKeys.SessionById(session.Id);
-        TimeSpan cacheTtl = SessionHelper.CalculateCacheTimeToLive(session.ExpiresAt, cacheTtlOptions.Value.AuthSessionByIdTtl);
+        TimeSpan cacheTtl = SessionHelper.CalculateCacheTimeToLive(session.ExpiresAt, cacheTtlOptions.Value.AuthSessionById.Ttl);
 
         await cacheService.SetAsync(cacheKey, sessionData, cacheTtl);
 

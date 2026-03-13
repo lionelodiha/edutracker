@@ -51,7 +51,7 @@ internal sealed class GetUserByIdQueryHandler(
         await cacheService.SetAsync(
             CacheKeys.UserProfileById(user.Id),
             response,
-            cacheTtlOptions.Value.UserProfileByIdTtl
+            cacheTtlOptions.Value.UserProfileById.Ttl
         );
 
         return ResponseCatalog.User.Retrieved
