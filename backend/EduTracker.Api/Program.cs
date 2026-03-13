@@ -6,7 +6,6 @@ using EduTracker.Api.Endpoints.Auth;
 using EduTracker.Api.Endpoints.Base;
 using EduTracker.Api.Endpoints.Organizations;
 using EduTracker.Api.Endpoints.Sessions;
-using EduTracker.Api.Endpoints.Subscriptions;
 using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Cors;
@@ -85,6 +84,5 @@ app.MapAuthEndpoints();
 app.MapSessionEndpoints();
 app.MapUserEndpoints();
 app.MapOrganizationEndpoints();
-app.MapSubscriptionEndpoints();
 
 app.Run();

@@ -12,23 +12,6 @@ namespace EduTracker.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "organization_plans",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    max_students = table.Column<int>(type: "integer", nullable: true),
-                    has_advanced_reports = table.Column<bool>(type: "boolean", nullable: false),
-                    has_api_access = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_organization_plans", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "users",
                 columns: table => new
                 {
@@ -123,61 +106,6 @@ namespace EduTracker.Persistence.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "organization_payment_methods",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Data = table.Column<byte[]>(type: "bytea", nullable: false),
-                    organization_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    provider = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    brand = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    is_default = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_organization_payment_methods", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_organization_payment_methods_organizations_organization_id",
-                        column: x => x.organization_id,
-                        principalTable: "organizations",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "organization_subscriptions",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    organization_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    plan_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    starts_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ends_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    auto_renew = table.Column<bool>(type: "boolean", nullable: false),
-                    cancelled_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_organization_subscriptions", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_organization_subscriptions_organization_plans_plan_id",
-                        column: x => x.plan_id,
-                        principalTable: "organization_plans",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_organization_subscriptions_organizations_organization_id",
-                        column: x => x.organization_id,
-                        principalTable: "organizations",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "ix_organization_members_organization_id",
                 table: "organization_members",
@@ -203,37 +131,6 @@ namespace EduTracker.Persistence.Migrations
                 name: "ix_organization_members_user_id",
                 table: "organization_members",
                 column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_payment_methods_organization_id",
-                table: "organization_payment_methods",
-                column: "organization_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_payment_methods_organization_id_is_default",
-                table: "organization_payment_methods",
-                columns: new[] { "organization_id", "is_default" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_plans_name",
-                table: "organization_plans",
-                column: "name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_subscriptions_organization_id",
-                table: "organization_subscriptions",
-                column: "organization_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_subscriptions_organization_id_starts_at",
-                table: "organization_subscriptions",
-                columns: new[] { "organization_id", "starts_at" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_organization_subscriptions_plan_id",
-                table: "organization_subscriptions",
-                column: "plan_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_organizations_name",
@@ -286,16 +183,7 @@ namespace EduTracker.Persistence.Migrations
                 name: "organization_members");
 
             migrationBuilder.DropTable(
-                name: "organization_payment_methods");
-
-            migrationBuilder.DropTable(
-                name: "organization_subscriptions");
-
-            migrationBuilder.DropTable(
                 name: "user_sessions");
-
-            migrationBuilder.DropTable(
-                name: "organization_plans");
 
             migrationBuilder.DropTable(
                 name: "organizations");
