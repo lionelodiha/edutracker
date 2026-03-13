@@ -10,7 +10,7 @@ using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Cors;
 using EduTracker.Api.Extensions.OpenApi;
-using EduTracker.Api.Extensions.Seeders;
+using EduTracker.Api.Hosting;
 using EduTracker.Api.Middleware;
 using EduTracker.Application;
 using EduTracker.Application.CQRS.Messaging;
@@ -19,7 +19,6 @@ using EduTracker.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -54,10 +53,11 @@ builder.Services.Configure<JsonOptions>(opts =>
 
 builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); });
 
+builder.Services.AddHostedService<StartupTasksHostedService>();
+
 WebApplication app = builder.Build();
 
 app.UseCustomCors();
-await app.SeedSuperAdminAsync();
 
 if (app.Environment.IsDevelopment())
 {

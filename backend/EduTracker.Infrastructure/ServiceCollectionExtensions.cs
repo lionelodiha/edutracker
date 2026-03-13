@@ -20,15 +20,13 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddInfrastructureServices(params Assembly[] assembliesToScan)
         {
             services.AddOptions<DataEncryptionOptions>()
-                .BindConfiguration(nameof(DataEncryptionOptions))
-                .ValidateOnStart();
+                .BindConfiguration(nameof(DataEncryptionOptions));
 
             services.AddSingleton<IValidateOptions<DataEncryptionOptions>, DataEncryptionOptionsValidator>();
             services.AddSingleton<IDataEncryptionService, AesGcmDataEncryptionService>();
 
             services.AddOptions<HashingOptions>()
-                .BindConfiguration(nameof(HashingOptions))
-                .ValidateOnStart();
+                .BindConfiguration(nameof(HashingOptions));
 
             services.AddSingleton<IValidateOptions<HashingOptions>, HashingOptionsValidator>();
             services.AddSingleton<IHashingService, HashingService>();
