@@ -32,7 +32,6 @@ public static class ServiceCollectionExtensions
 
             services.AddSingleton<IValidateOptions<HashingOptions>, HashingOptionsValidator>();
             services.AddSingleton<IHashingService, HashingService>();
-            services.AddScoped<IPaymentService, FakePaymentService>();
 
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddCqrsWithValidation(assembliesToScan);
