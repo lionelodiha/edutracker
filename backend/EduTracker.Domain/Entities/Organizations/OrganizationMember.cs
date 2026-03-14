@@ -36,7 +36,8 @@ public sealed class OrganizationMember : IEntity, IAuditable
     {
         OrganizationMemberRole validatedRole = ValidateRole(newRole);
 
-        if (Role == validatedRole) return;
+        if (Role == validatedRole)
+            return;
 
         Role = validatedRole;
         AuditState.UpdateAudit();
@@ -46,7 +47,8 @@ public sealed class OrganizationMember : IEntity, IAuditable
     {
         OrganizationMemberStatus validatedStatus = ValidateStatus(newStatus);
 
-        if (Status == validatedStatus) return;
+        if (Status == validatedStatus)
+            return;
 
         Status = validatedStatus;
         AuditState.UpdateAudit();

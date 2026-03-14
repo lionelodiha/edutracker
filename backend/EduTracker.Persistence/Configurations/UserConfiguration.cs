@@ -1,4 +1,7 @@
-﻿using EduTracker.Domain.Entities.Users;
+using EduTracker.Domain.Components.Auditing;
+using EduTracker.Domain.Components.Security;
+using EduTracker.Domain.Entities.Users;
+using EduTracker.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,18 +16,18 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.OwnsOne(u => u.AuditState, audit =>
         {
             audit.Property(a => a.CreatedAt)
-                .HasColumnName("created_at")
+                .HasColumnName(nameof(AuditState.CreatedAt).ToSnakeCase())
                 .IsRequired();
 
             audit.Property(a => a.UpdatedAt)
-                .HasColumnName("updated_at")
+                .HasColumnName(nameof(AuditState.UpdatedAt).ToSnakeCase())
                 .IsRequired();
         });
 
         builder.OwnsOne(u => u.SensitiveDataState, sensitive =>
         {
             sensitive.Property(s => s.EncryptedData)
-                .HasColumnName("Data")
+                .HasColumnName(nameof(SensitiveDataState<>.EncryptedData).ToSnakeCase())
                 .IsRequired();
 
             sensitive.Ignore(s => s.SensitiveData);

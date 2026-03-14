@@ -20,7 +20,10 @@ internal sealed class PromoteUserCommandHandler(
         if (message.ActorId is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        var cachedUserAuth = await cacheService.GetAsync<UserAuthData>(CacheKeys.UserAuthenticationState(message.ActorId.Value));
+        UserAuthData? cachedUserAuth = await cacheService.GetAsync<UserAuthData>(
+            CacheKeys.UserAuthenticationState(message.ActorId.Value)
+        );
+
         UserRole? actorRole = cachedUserAuth?.Role;
 
         actorRole ??= await db.Users

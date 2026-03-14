@@ -6,12 +6,11 @@ using EduTracker.Api.Endpoints.Auth;
 using EduTracker.Api.Endpoints.Base;
 using EduTracker.Api.Endpoints.Organizations;
 using EduTracker.Api.Endpoints.Sessions;
-using EduTracker.Api.Endpoints.Subscriptions;
 using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Cors;
 using EduTracker.Api.Extensions.OpenApi;
-using EduTracker.Api.Extensions.Seeders;
+using EduTracker.Api.Hosting;
 using EduTracker.Api.Middleware;
 using EduTracker.Application;
 using EduTracker.Application.CQRS.Messaging;
@@ -54,10 +53,11 @@ builder.Services.Configure<JsonOptions>(opts =>
 
 builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); });
 
+builder.Services.AddHostedService<StartupTasksHostedService>();
+
 WebApplication app = builder.Build();
 
 app.UseCustomCors();
-await app.SeedSuperAdminAsync();
 
 if (app.Environment.IsDevelopment())
 {
@@ -85,6 +85,5 @@ app.MapAuthEndpoints();
 app.MapSessionEndpoints();
 app.MapUserEndpoints();
 app.MapOrganizationEndpoints();
-app.MapSubscriptionEndpoints();
 
 app.Run();

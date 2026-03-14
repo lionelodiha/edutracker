@@ -34,7 +34,7 @@ internal static class OperationOutcomeResponseExtensions
         public OperationResult<object> ToOperationResult()
         {
             NormalizeResponse(response, out string messageId, out string message, out List<ResponseDetail>? details);
-            return new OperationResult<object>(messageId, message, details, response.Data);
+            return new OperationResult<object>(messageId, message, details, null);
         }
     }
 }

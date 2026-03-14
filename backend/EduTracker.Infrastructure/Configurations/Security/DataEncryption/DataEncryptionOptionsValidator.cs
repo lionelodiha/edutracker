@@ -7,10 +7,14 @@ internal sealed class DataEncryptionOptionsValidator : IValidateOptions<DataEncr
     public ValidateOptionsResult Validate(string? name, DataEncryptionOptions options)
     {
         if (options.Keys is null || options.Keys.Count is 0)
-            return ValidateOptionsResult.Fail("At least one key must be configured in DataEncryptionOptions:Keys.");
+            return ValidateOptionsResult.Fail(
+                "At least one key must be configured in DataEncryptionOptions:Keys."
+            );
 
         if (!options.Keys.ContainsKey(options.CurrentKeyVersion))
-            return ValidateOptionsResult.Fail($"CurrentKeyVersion '{options.CurrentKeyVersion}' must exist in the configured keys.");
+            return ValidateOptionsResult.Fail(
+                $"CurrentKeyVersion '{options.CurrentKeyVersion}' must exist in the configured keys."
+            );
 
         foreach (KeyValuePair<byte, string> kvp in options.Keys)
         {
