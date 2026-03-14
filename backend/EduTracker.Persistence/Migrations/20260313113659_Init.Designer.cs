@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EduTracker.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260313080234_Init")]
+    [Migration("20260313113659_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace EduTracker.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -302,7 +302,7 @@ namespace EduTracker.Persistence.Migrations
                             b1.Property<byte[]>("EncryptedData")
                                 .IsRequired()
                                 .HasColumnType("bytea")
-                                .HasColumnName("Data");
+                                .HasColumnName("encrypted_data");
 
                             b1.HasKey("UserId");
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,7 +18,7 @@ namespace EduTracker.Persistence.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Data = table.Column<byte[]>(type: "bytea", nullable: false),
+                    encrypted_data = table.Column<byte[]>(type: "bytea", nullable: false),
                     user_name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
                     email_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     password_hash = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),

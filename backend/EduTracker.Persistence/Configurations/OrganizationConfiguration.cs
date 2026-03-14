@@ -1,4 +1,6 @@
+using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Organizations;
+using EduTracker.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,11 +15,11 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
         builder.OwnsOne(o => o.AuditState, audit =>
         {
             audit.Property(a => a.CreatedAt)
-                .HasColumnName("created_at")
+                .HasColumnName(nameof(AuditState.CreatedAt).ToSnakeCase())
                 .IsRequired();
 
             audit.Property(a => a.UpdatedAt)
-                .HasColumnName("updated_at")
+                .HasColumnName(nameof(AuditState.UpdatedAt).ToSnakeCase())
                 .IsRequired();
         });
 
