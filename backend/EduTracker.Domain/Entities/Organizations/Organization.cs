@@ -33,7 +33,8 @@ public sealed class Organization : IEntity, IAuditable
     {
         string validatedName = ValidateName(newName);
 
-        if (Name == validatedName) return;
+        if (Name == validatedName)
+            return;
 
         Name = validatedName;
         AuditState.UpdateAudit();
@@ -41,7 +42,8 @@ public sealed class Organization : IEntity, IAuditable
 
     public void Lock()
     {
-        if (IsLocked) return;
+        if (IsLocked)
+            return;
 
         IsLocked = true;
         AuditState.UpdateAudit();
@@ -49,7 +51,8 @@ public sealed class Organization : IEntity, IAuditable
 
     public void Unlock()
     {
-        if (!IsLocked) return;
+        if (!IsLocked)
+            return;
 
         IsLocked = false;
         AuditState.UpdateAudit();
@@ -67,7 +70,9 @@ public sealed class Organization : IEntity, IAuditable
             );
 
         if (!OrganizationLimits.NameRegex().IsMatch(name))
-            throw new ArgumentException("Organization name contains invalid characters.", nameof(name));
+            throw new ArgumentException(
+                "Organization name contains invalid characters.", nameof(name)
+            );
 
         return name;
     }

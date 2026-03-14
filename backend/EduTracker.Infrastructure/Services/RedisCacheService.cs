@@ -64,7 +64,8 @@ internal sealed class RedisCacheService : ICacheService
         {
             RedisValue value = await _db.StringGetAsync(key);
 
-            if (value.IsNullOrEmpty) return default;
+            if (value.IsNullOrEmpty)
+                return default;
 
             return JsonSerializer.Deserialize<T>(value.ToString());
         }

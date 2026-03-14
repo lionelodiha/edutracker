@@ -15,9 +15,9 @@ internal static class StringExtensions
 
             for (int idx = 0; idx < value.Length; idx++)
             {
-                char current = value[idx];
+                char currentCharacter = value[idx];
 
-                if (char.IsUpper(current))
+                if (char.IsUpper(currentCharacter))
                 {
                     if (idx > 0)
                     {
@@ -28,16 +28,15 @@ internal static class StringExtensions
                             builder.Append('_');
                     }
 
-                    builder.Append(char.ToLowerInvariant(current));
+                    builder.Append(char.ToLowerInvariant(currentCharacter));
                 }
                 else
                 {
-                    builder.Append(current);
+                    builder.Append(currentCharacter);
                 }
             }
 
             return builder.ToString();
-
         }
     }
 }

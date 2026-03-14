@@ -53,7 +53,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     {
         string validatedUserName = ValidateUserName(newUserName);
 
-        if (UserName == validatedUserName) return;
+        if (UserName == validatedUserName)
+            return;
 
         UserName = validatedUserName;
         AuditState.UpdateAudit();
@@ -63,7 +64,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     {
         string validatedEmailHash = ValidateEmailHash(newEmailHash);
 
-        if (EmailHash == validatedEmailHash) return;
+        if (EmailHash == validatedEmailHash)
+            return;
 
         EmailHash = validatedEmailHash;
         AuditState.UpdateAudit();
@@ -73,7 +75,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     {
         string validatedPasswordHash = ValidatePasswordHash(newPasswordHash);
 
-        if (PasswordHash == validatedPasswordHash) return;
+        if (PasswordHash == validatedPasswordHash)
+            return;
 
         PasswordHash = validatedPasswordHash;
         AuditState.UpdateAudit();
@@ -83,7 +86,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     {
         UserRole validatedRole = ValidateRole(newRole);
 
-        if (Role == validatedRole) return;
+        if (Role == validatedRole)
+            return;
 
         Role = validatedRole;
         AuditState.UpdateAudit();
@@ -91,7 +95,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
 
     public void Lock()
     {
-        if (IsLocked) return;
+        if (IsLocked)
+            return;
 
         IsLocked = true;
         AuditState.UpdateAudit();
@@ -99,7 +104,8 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
 
     public void Unlock()
     {
-        if (!IsLocked) return;
+        if (!IsLocked)
+            return;
 
         IsLocked = false;
         AuditState.UpdateAudit();

@@ -50,16 +50,19 @@ public sealed class UserSession : IEntity, IAuditable
 
         double thresholdFraction = thresholdPercent / 100.0;
 
-        if (IsRevoked) return false;
+        if (IsRevoked)
+            return false;
 
         DateTime now = DateTime.UtcNow;
 
-        if (now >= AbsoluteExpiresAt) return false;
+        if (now >= AbsoluteExpiresAt)
+            return false;
 
         TimeSpan remaining = ExpiresAt - now;
         TimeSpan total = ExpiresAt - CreatedAt;
 
-        if (total <= TimeSpan.Zero) return true;
+        if (total <= TimeSpan.Zero)
+            return true;
 
         double remainingPercent = remaining.TotalSeconds / total.TotalSeconds;
         return remainingPercent <= thresholdFraction;
@@ -67,7 +70,8 @@ public sealed class UserSession : IEntity, IAuditable
 
     public void ExtendSession(TimeSpan slidingLifetime)
     {
-        if (IsRevoked) return;
+        if (IsRevoked)
+            return;
 
         DateTime now = DateTime.UtcNow;
         ExpiresAt = now.Add(slidingLifetime);
@@ -80,7 +84,8 @@ public sealed class UserSession : IEntity, IAuditable
 
     public void Revoke()
     {
-        if (IsRevoked) return;
+        if (IsRevoked)
+            return;
 
         IsRevoked = true;
         RevokedAt = DateTime.UtcNow;
