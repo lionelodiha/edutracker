@@ -83,7 +83,7 @@ internal sealed class GetUsersQueryHandler(
 
             foreach (User user in missingUsers)
             {
-                var sensitiveData = ObjectByteConverter.DeserializeFromBytes<UserSensitive>(
+                UserSensitive sensitiveData = ObjectByteConverter.DeserializeFromBytes<UserSensitive>(
                     encryptionService.Decrypt(user.EncryptedData, CryptoPurpose.UserSensitiveData)
                 );
 

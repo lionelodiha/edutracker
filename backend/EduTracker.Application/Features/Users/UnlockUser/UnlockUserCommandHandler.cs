@@ -20,7 +20,7 @@ internal sealed class UnlockUserCommandHandler(
         if (message.ActorId is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        var cachedUserAuth = await cacheService.GetAsync<UserAuthData>(
+        UserAuthData? cachedUserAuth = await cacheService.GetAsync<UserAuthData>(
             CacheKeys.UserAuthenticationState(message.ActorId.Value)
         );
 

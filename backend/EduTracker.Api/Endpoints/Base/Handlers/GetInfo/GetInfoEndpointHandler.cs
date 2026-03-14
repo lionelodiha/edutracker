@@ -5,11 +5,11 @@ namespace EduTracker.Api.Endpoints.Base.Handlers.GetInfo;
 internal static class GetInfoEndpointHandler
 {
     private static readonly string[] Features = [
-        "User Authentication & Management",
-        "Job Posting & Candidate Sourcing",
-        "Job Matching & Recommendations",
-        "Roadmap & Career Planning",
-        "AI-Powered Insights",
+        "Student & Educator Account Management",
+        "Course & Curriculum Tracking",
+        "Learning Progress & Performance Monitoring",
+        "Academic Roadmaps & Learning Paths",
+        "AI-Powered Academic Insights & Recommendations",
     ];
 
     public static IResult Handle()
@@ -21,9 +21,9 @@ internal static class GetInfoEndpointHandler
             Details: null,
             Data: new
             {
-                Name = "EduTracker API Gateway",
+                Name = "EduTracker API",
                 Version = "1.0.0",
-                Description = "The central API gateway powering job matching, recruitment workflows, and career development services.",
+                Description = "A centralized API platform for managing educational data, tracking student learning progress, and delivering academic insights for institutions, educators, and learners.",
                 Features,
                 Documentation = "Available at /scalar (development environments only).",
             }

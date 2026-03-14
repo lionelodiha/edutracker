@@ -15,62 +15,88 @@ internal sealed class StartupTasksHostedService(
     ILogger<StartupTasksHostedService> logger
 ) : IHostedService
 {
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         appLifetime.ApplicationStarted.Register(() =>
         {
-            _ = Task.Run(async () =>
-            {
-                using IServiceScope scope = serviceProvider.CreateScope();
-
-                List<string> failures = [];
-
-                ValidateOptions(scope.ServiceProvider.GetRequiredService<IOptions<CacheTimeToLiveOptions>>(), failures);
-                ValidateOptions(scope.ServiceProvider.GetRequiredService<IOptions<SessionLifetimeOptions>>(), failures);
-                ValidateOptions(scope.ServiceProvider.GetRequiredService<IOptions<SuperAdminSeedOptions>>(), failures);
-                ValidateOptions(scope.ServiceProvider.GetRequiredService<IOptions<DataEncryptionOptions>>(), failures);
-                ValidateOptions(scope.ServiceProvider.GetRequiredService<IOptions<HashingOptions>>(), failures);
-
-                if (failures.Count > 0)
-                {
-                    List<string> distinctFailures = [.. failures.Distinct()];
-
-                    logger.LogError(
-                        "Configuration validation failed with {FailureCount} error(s): {Failures}",
-                        distinctFailures.Count,
-                        distinctFailures
-                    );
-
-                    Environment.ExitCode = 1;
-                    appLifetime.StopApplication();
-                    return;
-                }
-
-                SuperAdminSeedOptions options = scope.ServiceProvider
-                    .GetRequiredService<IOptions<SuperAdminSeedOptions>>()
-                    .Value;
-
-                IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                SeedSuperAdminCommand command = new(
-                    options.FirstName,
-                    options.MiddleName,
-                    options.LastName,
-                    options.UserName,
-                    options.Email,
-                    options.Password
-                );
-
-                await mediator.Send(command, cancellationToken);
-            });
+            _ = Task.Run(() => RunStartupTasksAsync(cancellationToken));
         });
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-    private static void ValidateOptions<T>(IOptions<T> options, List<string> failures) where T : class
+    private async Task RunStartupTasksAsync(CancellationToken cancellationToken)
+    {
+        using IServiceScope scope = serviceProvider.CreateScope();
+
+        if (!ValidateConfiguration(scope.ServiceProvider))
+        {
+            Environment.ExitCode = 1;
+            appLifetime.StopApplication();
+            return;
+        }
+
+        try
+        {
+            await SeedSuperAdminAsync(scope.ServiceProvider, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, "Super admin seeding failed. Shutting down application.");
+
+            Environment.ExitCode = 1;
+            appLifetime.StopApplication();
+        }
+    }
+
+    private bool ValidateConfiguration(IServiceProvider services)
+    {
+        List<string> failures = [];
+
+        ValidateOptions(services.GetRequiredService<IOptions<CacheTimeToLiveOptions>>(), failures);
+        ValidateOptions(services.GetRequiredService<IOptions<SessionLifetimeOptions>>(), failures);
+        ValidateOptions(services.GetRequiredService<IOptions<SuperAdminSeedOptions>>(), failures);
+        ValidateOptions(services.GetRequiredService<IOptions<DataEncryptionOptions>>(), failures);
+        ValidateOptions(services.GetRequiredService<IOptions<HashingOptions>>(), failures);
+
+        if (failures.Count is 0)
+            return true;
+
+        List<string> distinctFailures = [.. failures.Distinct()];
+
+        logger.LogError(
+            "Configuration validation failed with {FailureCount} error(s): {Failures}",
+            distinctFailures.Count,
+            distinctFailures
+        );
+
+        return false;
+    }
+
+    private static async Task SeedSuperAdminAsync(IServiceProvider services, CancellationToken cancellationToken)
+    {
+        SuperAdminSeedOptions options = services
+            .GetRequiredService<IOptions<SuperAdminSeedOptions>>()
+            .Value;
+
+        IMediator mediator = services.GetRequiredService<IMediator>();
+
+        SeedSuperAdminCommand command = new(
+            options.FirstName,
+            options.MiddleName,
+            options.LastName,
+            options.UserName,
+            options.Email,
+            options.Password
+        );
+
+        await mediator.Send(command, cancellationToken);
+    }
+
+    private static void ValidateOptions<T>(IOptions<T> options, List<string> failures)
+        where T : class
     {
         try
         {

@@ -28,7 +28,7 @@ internal sealed class GetUserByIdQueryHandler(
         if (message.Id is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        var cachedUserProfile = await cacheService.GetAsync<UserResponse>(
+        UserResponse? cachedUserProfile = await cacheService.GetAsync<UserResponse>(
             CacheKeys.UserProfileById(message.Id.Value)
         );
 
