@@ -27,8 +27,7 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
             .HasMaxLength(OrganizationLimits.NameMaxLength)
             .IsRequired();
 
-        builder.HasIndex(o => o.Name)
-            .IsUnique();
+        builder.HasIndex(o => o.Name);
 
         builder.Property(o => o.IsLocked)
             .IsRequired();

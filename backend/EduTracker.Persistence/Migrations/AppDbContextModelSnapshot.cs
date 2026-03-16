@@ -47,13 +47,61 @@ namespace EduTracker.Persistence.Migrations
                         .HasName("pk_organizations");
 
                     b.HasIndex("Name")
-                        .IsUnique()
                         .HasDatabaseName("ix_organizations_name");
 
                     b.HasIndex("OwnerUserId")
                         .HasDatabaseName("ix_organizations_owner_user_id");
 
                     b.ToTable("organizations", (string)null);
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("InvitedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_by_user_id");
+
+                    b.Property<Guid>("InvitedUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_user_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organization_invites");
+
+                    b.HasIndex("InvitedByUserId")
+                        .HasDatabaseName("ix_organization_invites_invited_by_user_id");
+
+                    b.HasIndex("InvitedUserId", "Status")
+                        .HasDatabaseName("ix_organization_invites_invited_user_id_status");
+
+                    b.HasIndex("OrganizationId", "InvitedUserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_organization_invites_organization_id_invited_user_id")
+                        .HasFilter("status = 'Pending'");
+
+                    b.HasIndex("OrganizationId", "Status")
+                        .HasDatabaseName("ix_organization_invites_organization_id_status");
+
+                    b.ToTable("organization_invites", (string)null);
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationMember", b =>
@@ -239,6 +287,62 @@ namespace EduTracker.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("OwnerUser");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationInvite", b =>
+                {
+                    b.HasOne("EduTracker.Domain.Entities.Users.User", "InvitedByUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_invites_users_invited_by_user_id");
+
+                    b.HasOne("EduTracker.Domain.Entities.Users.User", "InvitedUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_invites_users_invited_user_id");
+
+                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_invites_organizations_organization_id");
+
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationInviteId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("created_at");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("updated_at");
+
+                            b1.HasKey("OrganizationInviteId");
+
+                            b1.ToTable("organization_invites");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationInviteId")
+                                .HasConstraintName("fk_organization_invites_organization_invites_id");
+                        });
+
+                    b.Navigation("AuditState")
+                        .IsRequired();
+
+                    b.Navigation("InvitedByUser");
+
+                    b.Navigation("InvitedUser");
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationMember", b =>
