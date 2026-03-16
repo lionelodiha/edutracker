@@ -5,4 +5,6 @@ public sealed record CacheTimeToLiveOptions
     public CacheOptions AuthSessionById { get; init; } = default!;
     public CacheOptions UserAuthenticationState { get; init; } = default!;
     public CacheOptions UserProfileById { get; init; } = default!;
+    public CacheOptions OrganizationById { get; init; } = default!;
+    public CacheOptions OrganizationMembers { get; init; } = default!;
 }

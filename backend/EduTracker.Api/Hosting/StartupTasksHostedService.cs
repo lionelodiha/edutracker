@@ -1,4 +1,5 @@
 using EduTracker.Application.Configurations.Caching;
+using EduTracker.Application.Configurations.Organizations;
 using EduTracker.Application.Configurations.Security;
 using EduTracker.Application.Configurations.Seeders;
 using EduTracker.Application.CQRS.Messaging;
@@ -56,6 +57,7 @@ internal sealed class StartupTasksHostedService(
         List<string> failures = [];
 
         ValidateOptions(services.GetRequiredService<IOptions<CacheTimeToLiveOptions>>(), failures);
+        ValidateOptions(services.GetRequiredService<IOptions<OrganizationInviteOptions>>(), failures);
         ValidateOptions(services.GetRequiredService<IOptions<SessionLifetimeOptions>>(), failures);
         ValidateOptions(services.GetRequiredService<IOptions<SuperAdminSeedOptions>>(), failures);
         ValidateOptions(services.GetRequiredService<IOptions<DataEncryptionOptions>>(), failures);

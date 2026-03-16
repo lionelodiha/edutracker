@@ -29,4 +29,5 @@ public static partial class OrganizationLimits
 
     public const int MemberRoleMaxLength = 20;
     public const int MemberStatusMaxLength = 20;
+    public const int InviteStatusMaxLength = 20;
 }

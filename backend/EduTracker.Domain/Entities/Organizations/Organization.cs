@@ -29,6 +29,18 @@ public sealed class Organization : IEntity, IAuditable
     public Guid OwnerUserId { get; private set; }
     public User OwnerUser { get; private set; } = null!;
 
+    public void TransferOwnership(Guid newOwnerUserId)
+    {
+        if (newOwnerUserId == Guid.Empty)
+            throw new ArgumentException("New owner user ID is required.", nameof(newOwnerUserId));
+
+        if (OwnerUserId == newOwnerUserId)
+            return;
+
+        OwnerUserId = newOwnerUserId;
+        AuditState.UpdateAudit();
+    }
+
     public void SetName(string newName)
     {
         string validatedName = ValidateName(newName);

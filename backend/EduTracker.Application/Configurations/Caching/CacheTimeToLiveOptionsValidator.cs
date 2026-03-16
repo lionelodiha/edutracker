@@ -17,6 +17,12 @@ internal sealed class CacheTimeToLiveOptionsValidator : IValidateOptions<CacheTi
         if (options.UserProfileById is null || options.UserProfileById.Minutes <= 0)
             errors.Add("CacheTimeToLiveOptions:UserProfileById:Minutes must be greater than 0.");
 
+        if (options.OrganizationById is null || options.OrganizationById.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:OrganizationById:Minutes must be greater than 0.");
+
+        if (options.OrganizationMembers is null || options.OrganizationMembers.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:OrganizationMembers:Minutes must be greater than 0.");
+
         return errors.Count is 0
             ? ValidateOptionsResult.Success
             : ValidateOptionsResult.Fail(errors);
