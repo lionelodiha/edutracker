@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  cancelOrganizationSubscriptionEndpointHandler,
-  createOrganizationSubscriptionEndpointHandler,
   createOrganizationEndpointHandler,
   demoteUserEndpointHandler,
   getCurrentUserEndpointHandler,
   getCurrentUserSessionsEndpointHandler,
   getOrganizationByIdEndpointHandler,
   getOrganizationMembersEndpointHandler,
-  getOrganizationSubscriptionEndpointHandler,
   getOrganizationsEndpointHandler,
   getUserByIdEndpointHandler,
   getUsersEndpointHandler,
@@ -25,7 +22,6 @@ import {
   updateCurrentUserEndpointHandler,
   updateCurrentUserPasswordEndpointHandler,
   updateOrganizationMemberRoleEndpointHandler,
-  updateOrganizationSubscriptionEndpointHandler,
 } from "./api";
 import { client } from "./api/client.gen";
 
@@ -357,88 +353,6 @@ const operationConfigs: OperationConfig[] = [
     ),
     run: ({ path }) =>
       getOrganizationMembersEndpointHandler({ path: path as never }),
-  },
-  {
-    id: "get_org_subscription",
-    label: "Get Org Subscription",
-    side: "org",
-    method: "GET",
-    route: "/api/organizations/{id}/subscription",
-    needsPath: true,
-    pathTemplate: JSON.stringify(
-      { id: "00000000-0000-0000-0000-000000000000" },
-      null,
-      2,
-    ),
-    run: ({ path }) =>
-      getOrganizationSubscriptionEndpointHandler({ path: path as never }),
-  },
-  {
-    id: "update_org_subscription",
-    label: "Update Org Subscription",
-    side: "org",
-    method: "PATCH",
-    route: "/api/organizations/{id}/subscription",
-    needsPath: true,
-    pathTemplate: JSON.stringify(
-      { id: "00000000-0000-0000-0000-000000000000" },
-      null,
-      2,
-    ),
-    bodyTemplate: JSON.stringify(
-      {
-        planName: "Pro",
-        seats: 25,
-      },
-      null,
-      2,
-    ),
-    run: ({ body, path }) =>
-      updateOrganizationSubscriptionEndpointHandler({
-        body: body as never,
-        path: path as never,
-      }),
-  },
-  {
-    id: "create_org_subscription",
-    label: "Create Org Subscription",
-    side: "org",
-    method: "POST",
-    route: "/api/organizations/{id}/subscription",
-    needsPath: true,
-    pathTemplate: JSON.stringify(
-      { id: "00000000-0000-0000-0000-000000000000" },
-      null,
-      2,
-    ),
-    bodyTemplate: JSON.stringify(
-      {
-        planName: "Starter",
-        seats: 10,
-      },
-      null,
-      2,
-    ),
-    run: ({ body, path }) =>
-      createOrganizationSubscriptionEndpointHandler({
-        body: body as never,
-        path: path as never,
-      }),
-  },
-  {
-    id: "cancel_org_sub",
-    label: "Cancel Org Subscription",
-    side: "org",
-    method: "POST",
-    route: "/api/organizations/{id}/subscription/cancel",
-    needsPath: true,
-    pathTemplate: JSON.stringify(
-      { id: "00000000-0000-0000-0000-000000000000" },
-      null,
-      2,
-    ),
-    run: ({ path }) =>
-      cancelOrganizationSubscriptionEndpointHandler({ path: path as never }),
   },
 ];
 

@@ -3,12 +3,8 @@
 import type { Client, Options as Options2, TDataShape } from "./client";
 import { client } from "./client.gen";
 import type {
-  CancelOrganizationSubscriptionEndpointHandlerData,
-  CancelOrganizationSubscriptionEndpointHandlerResponses,
   CreateOrganizationEndpointHandlerData,
   CreateOrganizationEndpointHandlerResponses,
-  CreateOrganizationSubscriptionEndpointHandlerData,
-  CreateOrganizationSubscriptionEndpointHandlerResponses,
   DemoteUserEndpointHandlerData,
   DemoteUserEndpointHandlerErrors,
   DemoteUserEndpointHandlerResponses,
@@ -24,8 +20,6 @@ import type {
   GetOrganizationMembersEndpointHandlerResponses,
   GetOrganizationsEndpointHandlerData,
   GetOrganizationsEndpointHandlerResponses,
-  GetOrganizationSubscriptionEndpointHandlerData,
-  GetOrganizationSubscriptionEndpointHandlerResponses,
   GetUserByIdEndpointHandlerData,
   GetUserByIdEndpointHandlerErrors,
   GetUserByIdEndpointHandlerResponses,
@@ -69,8 +63,6 @@ import type {
   UpdateCurrentUserPasswordEndpointHandlerResponses,
   UpdateOrganizationMemberRoleEndpointHandlerData,
   UpdateOrganizationMemberRoleEndpointHandlerResponses,
-  UpdateOrganizationSubscriptionEndpointHandlerData,
-  UpdateOrganizationSubscriptionEndpointHandlerResponses,
 } from "./types.gen";
 
 export type Options<
@@ -714,85 +706,3 @@ export const getOrganizationMembersEndpointHandler = <
     unknown,
     ThrowOnError
   >({ url: "/api/organizations/{id}/members", ...options });
-
-/**
- * Get organization subscription
- */
-export const getOrganizationSubscriptionEndpointHandler = <
-  ThrowOnError extends boolean = false,
->(
-  options: Options<
-    GetOrganizationSubscriptionEndpointHandlerData,
-    ThrowOnError
-  >,
-) =>
-  (options.client ?? client).get<
-    GetOrganizationSubscriptionEndpointHandlerResponses,
-    unknown,
-    ThrowOnError
-  >({ url: "/api/organizations/{id}/subscription", ...options });
-
-/**
- * Update organization subscription
- */
-export const updateOrganizationSubscriptionEndpointHandler = <
-  ThrowOnError extends boolean = false,
->(
-  options: Options<
-    UpdateOrganizationSubscriptionEndpointHandlerData,
-    ThrowOnError
-  >,
-) =>
-  (options.client ?? client).patch<
-    UpdateOrganizationSubscriptionEndpointHandlerResponses,
-    unknown,
-    ThrowOnError
-  >({
-    url: "/api/organizations/{id}/subscription",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-/**
- * Create organization subscription
- */
-export const createOrganizationSubscriptionEndpointHandler = <
-  ThrowOnError extends boolean = false,
->(
-  options: Options<
-    CreateOrganizationSubscriptionEndpointHandlerData,
-    ThrowOnError
-  >,
-) =>
-  (options.client ?? client).post<
-    CreateOrganizationSubscriptionEndpointHandlerResponses,
-    unknown,
-    ThrowOnError
-  >({
-    url: "/api/organizations/{id}/subscription",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-/**
- * Cancel organization subscription
- */
-export const cancelOrganizationSubscriptionEndpointHandler = <
-  ThrowOnError extends boolean = false,
->(
-  options: Options<
-    CancelOrganizationSubscriptionEndpointHandlerData,
-    ThrowOnError
-  >,
-) =>
-  (options.client ?? client).post<
-    CancelOrganizationSubscriptionEndpointHandlerResponses,
-    unknown,
-    ThrowOnError
-  >({ url: "/api/organizations/{id}/subscription/cancel", ...options });

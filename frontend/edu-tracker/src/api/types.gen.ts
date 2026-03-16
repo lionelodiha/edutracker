@@ -52,14 +52,6 @@ export type ApiResponseOfOrganizationResponse = {
   data: null | OrganizationResponse;
 };
 
-export type ApiResponseOfOrganizationSubscriptionResponse = {
-  success: boolean;
-  messageId: string;
-  message: string;
-  details: null | Array<ResponseDetail>;
-  data: null | OrganizationSubscriptionResponse;
-};
-
 export type ApiResponseOfSessionTimestampsResponse = {
   success: boolean;
   messageId: string;
@@ -78,13 +70,6 @@ export type ApiResponseOfUserResponse = {
 
 export type CreateOrganizationRequest = {
   name: string;
-};
-
-export type CreateOrganizationSubscriptionRequest = {
-  planId: string;
-  startsAt: string;
-  endsAt: null | string;
-  autoRenew: boolean;
 };
 
 export type CursorPageOfUserResponse = {
@@ -133,19 +118,6 @@ export type OrganizationResponse = {
   name: string;
   ownerUserId: string;
   createdAt: string;
-};
-
-export type OrganizationSubscriptionResponse = {
-  id: string;
-  organizationId: string;
-  planId: string;
-  startsAt: string;
-  endsAt: null | string;
-  autoRenew: boolean;
-  cancelledAt: null | string;
-  isActive: boolean;
-  isExpired: boolean;
-  isCancelled: boolean;
 };
 
 export type RegisterUserCommand = {
@@ -199,13 +171,6 @@ export type UpdateCurrentUserRequest = {
 
 export type UpdateOrganizationMemberRoleRequest = {
   role: OrganizationMemberRole;
-};
-
-export type UpdateOrganizationSubscriptionRequest = {
-  planId: null | string;
-  startsAt: null | string;
-  endsAt: null | string;
-  autoRenew: null | boolean;
 };
 
 export type UserResponse = {
@@ -884,79 +849,3 @@ export type GetOrganizationMembersEndpointHandlerResponses = {
 
 export type GetOrganizationMembersEndpointHandlerResponse =
   GetOrganizationMembersEndpointHandlerResponses[keyof GetOrganizationMembersEndpointHandlerResponses];
-
-export type GetOrganizationSubscriptionEndpointHandlerData = {
-  body?: never;
-  path: {
-    id: string;
-  };
-  query?: never;
-  url: "/api/organizations/{id}/subscription";
-};
-
-export type GetOrganizationSubscriptionEndpointHandlerResponses = {
-  /**
-   * OK
-   */
-  200: ApiResponseOfOrganizationSubscriptionResponse;
-};
-
-export type GetOrganizationSubscriptionEndpointHandlerResponse =
-  GetOrganizationSubscriptionEndpointHandlerResponses[keyof GetOrganizationSubscriptionEndpointHandlerResponses];
-
-export type UpdateOrganizationSubscriptionEndpointHandlerData = {
-  body: UpdateOrganizationSubscriptionRequest;
-  path: {
-    id: string;
-  };
-  query?: never;
-  url: "/api/organizations/{id}/subscription";
-};
-
-export type UpdateOrganizationSubscriptionEndpointHandlerResponses = {
-  /**
-   * OK
-   */
-  200: ApiResponseOfObject;
-};
-
-export type UpdateOrganizationSubscriptionEndpointHandlerResponse =
-  UpdateOrganizationSubscriptionEndpointHandlerResponses[keyof UpdateOrganizationSubscriptionEndpointHandlerResponses];
-
-export type CreateOrganizationSubscriptionEndpointHandlerData = {
-  body: CreateOrganizationSubscriptionRequest;
-  path: {
-    id: string;
-  };
-  query?: never;
-  url: "/api/organizations/{id}/subscription";
-};
-
-export type CreateOrganizationSubscriptionEndpointHandlerResponses = {
-  /**
-   * Created
-   */
-  201: ApiResponseOfObject;
-};
-
-export type CreateOrganizationSubscriptionEndpointHandlerResponse =
-  CreateOrganizationSubscriptionEndpointHandlerResponses[keyof CreateOrganizationSubscriptionEndpointHandlerResponses];
-
-export type CancelOrganizationSubscriptionEndpointHandlerData = {
-  body?: never;
-  path: {
-    id: string;
-  };
-  query?: never;
-  url: "/api/organizations/{id}/subscription/cancel";
-};
-
-export type CancelOrganizationSubscriptionEndpointHandlerResponses = {
-  /**
-   * OK
-   */
-  200: ApiResponseOfObject;
-};
-
-export type CancelOrganizationSubscriptionEndpointHandlerResponse =
-  CancelOrganizationSubscriptionEndpointHandlerResponses[keyof CancelOrganizationSubscriptionEndpointHandlerResponses];
