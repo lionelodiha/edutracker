@@ -87,7 +87,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     Possible responses:
                     - `200 OK`: Organization retrieved successfully.
@@ -114,7 +114,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     Possible responses:
                     - `200 OK`: Organization deleted successfully.
@@ -141,7 +141,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     **Request Body**:
                     - `Name` (string, required): New organization name.
@@ -173,10 +173,10 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     **Request Body**:
-                    - `MemberId` (GUID, required): Target member ID.
+                    - `MemberId` (uuid, required): Target member ID.
 
                     Possible responses:
                     - `200 OK`: Ownership transferred successfully.
@@ -205,10 +205,10 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     **Request Body**:
-                    - `UserId` (GUID, required): User to invite.
+                    - `UserId` (uuid, required): User to invite.
 
                     Possible responses:
                     - `200 OK`: Invite created successfully.
@@ -237,8 +237,8 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
-                    - `memberId` (GUID): Target member identifier.
+                    - `id` (uuid): Organization identifier.
+                    - `memberId` (uuid): Target member identifier.
 
                     **Request Body**:
                     - `Role` (string, required): New role (Member, Moderator).
@@ -270,7 +270,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     Possible responses:
                     - `200 OK`: Organization members retrieved successfully.
@@ -297,8 +297,8 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
-                    - `memberId` (GUID): Member identifier to remove or leave.
+                    - `id` (uuid): Organization identifier.
+                    - `memberId` (uuid): Member identifier to remove or leave.
 
                     Possible responses:
                     - `200 OK`: Member removed successfully.
@@ -327,7 +327,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
+                    - `id` (uuid): Organization identifier.
 
                     Possible responses:
                     - `200 OK`: Invites retrieved successfully.
@@ -352,7 +352,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `inviteId` (GUID): Invite identifier.
+                    - `inviteId` (uuid): Invite identifier.
 
                     Possible responses:
                     - `200 OK`: Invite accepted and membership created.
@@ -379,7 +379,7 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `inviteId` (GUID): Invite identifier.
+                    - `inviteId` (uuid): Invite identifier.
 
                     Possible responses:
                     - `200 OK`: Invite rejected successfully.
@@ -406,8 +406,8 @@ internal static class OrganizationEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): Organization identifier.
-                    - `inviteId` (GUID): Invite identifier.
+                    - `id` (uuid): Organization identifier.
+                    - `inviteId` (uuid): Invite identifier.
 
                     Possible responses:
                     - `200 OK`: Invite cancelled successfully.

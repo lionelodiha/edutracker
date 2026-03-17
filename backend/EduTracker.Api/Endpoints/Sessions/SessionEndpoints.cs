@@ -50,7 +50,7 @@ internal static class SessionEndpoints
                     **Authentication Required**: A valid session is needed.
 
                     **Route Parameter**:
-                    - `id` (GUID): The ID of the session to revoke.
+                    - `id` (uuid): The ID of the session to revoke.
 
                     **Behavior**:
                     - The specified session will be invalidated in the database.
