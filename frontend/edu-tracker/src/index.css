@@ -44,6 +44,10 @@
   --grad-brand: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
   --grad-brand-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(168, 85, 247, 0.04));
 
+  /* ─── Org / avatar gradient ─── */
+  --gradient-start: #6366f1;
+  --gradient-end: #8b5cf6;
+
   /* ─── Radius ─── */
   --r-sm: 8px;
   --r-md: 12px;
@@ -963,4 +967,255 @@ a:hover {
 
 .section {
   padding: 6rem 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Card Clickable (interactive org cards etc.)
+   ═══════════════════════════════════════════════════════ */
+
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Dark Sidebar
+   ═══════════════════════════════════════════════════════ */
+
+.sidebar {
+  background: #0a0b0f;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sidebar .sidebar-link {
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 500;
+}
+
+.sidebar .sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar .sidebar-link.active {
+  background: rgba(99, 102, 241, 0.2);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #6366f1;
+  border-radius: var(--r-md);
+}
+
+/* ─── Nav section label ─── */
+.nav-section-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.22);
+  padding: 0 0.875rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+/* ─── Sidebar link icon ─── */
+.sidebar-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: transparent;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.sidebar .sidebar-link.active .sidebar-link-icon {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+/* ─── Sidebar logout button ─── */
+.sidebar .sidebar-link-logout {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.82rem;
+}
+
+.sidebar .sidebar-link-logout:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: #f87171;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Dashboard Top Bar
+   ═══════════════════════════════════════════════════════ */
+
+.dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 2.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Stat Card V2 (with icon)
+   ═══════════════════════════════════════════════════════ */
+
+.stat-card-v2 {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 1.5rem;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.stat-card-v2:hover {
+  border-color: rgba(99, 102, 241, 0.15);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-glow-strong);
+  flex-shrink: 0;
+}
+
+.stat-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stat-icon-green {
+  background: var(--success-bg);
+}
+
+.stat-icon-green svg {
+  stroke: var(--success);
+}
+
+.stat-icon-amber {
+  background: var(--warn-bg);
+}
+
+.stat-icon-amber svg {
+  stroke: var(--warn);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Landing Page – Dashboard Mockup Preview
+   ═══════════════════════════════════════════════════════ */
+
+.mockup-window {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.1), 0 8px 24px rgba(99, 102, 241, 0.06);
+  position: relative;
+}
+
+.mockup-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-input);
+  border-bottom: 1px solid var(--border);
+}
+
+.mockup-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.mockup-addressbar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.mockup-addressbar-inner {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.2rem 0.875rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Pricing cards ─── */
+.pricing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 2rem;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.pricing-card:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.pricing-card.featured {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: var(--grad-brand-subtle);
+}
+
+/* ─── Section divider ─── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Skeleton Loading
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-input) 25%,
+    var(--bg-card-hover) 50%,
+    var(--bg-input) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--r-sm);
 }

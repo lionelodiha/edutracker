@@ -45,11 +45,23 @@ export default function OrganizationsPage() {
                 setNewName("");
                 await fetchOrgs();
             } else {
-                const d = result.data as any;
-                setError(d?.message || "Failed to create organization.");
+                const errBody = result.error || result.data as any;
+                let errorMsg = "Failed to create organization.";
+                if (errBody) {
+                    if (errBody.message) errorMsg = errBody.message;
+                    else if (errBody.title) errorMsg = errBody.title;
+                    else if (typeof errBody === 'string') errorMsg = errBody;
+                    
+                    if (errBody.details && Array.isArray(errBody.details)) {
+                        errorMsg += " " + errBody.details.map((d: any) => d.message || d).join(" ");
+                    }
+                }
+                setError(errorMsg);
+                console.error("Create organization failed:", result);
             }
         } catch (err: any) {
             setError(err?.message || "Failed to create organization.");
+            console.error("Create organization exception:", err);
         }
         setCreating(false);
     };
