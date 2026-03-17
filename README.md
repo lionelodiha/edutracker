@@ -19,7 +19,7 @@ A full‑stack web application with an ASP.NET Core backend API and a React (Vit
 │  └─ edu-tracker/                 # React + Vite frontend
 ├─ edutracker.slnx                 # Solution
 ├─ Directory.Build.props           # Shared .NET build properties (net10.0)
-├�� Directory.Packages.props        # Central package management
+├─ Directory.Packages.props        # Central package management
 └─ LICENSE
 ```
 

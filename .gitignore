@@ -29,6 +29,7 @@ dist-ssr
 *.userosscache
 *.sln.docstates
 
+.dotnet
 *.userprefs
 mono_crash.*
 

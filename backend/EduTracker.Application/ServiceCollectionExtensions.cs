@@ -1,4 +1,5 @@
 using EduTracker.Application.Configurations.Caching;
+using EduTracker.Application.Configurations.Organizations;
 using EduTracker.Application.Configurations.Security;
 using EduTracker.Application.Configurations.Seeders;
 using EduTracker.Application.Services;
@@ -14,22 +15,26 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddApplicationServices()
         {
             services.AddOptions<CacheTimeToLiveOptions>()
-                .BindConfiguration(nameof(CacheTimeToLiveOptions))
-                .ValidateOnStart();
+                .BindConfiguration(nameof(CacheTimeToLiveOptions));
 
             services.AddSingleton<IValidateOptions<CacheTimeToLiveOptions>, CacheTimeToLiveOptionsValidator>();
 
+            services.AddOptions<OrganizationInviteOptions>()
+                .BindConfiguration(nameof(OrganizationInviteOptions));
+
+            services.AddSingleton<IValidateOptions<OrganizationInviteOptions>, OrganizationInviteOptionsValidator>();
+
             services.AddOptions<SessionLifetimeOptions>()
-                .BindConfiguration(nameof(SessionLifetimeOptions))
-                .ValidateOnStart();
+                .BindConfiguration(nameof(SessionLifetimeOptions));
 
             services.AddSingleton<IValidateOptions<SessionLifetimeOptions>, SessionLifetimeOptionsValidator>();
-            services.AddScoped<SessionStateService>();
 
             services.AddOptions<SuperAdminSeedOptions>()
-                .BindConfiguration(nameof(SuperAdminSeedOptions))
-                .ValidateOnStart();
+                .BindConfiguration(nameof(SuperAdminSeedOptions));
 
+            services.AddSingleton<IValidateOptions<SuperAdminSeedOptions>, SuperAdminSeedOptionsValidator>();
+
+            services.AddScoped<SessionStateService>();
             services.AddScoped<UserAuthenticationStateService>();
 
             return services;

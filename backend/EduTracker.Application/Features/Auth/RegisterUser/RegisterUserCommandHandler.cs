@@ -61,7 +61,7 @@ internal sealed class RegisterUserCommandHandler(
         await cacheService.SetAsync(
             CacheKeys.UserProfileById(user.Id),
             user.ToUserResponse(),
-            cacheTtlOptions.Value.UserProfileByIdTtl
+            cacheTtlOptions.Value.UserProfileById.Ttl
         );
 
         user.ClearSensitiveData();

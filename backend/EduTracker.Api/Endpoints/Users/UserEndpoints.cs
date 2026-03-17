@@ -35,9 +35,9 @@ internal static class UserEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **Admin or SuperAdmin role** are required.
 
                     **Query Parameters**:
-                    - `cursor` (GUID, optional): Fetch users after this cursor (exclusive).
+                    - `cursor` (uuid, optional): Fetch users after this cursor (exclusive).
                     - `limit` (int, optional): Page size (default 20, max 100).
-                    - `id` (GUID, optional): Filter by a specific user ID.
+                    - `id` (uuid, optional): Filter by a specific user ID.
                     - `userName` (string, optional): Filter by username (partial match).
 
                     The response includes:
@@ -92,7 +92,7 @@ internal static class UserEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed.
 
                     **Route Parameters**:
-                    - `id` (GUID): The unique identifier of the user to retrieve.
+                    - `id` (uuid): The unique identifier of the user to retrieve.
 
                     The response includes:
                     - `Id`: User's unique identifier.
@@ -188,7 +188,7 @@ internal static class UserEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **SuperAdmin role** are required.
 
                     **Request Body**:
-                    - `UserId` (GUID, required): The unique identifier of the user to promote.
+                    - `UserId` (uuid, required): The unique identifier of the user to promote.
 
                     **Role Hierarchy**:
                     - User → Admin → SuperAdmin
@@ -224,7 +224,7 @@ internal static class UserEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **SuperAdmin role** are required.
 
                     **Request Body**:
-                    - `UserId` (GUID, required): The unique identifier of the user to demote.
+                    - `UserId` (uuid, required): The unique identifier of the user to demote.
 
                     **Role Hierarchy**:
                     - SuperAdmin → Admin → User
@@ -260,7 +260,7 @@ internal static class UserEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **Admin or SuperAdmin role** are required.
 
                     **Request Body**:
-                    - `UserId` (GUID, required): The unique identifier of the user account to lock.
+                    - `UserId` (uuid, required): The unique identifier of the user account to lock.
 
                     **Notes**:
                     - Locked users cannot access the system until an Admin or SuperAdmin unlocks their account.
@@ -290,7 +290,7 @@ internal static class UserEndpoints
                     **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) and **Admin or SuperAdmin role** are required.
 
                     **Request Body**:
-                    - `UserId` (GUID, required): The unique identifier of the user account to unlock.
+                    - `UserId` (uuid, required): The unique identifier of the user account to unlock.
 
                     **Notes**:
                     - Unlocking a user who is not currently locked will still return `200 OK` (idempotent operation).

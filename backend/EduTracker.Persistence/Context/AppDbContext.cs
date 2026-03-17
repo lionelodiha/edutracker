@@ -10,9 +10,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<OrganizationMember> OrganizationMembers => Set<OrganizationMember>();
-    public DbSet<OrganizationPlan> OrganizationPlans => Set<OrganizationPlan>();
-    public DbSet<OrganizationSubscription> OrganizationSubscriptions => Set<OrganizationSubscription>();
-    public DbSet<OrganizationPaymentMethod> OrganizationPaymentMethods => Set<OrganizationPaymentMethod>();
+    public DbSet<OrganizationInvite> OrganizationInvites => Set<OrganizationInvite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

@@ -63,7 +63,7 @@ internal sealed class GetUsersQueryHandler(
 
         foreach (User user in usersPage)
         {
-            var cachedResponse = await cacheService.GetAsync<UserResponse>(
+            UserResponse? cachedResponse = await cacheService.GetAsync<UserResponse>(
                 CacheKeys.UserProfileById(user.Id)
             );
 
@@ -83,7 +83,7 @@ internal sealed class GetUsersQueryHandler(
 
             foreach (User user in missingUsers)
             {
-                var sensitiveData = ObjectByteConverter.DeserializeFromBytes<UserSensitive>(
+                UserSensitive sensitiveData = ObjectByteConverter.DeserializeFromBytes<UserSensitive>(
                     encryptionService.Decrypt(user.EncryptedData, CryptoPurpose.UserSensitiveData)
                 );
 
@@ -94,7 +94,7 @@ internal sealed class GetUsersQueryHandler(
                 await cacheService.SetAsync(
                     CacheKeys.UserProfileById(user.Id),
                     response,
-                    cacheTtlOptions.Value.UserProfileByIdTtl
+                    cacheTtlOptions.Value.UserProfileById.Ttl
                 );
 
                 responses.Add(response);

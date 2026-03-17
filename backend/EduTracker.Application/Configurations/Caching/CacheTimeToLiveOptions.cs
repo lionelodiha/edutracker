@@ -2,16 +2,9 @@ namespace EduTracker.Application.Configurations.Caching;
 
 public sealed record CacheTimeToLiveOptions
 {
-    public int AuthSessionByIdMinutes { get; init; }
-    public int UserAuthenticationStateMinutes { get; init; }
-    public int UserProfileByIdMinutes { get; init; }
-
-    public TimeSpan AuthSessionByIdTtl
-        => TimeSpan.FromMinutes(AuthSessionByIdMinutes);
-
-    public TimeSpan UserAuthenticationStateTtl
-        => TimeSpan.FromMinutes(UserAuthenticationStateMinutes);
-
-    public TimeSpan UserProfileByIdTtl
-        => TimeSpan.FromMinutes(UserProfileByIdMinutes);
+    public CacheOptions AuthSessionById { get; init; } = default!;
+    public CacheOptions UserAuthenticationState { get; init; } = default!;
+    public CacheOptions UserProfileById { get; init; } = default!;
+    public CacheOptions OrganizationById { get; init; } = default!;
+    public CacheOptions OrganizationMembers { get; init; } = default!;
 }

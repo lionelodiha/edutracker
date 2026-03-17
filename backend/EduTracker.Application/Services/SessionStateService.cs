@@ -19,7 +19,8 @@ public sealed class SessionStateService(
         string cacheKey = CacheKeys.SessionById(sessionId);
         SessionData? cachedSession = await cacheService.GetAsync<SessionData>(cacheKey);
 
-        if (cachedSession is not null) return cachedSession;
+        if (cachedSession is not null)
+            return cachedSession;
 
         SessionData? sessionData = await db.UserSessions
             .AsNoTracking()
@@ -35,11 +36,12 @@ public sealed class SessionStateService(
             ))
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (sessionData is null) return null;
+        if (sessionData is null)
+            return null;
 
         TimeSpan cacheDuration = SessionHelper.CalculateCacheTimeToLive(
             sessionData.ExpiresAt,
-            cacheOptions.Value.AuthSessionByIdTtl
+            cacheOptions.Value.AuthSessionById.Ttl
         );
 
         if (cacheDuration > TimeSpan.Zero)

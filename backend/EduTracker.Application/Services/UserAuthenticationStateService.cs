@@ -32,7 +32,8 @@ public sealed class UserAuthenticationStateService(
 
         if (userAuthData is null) return null;
 
-        await cacheService.SetAsync(cacheKey, userAuthData, cacheTtlOptions.Value.AuthSessionByIdTtl);
+        TimeSpan timeToLive = cacheTtlOptions.Value.UserAuthenticationState.Ttl;
+        await cacheService.SetAsync(cacheKey, userAuthData, timeToLive);
 
         return userAuthData;
     }

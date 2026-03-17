@@ -21,7 +21,10 @@ internal sealed class LockUserCommandHandler(
         if (request.ActorId is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
-        var cachedUser = await cacheService.GetAsync<UserResponse>(CacheKeys.UserProfileById(request.ActorId.Value));
+        UserResponse? cachedUser = await cacheService.GetAsync<UserResponse>(
+            CacheKeys.UserProfileById(request.ActorId.Value)
+        );
+
         UserRole? actorRole = cachedUser?.Role;
 
         actorRole ??= await db.Users

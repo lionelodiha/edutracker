@@ -22,9 +22,16 @@ internal sealed class GetCurrentUserSessionsQueryHandler(
         if (message.UserId is null)
             throw ResponseCatalog.Auth.InvalidSession.ToException();
 
+        DateTime now = DateTime.UtcNow;
+
         List<Guid> sessionIds = await db.UserSessions
             .AsNoTracking()
-            .Where(s => s.UserId == message.UserId && !s.IsRevoked)
+            .Where(s =>
+                s.UserId == message.UserId &&
+                !s.IsRevoked &&
+                now < s.ExpiresAt &&
+                now < s.AbsoluteExpiresAt
+            )
             .OrderByDescending(s => s.AuditState.CreatedAt)
             .Select(s => s.Id)
             .ToListAsync(cancellationToken);
@@ -34,7 +41,7 @@ internal sealed class GetCurrentUserSessionsQueryHandler(
 
         foreach (Guid sessionId in sessionIds)
         {
-            var cachedSession = await cacheService.GetAsync<SessionData>(CacheKeys.SessionById(sessionId));
+            SessionData? cachedSession = await cacheService.GetAsync<SessionData>(CacheKeys.SessionById(sessionId));
 
             if (cachedSession is not null)
             {
@@ -69,7 +76,7 @@ internal sealed class GetCurrentUserSessionsQueryHandler(
                 await cacheService.SetAsync(
                     CacheKeys.SessionById(session.SessionId),
                     session,
-                    cacheTtlOptions.Value.AuthSessionByIdTtl
+                    cacheTtlOptions.Value.AuthSessionById.Ttl
                 );
             }
         }

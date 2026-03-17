@@ -6,53 +6,44 @@ internal sealed class SessionLifetimeOptionsValidator : IValidateOptions<Session
 {
     public ValidateOptionsResult Validate(string? name, SessionLifetimeOptions options)
     {
-        if (options.StandardSessionDurationHours <= 0)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:StandardSessionDurationHours must be greater than 0."
-            );
+        List<string> errors = [];
 
-        if (options.ExtendedSessionDurationDays <= 0)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:ExtendedSessionDurationDays must be greater than 0."
-            );
+        if (options.StandardSessionDuration is null || options.StandardSessionDuration.Hours <= 0)
+            errors.Add("SessionLifetimeOptions:StandardSessionDuration:Hours must be greater than 0.");
 
-        if (options.AbsoluteSessionLimitDays <= 0)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:AbsoluteSessionLimitDays must be greater than 0."
-            );
+        if (options.ExtendedSessionDuration is null || options.ExtendedSessionDuration.Hours <= 0)
+            errors.Add("SessionLifetimeOptions:ExtendedSessionDuration:Hours must be greater than 0.");
 
-        if (options.StandardExpiryExtensionHours < 0)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:StandardExpiryExtensionHours cannot be negative."
-            );
+        if (options.AbsoluteSessionLimit is null || options.AbsoluteSessionLimit.Hours <= 0)
+            errors.Add("SessionLifetimeOptions:AbsoluteSessionLimit:Hours must be greater than 0.");
 
-        if (options.ExtendedExpiryExtensionHours < 0)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:ExtendedExpiryExtensionHours cannot be negative."
-            );
+        if (options.StandardExpiryExtension is null || options.StandardExpiryExtension.Hours < 0)
+            errors.Add("SessionLifetimeOptions:StandardExpiryExtension:Hours cannot be negative.");
+
+        if (options.ExtendedExpiryExtension is null || options.ExtendedExpiryExtension.Hours < 0)
+            errors.Add("SessionLifetimeOptions:ExtendedExpiryExtension:Hours cannot be negative.");
 
         if (options.ExpiryExtensionTriggerPercent < 1 || options.ExpiryExtensionTriggerPercent > 100)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:ExpiryExtensionTriggerPercent must be between 1 and 100."
-            );
+            errors.Add("SessionLifetimeOptions:ExpiryExtensionTriggerPercent must be between 1 and 100.");
 
-        if (options.AbsoluteSessionLimitDays < options.ExtendedSessionDurationDays)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:AbsoluteSessionLimitDays must be greater than or equal to ExtendedSessionDurationDays."
-            );
+        if (options.AbsoluteSessionLimit is not null && options.ExtendedSessionDuration is not null &&
+            options.AbsoluteSessionLimit.Hours < options.ExtendedSessionDuration.Hours)
+            errors.Add("SessionLifetimeOptions:AbsoluteSessionLimit:Hours must be greater than or equal to ExtendedSessionDuration:Hours.");
 
-        int absoluteLimitHours = options.AbsoluteSessionLimitDays * 24;
+        if (options.AbsoluteSessionLimit is not null &&
+            options.StandardSessionDuration is not null &&
+            options.StandardExpiryExtension is not null &&
+            options.StandardSessionDuration.Hours + options.StandardExpiryExtension.Hours > options.AbsoluteSessionLimit.Hours)
+            errors.Add("SessionLifetimeOptions:Standard session duration plus extension cannot exceed the absolute session limit.");
 
-        if (options.StandardSessionDurationHours + options.StandardExpiryExtensionHours > absoluteLimitHours)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:Standard session duration plus extension cannot exceed the absolute session limit."
-            );
+        if (options.AbsoluteSessionLimit is not null &&
+            options.ExtendedSessionDuration is not null &&
+            options.ExtendedExpiryExtension is not null &&
+            options.ExtendedSessionDuration.Hours + options.ExtendedExpiryExtension.Hours > options.AbsoluteSessionLimit.Hours)
+            errors.Add("SessionLifetimeOptions:Extended session duration plus extension cannot exceed the absolute session limit.");
 
-        if ((options.ExtendedSessionDurationDays * 24) + options.ExtendedExpiryExtensionHours > absoluteLimitHours)
-            return ValidateOptionsResult.Fail(
-                "SessionManagementOptions:Extended session duration plus extension cannot exceed the absolute session limit."
-            );
-
-        return ValidateOptionsResult.Success;
+        return errors.Count is 0
+            ? ValidateOptionsResult.Success
+            : ValidateOptionsResult.Fail(errors);
     }
 }

@@ -6,27 +6,31 @@ internal sealed class SuperAdminSeedOptionsValidator : IValidateOptions<SuperAdm
 {
     public ValidateOptionsResult Validate(string? name, SuperAdminSeedOptions options)
     {
+        List<string> errors = [];
+
         if (string.IsNullOrWhiteSpace(options.FirstName))
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:FirstName is required.");
+            errors.Add("SuperAdminSeedOptions:FirstName is required.");
 
         if (string.IsNullOrWhiteSpace(options.LastName))
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:LastName is required.");
+            errors.Add("SuperAdminSeedOptions:LastName is required.");
 
         if (string.IsNullOrWhiteSpace(options.UserName))
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:UserName is required.");
+            errors.Add("SuperAdminSeedOptions:UserName is required.");
 
         if (string.IsNullOrWhiteSpace(options.Email))
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:Email is required.");
+            errors.Add("SuperAdminSeedOptions:Email is required.");
 
-        if (!options.Email.Contains('@'))
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:Email is invalid.");
+        if (!string.IsNullOrWhiteSpace(options.Email) && !options.Email.Contains('@'))
+            errors.Add("SuperAdminSeedOptions:Email is invalid.");
 
         if (string.IsNullOrWhiteSpace(options.Password))
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:Password is required.");
+            errors.Add("SuperAdminSeedOptions:Password is required.");
 
-        if (options.Password.Length < 8)
-            return ValidateOptionsResult.Fail("SuperAdminSeedOptions:Password must be at least 8 characters long.");
+        if (!string.IsNullOrWhiteSpace(options.Password) && options.Password.Length < 8)
+            errors.Add("SuperAdminSeedOptions:Password must be at least 8 characters long.");
 
-        return ValidateOptionsResult.Success;
+        return errors.Count is 0
+            ? ValidateOptionsResult.Success
+            : ValidateOptionsResult.Fail(errors);
     }
 }

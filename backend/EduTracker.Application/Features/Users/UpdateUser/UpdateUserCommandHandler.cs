@@ -62,7 +62,6 @@ internal sealed class UpdateUserCommandHandler(
         user.SetEncryptedData(encryptedData);
 
         await db.SaveChangesAsync(cancellationToken);
-
         await cacheService.RemoveAsync(CacheKeys.UserProfileById(user.Id));
 
         user.ClearSensitiveData();

@@ -2,16 +2,10 @@ namespace EduTracker.Application.Configurations.Security;
 
 public sealed record SessionLifetimeOptions
 {
-    public int StandardSessionDurationHours { get; init; }
-    public int ExtendedSessionDurationDays { get; init; }
-    public int AbsoluteSessionLimitDays { get; init; }
-    public int StandardExpiryExtensionHours { get; init; }
-    public int ExtendedExpiryExtensionHours { get; init; }
+    public SessionDurationOptions StandardSessionDuration { get; init; } = default!;
+    public SessionDurationOptions ExtendedSessionDuration { get; init; } = default!;
+    public SessionDurationOptions AbsoluteSessionLimit { get; init; } = default!;
+    public SessionDurationOptions StandardExpiryExtension { get; init; } = default!;
+    public SessionDurationOptions ExtendedExpiryExtension { get; init; } = default!;
     public int ExpiryExtensionTriggerPercent { get; init; }
-
-    public TimeSpan StandardSessionDuration => TimeSpan.FromHours(StandardSessionDurationHours);
-    public TimeSpan ExtendedSessionDuration => TimeSpan.FromDays(ExtendedSessionDurationDays);
-    public TimeSpan AbsoluteSessionLimit => TimeSpan.FromDays(AbsoluteSessionLimitDays);
-    public TimeSpan StandardExpiryExtension => TimeSpan.FromHours(StandardExpiryExtensionHours);
-    public TimeSpan ExtendedExpiryExtension => TimeSpan.FromHours(ExtendedExpiryExtensionHours);
 }
