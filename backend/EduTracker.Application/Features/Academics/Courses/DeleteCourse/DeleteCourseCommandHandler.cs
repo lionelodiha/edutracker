@@ -2,7 +2,6 @@ using EduTracker.Application.Constants.Cache;
 using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
-using EduTracker.Application.Features.Academics;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Academics;

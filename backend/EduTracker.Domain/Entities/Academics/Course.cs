@@ -1,11 +1,13 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
+using System.Collections.ObjectModel;
 
 namespace EduTracker.Domain.Entities.Academics;
 
 public sealed class Course : IEntity, IAuditable
 {
     public AuditState AuditState { get; private set; } = new();
+    private readonly List<CourseOffering> _courseOfferings = [];
 
     private Course() { }
 
@@ -13,7 +15,7 @@ public sealed class Course : IEntity, IAuditable
     {
         Name = ValidateName(name);
         Code = ValidateCode(code);
-        OrganizationId = organizationId;
+        OrganizationId = ValidateOrganizationId(organizationId);
 
         AuditState.UpdateAudit();
     }
@@ -25,13 +27,14 @@ public sealed class Course : IEntity, IAuditable
 
     public string Name { get; private set; } = string.Empty;
     public string Code { get; private set; } = string.Empty;
-    
     public Guid OrganizationId { get; private set; }
+
+    public IReadOnlyCollection<CourseOffering> CourseOfferings => new ReadOnlyCollection<CourseOffering>(_courseOfferings);
 
     public void UpdateDetails(string name, string code)
     {
         bool changed = false;
-        
+
         string validatedName = ValidateName(name);
         if (Name != validatedName)
         {
@@ -46,10 +49,18 @@ public sealed class Course : IEntity, IAuditable
             changed = true;
         }
 
-        if (changed)
-        {
-            AuditState.UpdateAudit();
-        }
+        if (!changed)
+            return;
+
+        AuditState.UpdateAudit();
+    }
+
+    private static Guid ValidateOrganizationId(Guid organizationId)
+    {
+        if (organizationId == Guid.Empty)
+            throw new ArgumentException("Organization ID is required.", nameof(organizationId));
+
+        return organizationId;
     }
 
     private static string ValidateName(string name)
@@ -57,12 +68,15 @@ public sealed class Course : IEntity, IAuditable
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Course name is required.", nameof(name));
 
-        name = name.Trim();
+        string normalizedName = name.Trim();
 
-        if (name.Length > 150)
-            throw new ArgumentException("Course name cannot exceed 150 characters.", nameof(name));
+        if (normalizedName.Length > AcademicLimits.CourseNameMaxLength)
+            throw new ArgumentException(
+                $"Course name cannot exceed {AcademicLimits.CourseNameMaxLength} characters.",
+                nameof(name)
+            );
 
-        return name;
+        return normalizedName;
     }
 
     private static string ValidateCode(string code)
@@ -70,11 +84,14 @@ public sealed class Course : IEntity, IAuditable
         if (string.IsNullOrWhiteSpace(code))
             throw new ArgumentException("Course code is required.", nameof(code));
 
-        code = code.Trim().ToUpperInvariant();
+        string normalizedCode = code.Trim().ToUpperInvariant();
 
-        if (code.Length > 20)
-            throw new ArgumentException("Course code cannot exceed 20 characters.", nameof(code));
+        if (normalizedCode.Length > AcademicLimits.CourseCodeMaxLength)
+            throw new ArgumentException(
+                $"Course code cannot exceed {AcademicLimits.CourseCodeMaxLength} characters.",
+                nameof(code)
+            );
 
-        return code;
+        return normalizedCode;
     }
 }

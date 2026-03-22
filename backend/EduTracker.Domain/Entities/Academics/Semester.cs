@@ -1,19 +1,20 @@
-using System.Text.RegularExpressions;
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
+using System.Collections.ObjectModel;
 
 namespace EduTracker.Domain.Entities.Academics;
 
-public sealed partial class Semester : IEntity, IAuditable
+public sealed class Semester : IEntity, IAuditable
 {
     public AuditState AuditState { get; private set; } = new();
+    private readonly List<Term> _terms = [];
 
     private Semester() { }
 
-    public Semester(string session, Guid organizationId)
+    public Semester(int startYear, Guid organizationId)
     {
-        Session = ValidateSession(session);
-        OrganizationId = organizationId;
+        StartYear = ValidateStartYear(startYear);
+        OrganizationId = ValidateOrganizationId(organizationId);
 
         AuditState.UpdateAudit();
     }
@@ -23,50 +24,55 @@ public sealed partial class Semester : IEntity, IAuditable
     public DateTime CreatedAt => AuditState.CreatedAt;
     public DateTime UpdatedAt => AuditState.UpdatedAt;
 
-    public string Session { get; private set; } = string.Empty;
     public Guid OrganizationId { get; private set; }
+    public int StartYear { get; private set; }
+    public int EndYear => StartYear + 1;
+    public string Session => $"{StartYear}/{EndYear}";
 
-    public void UpdateSession(string session)
+    public IReadOnlyCollection<Term> Terms => new ReadOnlyCollection<Term>(_terms);
+
+    public void UpdateStartYear(int startYear)
     {
-        string validatedSession = ValidateSession(session);
+        int validatedStartYear = ValidateStartYear(startYear);
 
-        if (Session == validatedSession)
+        if (StartYear == validatedStartYear)
             return;
 
-        Session = validatedSession;
+        StartYear = validatedStartYear;
         AuditState.UpdateAudit();
     }
 
-    private static string ValidateSession(string session)
+    public Term AddTerm(int number, DateOnly startDate, DateOnly endDate)
     {
-        if (string.IsNullOrWhiteSpace(session))
-            throw new ArgumentException("Session is required.", nameof(session));
+        if (_terms.Any(item => item.Number == number))
+            throw new InvalidOperationException($"Term {number} already exists for this semester.");
 
-        session = session.Trim();
+        if (_terms.Any(item => DatesOverlap(item.StartDate, item.EndDate, startDate, endDate)))
+            throw new InvalidOperationException("Term dates cannot overlap within the same semester.");
 
-        var match = SessionRegex().Match(session);
-        if (!match.Success)
-            throw new ArgumentException("Session must be in the format 'YYYY/YYYY' or 'YY/YY'.", nameof(session));
+        Term term = new(Id, number, startDate, endDate);
+        _terms.Add(term);
 
-        string year1Str = match.Groups[1].Value;
-        string year2Str = match.Groups[2].Value;
-
-        if (!int.TryParse(year1Str, out int year1) || !int.TryParse(year2Str, out int year2))
-            throw new ArgumentException("Invalid year format in session.", nameof(session));
-
-        if (year1Str.Length != year2Str.Length)
-            throw new ArgumentException("Session years must use the same number format.", nameof(session));
-
-        int expectedYear2 = year1Str.Length == 2
-            ? (year1 + 1) % 100
-            : year1 + 1;
-
-        if (year2 != expectedYear2)
-            throw new ArgumentException("The session years must be exactly one year apart (e.g., '2023/2024' or '23/24').", nameof(session));
-
-        return session;
+        AuditState.UpdateAudit();
+        return term;
     }
 
-    [GeneratedRegex(@"^(\d{2}|\d{4})/(\d{2}|\d{4})$")]
-    private static partial Regex SessionRegex();
+    private static Guid ValidateOrganizationId(Guid organizationId)
+    {
+        if (organizationId == Guid.Empty)
+            throw new ArgumentException("Organization ID is required.", nameof(organizationId));
+
+        return organizationId;
+    }
+
+    private static int ValidateStartYear(int startYear)
+    {
+        if (startYear < 1900 || startYear > 3000)
+            throw new ArgumentOutOfRangeException(nameof(startYear), "Start year must be between 1900 and 3000.");
+
+        return startYear;
+    }
+
+    private static bool DatesOverlap(DateOnly firstStart, DateOnly firstEnd, DateOnly secondStart, DateOnly secondEnd)
+        => firstStart < secondEnd && secondStart < firstEnd;
 }

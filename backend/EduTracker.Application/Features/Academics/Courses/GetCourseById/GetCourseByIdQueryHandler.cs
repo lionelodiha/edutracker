@@ -4,7 +4,6 @@ using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Entities;
 using EduTracker.Application.Extensions.Responses;
-using EduTracker.Application.Features.Academics;
 using EduTracker.Application.Features.Academics.Models;
 using EduTracker.Application.Models;
 using EduTracker.Application.Services;
