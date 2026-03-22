@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EduTracker.Api.Authentication;
 using EduTracker.Api.Constants.Auth;
+using EduTracker.Api.Endpoints.Academics;
 using EduTracker.Api.Endpoints.Auth;
 using EduTracker.Api.Endpoints.Base;
 using EduTracker.Api.Endpoints.Organizations;
@@ -85,5 +86,6 @@ app.MapAuthEndpoints();
 app.MapSessionEndpoints();
 app.MapUserEndpoints();
 app.MapOrganizationEndpoints();
+app.MapAcademicEndpoints();
 
 app.Run();
