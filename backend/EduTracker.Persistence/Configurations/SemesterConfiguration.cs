@@ -1,4 +1,6 @@
+using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Academics;
+using EduTracker.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,19 +12,27 @@ internal sealed class SemesterConfiguration : IEntityTypeConfiguration<Semester>
     {
         builder.HasKey(s => s.Id);
 
-        builder.Property(s => s.StartYear).IsRequired();
+        builder.OwnsOne(s => s.AuditState, audit =>
+        {
+            audit.Property(a => a.CreatedAt)
+                .HasColumnName(nameof(AuditState.CreatedAt).ToSnakeCase())
+                .IsRequired();
 
-        builder.Ignore(s => s.EndYear);
-        builder.Ignore(s => s.Session);
+            audit.Property(a => a.UpdatedAt)
+                .HasColumnName(nameof(AuditState.UpdatedAt).ToSnakeCase())
+                .IsRequired();
+        });
+
+        builder.Property(s => s.StartYear)
+            .IsRequired();
 
         builder.HasOne(s => s.Organization)
             .WithMany()
             .HasForeignKey(s => s.OrganizationId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(s => new { s.OrganizationId, s.StartYear }).IsUnique();
-
-        builder.OwnsOne(s => s.AuditState);
+        builder.HasIndex(s => new { s.OrganizationId, s.StartYear })
+            .IsUnique();
     }
 }

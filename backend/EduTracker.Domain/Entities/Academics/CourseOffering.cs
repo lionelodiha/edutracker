@@ -9,11 +9,10 @@ public sealed class CourseOffering : IEntity, IAuditable
 
     private CourseOffering() { }
 
-    public CourseOffering(Guid semesterId, Guid termId, Guid courseId)
+    public CourseOffering(Guid termId, Guid courseId)
     {
-        SemesterId = semesterId;
-        CourseId = courseId;
         TermId = termId;
+        CourseId = courseId;
 
         AuditState.UpdateAudit();
     }
@@ -22,9 +21,6 @@ public sealed class CourseOffering : IEntity, IAuditable
 
     public DateTime CreatedAt => AuditState.CreatedAt;
     public DateTime UpdatedAt => AuditState.UpdatedAt;
-
-    public Guid SemesterId { get; private set; }
-    public Semester Semester { get; private set; } = null!;
 
     public Guid TermId { get; private set; }
     public Term Term { get; private set; } = null!;

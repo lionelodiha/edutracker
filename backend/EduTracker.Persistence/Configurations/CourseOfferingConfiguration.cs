@@ -1,4 +1,6 @@
+using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Academics;
+using EduTracker.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,26 +12,30 @@ internal sealed class CourseOfferingConfiguration : IEntityTypeConfiguration<Cou
     {
         builder.HasKey(co => co.Id);
 
-        builder.HasOne(co => co.Course)
-            .WithMany()
-            .HasForeignKey(co => co.CourseId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.OwnsOne(co => co.AuditState, audit =>
+        {
+            audit.Property(a => a.CreatedAt)
+                .HasColumnName(nameof(AuditState.CreatedAt).ToSnakeCase())
+                .IsRequired();
 
-        builder.HasOne(co => co.Semester)
-            .WithMany()
-            .HasForeignKey(co => co.SemesterId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            audit.Property(a => a.UpdatedAt)
+                .HasColumnName(nameof(AuditState.UpdatedAt).ToSnakeCase())
+                .IsRequired();
+        });
 
         builder.HasOne(co => co.Term)
             .WithMany()
             .HasForeignKey(co => co.TermId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(co => new { co.TermId, co.CourseId }).IsUnique();
+        builder.HasOne(co => co.Course)
+            .WithMany()
+            .HasForeignKey(co => co.CourseId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.OwnsOne(co => co.AuditState);
+        builder.HasIndex(co => new { co.TermId, co.CourseId })
+            .IsUnique();
     }
 }

@@ -9,10 +9,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
+
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<OrganizationMember> OrganizationMembers => Set<OrganizationMember>();
     public DbSet<OrganizationInvite> OrganizationInvites => Set<OrganizationInvite>();
-    
+
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Semester> Semesters => Set<Semester>();
     public DbSet<Term> Terms => Set<Term>();
