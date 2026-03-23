@@ -30,7 +30,7 @@ internal sealed class CreateCourseCommandHandler(
         if (exists)
             throw ResponseCatalog.Course.AlreadyExists.ToException();
 
-        Course course = new(message.Name, message.Code, message.OrganizationId);
+        Course course = new(message.OrganizationId, message.Name, message.Code);
 
         db.Courses.Add(course);
         await db.SaveChangesAsync(cancellationToken);

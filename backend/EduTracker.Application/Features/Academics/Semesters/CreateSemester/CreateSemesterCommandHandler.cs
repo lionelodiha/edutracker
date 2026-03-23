@@ -23,14 +23,14 @@ internal sealed class CreateSemesterCommandHandler(
             .AsNoTracking()
             .AnyAsync(
                 item => item.OrganizationId == message.OrganizationId
-                    && item.Session == message.Session.Trim(),
+                    && item.StartYear == message.StartYear,
                 cancellationToken
             );
 
         if (exists)
             throw ResponseCatalog.Semester.AlreadyExists.ToException();
 
-        Semester semester = new(message.Session, message.OrganizationId);
+        Semester semester = new(message.OrganizationId, message.StartYear);
 
         db.Semesters.Add(semester);
         await db.SaveChangesAsync(cancellationToken);

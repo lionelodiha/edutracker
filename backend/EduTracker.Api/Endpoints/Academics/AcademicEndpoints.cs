@@ -3,16 +3,19 @@ using EduTracker.Api.Constants.Routes;
 using EduTracker.Api.Endpoints.Academics.Handlers.CreateCourse;
 using EduTracker.Api.Endpoints.Academics.Handlers.CreateCourseOffering;
 using EduTracker.Api.Endpoints.Academics.Handlers.CreateSemester;
+using EduTracker.Api.Endpoints.Academics.Handlers.CreateTerm;
 using EduTracker.Api.Endpoints.Academics.Handlers.DeleteCourse;
 using EduTracker.Api.Endpoints.Academics.Handlers.DeleteCourseOffering;
 using EduTracker.Api.Endpoints.Academics.Handlers.DeleteSemester;
+using EduTracker.Api.Endpoints.Academics.Handlers.DeleteTerm;
 using EduTracker.Api.Endpoints.Academics.Handlers.GetCourseById;
 using EduTracker.Api.Endpoints.Academics.Handlers.GetCourseOfferingsBySemester;
 using EduTracker.Api.Endpoints.Academics.Handlers.GetCourses;
 using EduTracker.Api.Endpoints.Academics.Handlers.GetSemesterById;
 using EduTracker.Api.Endpoints.Academics.Handlers.GetSemesters;
+using EduTracker.Api.Endpoints.Academics.Handlers.GetTermById;
+using EduTracker.Api.Endpoints.Academics.Handlers.GetTermsBySemester;
 using EduTracker.Api.Endpoints.Academics.Handlers.UpdateCourse;
-using EduTracker.Api.Endpoints.Academics.Handlers.UpdateSemester;
 using EduTracker.Api.Models;
 using EduTracker.Application.Features.Academics.Models;
 
@@ -97,22 +100,49 @@ internal static class AcademicEndpoints
                 .WithSummary("Get semester by id")
                 .RequireAuthorization();
 
-            semesterGroup.MapPatch(ApiRoutes.Academic.Semester.Update, UpdateSemesterEndpointHandler.Handle)
-                .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
-                .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
-                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
-                .WithSummary("Update semester")
-                .RequireAuthorization();
-
             semesterGroup.MapDelete(ApiRoutes.Academic.Semester.Delete, DeleteSemesterEndpointHandler.Handle)
                 .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
                 .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
                 .WithSummary("Delete semester")
+                .RequireAuthorization();
+
+            RouteGroupBuilder termGroup = app.MapGroup(ApiRoutes.Academic.Term.Base)
+                .WithTags("Academics");
+
+            termGroup.MapPost(ApiRoutes.Academic.Term.Create, CreateTermEndpointHandler.Handle)
+                .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
+                .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
+                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
+                .WithSummary("Create term")
+                .RequireAuthorization();
+
+            termGroup.MapGet(ApiRoutes.Academic.Term.ListBySemester, GetTermsBySemesterEndpointHandler.Handle)
+                .Produces<ApiResponse<IReadOnlyList<TermResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
+                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithSummary("List terms by semester")
+                .RequireAuthorization();
+
+            termGroup.MapGet(ApiRoutes.Academic.Term.GetById, GetTermByIdEndpointHandler.Handle)
+                .Produces<ApiResponse<TermResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
+                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithSummary("Get term by id")
+                .RequireAuthorization();
+
+            termGroup.MapDelete(ApiRoutes.Academic.Term.Delete, DeleteTermEndpointHandler.Handle)
+                .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
+                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithSummary("Delete term")
                 .RequireAuthorization();
 
             RouteGroupBuilder courseOfferingGroup = app.MapGroup(ApiRoutes.Academic.CourseOffering.Base)

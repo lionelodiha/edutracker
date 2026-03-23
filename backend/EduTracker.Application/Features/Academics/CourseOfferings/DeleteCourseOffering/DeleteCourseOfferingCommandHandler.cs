@@ -21,7 +21,7 @@ internal sealed class DeleteCourseOfferingCommandHandler(
 
         CourseOffering offering = await db.CourseOfferings
             .FirstOrDefaultAsync(
-                item => item.Id == message.CourseOfferingId && item.OrganizationId == message.OrganizationId,
+                item => item.Id == message.CourseOfferingId && item.Semester.OrganizationId == message.OrganizationId,
                 cancellationToken
             )
             ?? throw ResponseCatalog.CourseOffering.NotFound.ToException();

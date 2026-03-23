@@ -17,7 +17,7 @@ internal static class CreateCourseOfferingEndpointHandler
     {
         Guid? actorId = httpContext.User.GetUserId();
         var result = await mediator.Send(
-            new CreateCourseOfferingCommand(actorId, request.OrganizationId, request.CourseId, request.SemesterId),
+            new CreateCourseOfferingCommand(actorId, request.OrganizationId, request.CourseId, request.TermId),
             cancellationToken
         );
 

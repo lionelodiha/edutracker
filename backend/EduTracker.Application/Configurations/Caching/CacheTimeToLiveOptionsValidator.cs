@@ -35,6 +35,12 @@ internal sealed class CacheTimeToLiveOptionsValidator : IValidateOptions<CacheTi
         if (options.Semesters is null || options.Semesters.Minutes <= 0)
             errors.Add("CacheTimeToLiveOptions:Semesters:Minutes must be greater than 0.");
 
+        if (options.TermById is null || options.TermById.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:TermById:Minutes must be greater than 0.");
+
+        if (options.TermsBySemester is null || options.TermsBySemester.Minutes <= 0)
+            errors.Add("CacheTimeToLiveOptions:TermsBySemester:Minutes must be greater than 0.");
+
         if (options.CourseOfferingsBySemester is null || options.CourseOfferingsBySemester.Minutes <= 0)
             errors.Add("CacheTimeToLiveOptions:CourseOfferingsBySemester:Minutes must be greater than 0.");
 

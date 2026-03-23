@@ -11,5 +11,7 @@ public sealed record CacheTimeToLiveOptions
     public CacheOptions Courses { get; init; } = default!;
     public CacheOptions SemesterById { get; init; } = default!;
     public CacheOptions Semesters { get; init; } = default!;
+    public CacheOptions TermById { get; init; } = default!;
+    public CacheOptions TermsBySemester { get; init; } = default!;
     public CacheOptions CourseOfferingsBySemester { get; init; } = default!;
 }

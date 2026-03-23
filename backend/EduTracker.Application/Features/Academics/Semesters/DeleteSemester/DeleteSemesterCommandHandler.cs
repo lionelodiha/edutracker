@@ -31,6 +31,7 @@ internal sealed class DeleteSemesterCommandHandler(
 
         await cacheService.RemoveAsync(CacheKeys.SemesterById(semester.Id));
         await cacheService.RemoveAsync(CacheKeys.Semesters(message.OrganizationId));
+        await cacheService.RemoveAsync(CacheKeys.TermsBySemester(semester.Id));
         await cacheService.RemoveAsync(CacheKeys.CourseOfferingsBySemester(semester.Id));
 
         return ResponseCatalog.Semester.Deleted.ToOperationResult();

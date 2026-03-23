@@ -38,7 +38,8 @@ internal sealed class UpdateCourseCommandHandler(
         if (exists)
             throw ResponseCatalog.Course.AlreadyExists.ToException();
 
-        course.UpdateDetails(message.Name, message.Code);
+        course.UpdateName(message.Name);
+        course.UpdateCode(message.Code);
         await db.SaveChangesAsync(cancellationToken);
 
         await cacheService.RemoveAsync(CacheKeys.CourseById(course.Id));

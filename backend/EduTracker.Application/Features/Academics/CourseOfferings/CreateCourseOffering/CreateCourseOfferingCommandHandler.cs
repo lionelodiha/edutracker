@@ -27,33 +27,34 @@ internal sealed class CreateCourseOfferingCommandHandler(
             )
             ?? throw ResponseCatalog.Course.NotFound.ToException();
 
-        Semester semester = await db.Semesters
+        Term term = await db.Terms
             .AsNoTracking()
+            .Include(item => item.Semester)
             .FirstOrDefaultAsync(
-                item => item.Id == message.SemesterId && item.OrganizationId == message.OrganizationId,
+                item => item.Id == message.TermId && item.Semester.OrganizationId == message.OrganizationId,
                 cancellationToken
             )
-            ?? throw ResponseCatalog.Semester.NotFound.ToException();
+            ?? throw ResponseCatalog.Term.NotFound.ToException();
 
-        if (course.OrganizationId != semester.OrganizationId)
+        if (course.OrganizationId != term.Semester.OrganizationId)
             throw ResponseCatalog.CourseOffering.OrganizationMismatch.ToException();
 
         bool exists = await db.CourseOfferings
             .AsNoTracking()
             .AnyAsync(
-                item => item.CourseId == message.CourseId && item.SemesterId == message.SemesterId,
+                item => item.CourseId == message.CourseId && item.TermId == message.TermId,
                 cancellationToken
             );
 
         if (exists)
             throw ResponseCatalog.CourseOffering.AlreadyExists.ToException();
 
-        CourseOffering offering = new(message.SemesterId, message.CourseId, message.OrganizationId);
+        CourseOffering offering = new(term.SemesterId, message.TermId, message.CourseId);
 
         db.CourseOfferings.Add(offering);
         await db.SaveChangesAsync(cancellationToken);
 
-        await cacheService.RemoveAsync(CacheKeys.CourseOfferingsBySemester(message.SemesterId));
+        await cacheService.RemoveAsync(CacheKeys.CourseOfferingsBySemester(term.SemesterId));
 
         return ResponseCatalog.CourseOffering.Created
             .As<Guid>()

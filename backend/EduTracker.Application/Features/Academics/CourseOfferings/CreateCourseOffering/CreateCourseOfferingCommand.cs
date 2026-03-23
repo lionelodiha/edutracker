@@ -7,5 +7,5 @@ public sealed record CreateCourseOfferingCommand(
     Guid? ActorId,
     Guid OrganizationId,
     Guid CourseId,
-    Guid SemesterId
+    Guid TermId
 ) : IMessage<OperationResult<Guid>>;

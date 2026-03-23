@@ -60,12 +60,6 @@ internal static partial class ResponseCatalog
             Details: []
         );
 
-        public static readonly OperationOutcomeResponse Updated = new(
-            Id: "SEMESTER_UPDATED",
-            Title: "Semester updated successfully.",
-            Details: []
-        );
-
         public static readonly OperationOutcomeResponse Deleted = new(
             Id: "SEMESTER_DELETED",
             Title: "Semester deleted successfully.",
@@ -82,7 +76,42 @@ internal static partial class ResponseCatalog
         public static readonly OperationFailureResponse AlreadyExists = new(
             Id: "SEMESTER_ALREADY_EXISTS",
             StatusCode: HttpStatusCodes.Conflict,
-            Title: "A semester with this session already exists for the organization.",
+            Title: "A semester with this start year already exists for the organization.",
+            Details: []
+        );
+    }
+
+    public static class Term
+    {
+        public static readonly OperationOutcomeResponse Created = new(
+            Id: "TERM_CREATED",
+            Title: "Term created successfully.",
+            Details: []
+        );
+
+        public static readonly OperationOutcomeResponse Retrieved = new(
+            Id: "TERM_RETRIEVED",
+            Title: "Term retrieved successfully.",
+            Details: []
+        );
+
+        public static readonly OperationOutcomeResponse Deleted = new(
+            Id: "TERM_DELETED",
+            Title: "Term deleted successfully.",
+            Details: []
+        );
+
+        public static readonly OperationFailureResponse NotFound = new(
+            Id: "TERM_NOT_FOUND",
+            StatusCode: HttpStatusCodes.NotFound,
+            Title: "Term not found.",
+            Details: []
+        );
+
+        public static readonly OperationFailureResponse AlreadyExists = new(
+            Id: "TERM_ALREADY_EXISTS",
+            StatusCode: HttpStatusCodes.Conflict,
+            Title: "A term with this ordinal already exists for the semester.",
             Details: []
         );
     }
@@ -117,14 +146,14 @@ internal static partial class ResponseCatalog
         public static readonly OperationFailureResponse AlreadyExists = new(
             Id: "COURSE_OFFERING_ALREADY_EXISTS",
             StatusCode: HttpStatusCodes.Conflict,
-            Title: "This course has already been linked to the semester.",
+            Title: "This course has already been linked to the term.",
             Details: []
         );
 
         public static readonly OperationFailureResponse OrganizationMismatch = new(
             Id: "COURSE_OFFERING_ORGANIZATION_MISMATCH",
             StatusCode: HttpStatusCodes.Conflict,
-            Title: "Course and semester must belong to the same organization.",
+            Title: "Course and term must belong to the same organization.",
             Details: []
         );
     }

@@ -15,6 +15,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Semester> Semesters => Set<Semester>();
+    public DbSet<Term> Terms => Set<Term>();
     public DbSet<CourseOffering> CourseOfferings => Set<CourseOffering>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

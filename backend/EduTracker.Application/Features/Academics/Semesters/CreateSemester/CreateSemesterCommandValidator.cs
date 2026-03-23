@@ -10,8 +10,8 @@ internal sealed class CreateSemesterCommandValidator : AbstractValidator<CreateS
             .NotEmpty()
             .WithMessage("OrganizationId is required.");
 
-        RuleFor(x => x.Session)
-            .NotEmpty()
-            .MaximumLength(9);
+        RuleFor(x => x.StartYear)
+            .InclusiveBetween(DateTime.UtcNow.Year - 20, DateTime.UtcNow.Year + 20)
+            .WithMessage("StartYear must be within the allowed academic range.");
     }
 }

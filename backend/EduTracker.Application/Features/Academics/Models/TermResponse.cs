@@ -1,13 +1,9 @@
 namespace EduTracker.Application.Features.Academics.Models;
 
-public sealed record CourseOfferingResponse(
+public sealed record TermResponse(
     Guid Id,
-    Guid CourseId,
-    string CourseName,
-    string CourseCode,
     Guid SemesterId,
-    Guid TermId,
-    int TermOrdinal,
+    int Ordinal,
     int SemesterStartYear,
     Guid OrganizationId,
     DateTime CreatedAt

@@ -14,8 +14,8 @@ internal sealed class CreateCourseOfferingCommandValidator : AbstractValidator<C
             .NotEmpty()
             .WithMessage("CourseId is required.");
 
-        RuleFor(x => x.SemesterId)
+        RuleFor(x => x.TermId)
             .NotEmpty()
-            .WithMessage("SemesterId is required.");
+            .WithMessage("TermId is required.");
     }
 }

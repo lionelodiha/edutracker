@@ -1,11 +1,10 @@
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Models;
 
-namespace EduTracker.Application.Features.Academics.Semesters.UpdateSemester;
+namespace EduTracker.Application.Features.Academics.Terms.DeleteTerm;
 
-public sealed record UpdateSemesterCommand(
+public sealed record DeleteTermCommand(
     Guid? ActorId,
     Guid OrganizationId,
-    Guid SemesterId,
-    string Session
+    Guid TermId
 ) : IMessage<OperationResult<object>>;

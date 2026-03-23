@@ -20,9 +20,21 @@ internal static class AcademicExtensions
     {
         public SemesterResponse ToSemesterResponse() => new(
             semester.Id,
-            semester.Session,
+            semester.StartYear,
             semester.OrganizationId,
             semester.CreatedAt
+        );
+    }
+
+    extension(Term term)
+    {
+        public TermResponse ToTermResponse() => new(
+            term.Id,
+            term.SemesterId,
+            term.Ordinal,
+            term.Semester.StartYear,
+            term.Semester.OrganizationId,
+            term.CreatedAt
         );
     }
 }

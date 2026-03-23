@@ -1,10 +1,11 @@
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Models;
 
-namespace EduTracker.Application.Features.Academics.Semesters.CreateSemester;
+namespace EduTracker.Application.Features.Academics.Terms.CreateTerm;
 
-public sealed record CreateSemesterCommand(
+public sealed record CreateTermCommand(
     Guid? ActorId,
     Guid OrganizationId,
-    int StartYear
+    Guid SemesterId,
+    int Ordinal
 ) : IMessage<OperationResult<Guid>>;

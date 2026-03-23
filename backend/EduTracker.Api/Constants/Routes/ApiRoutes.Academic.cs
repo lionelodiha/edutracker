@@ -18,7 +18,15 @@ internal static partial class ApiRoutes
             public const string Base = $"{ApiBasePath}/semesters";
             public const string List = "";
             public const string GetById = "/{id:guid}";
-            public const string Update = "/{id:guid}";
+            public const string Delete = "/{id:guid}";
+        }
+
+        public static class Term
+        {
+            public const string Base = $"{ApiBasePath}/terms";
+            public const string ListBySemester = "/semester/{semesterId:guid}";
+            public const string GetById = "/{id:guid}";
+            public const string Create = "";
             public const string Delete = "/{id:guid}";
         }
 

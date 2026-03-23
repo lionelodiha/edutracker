@@ -10,16 +10,16 @@ using EduTracker.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace EduTracker.Application.Features.Academics.CourseOfferings.GetCourseOfferingsBySemester;
+namespace EduTracker.Application.Features.Academics.Terms.GetTermsBySemester;
 
-internal sealed class GetCourseOfferingsBySemesterQueryHandler(
+internal sealed class GetTermsBySemesterQueryHandler(
     AppDbContext db,
     ICacheService cacheService,
     IOptions<CacheTimeToLiveOptions> cacheTtlOptions
-) : IHandler<GetCourseOfferingsBySemesterQuery, OperationResult<IReadOnlyList<CourseOfferingResponse>>>
+) : IHandler<GetTermsBySemesterQuery, OperationResult<IReadOnlyList<TermResponse>>>
 {
-    public async Task<OperationResult<IReadOnlyList<CourseOfferingResponse>>> Handle(
-        GetCourseOfferingsBySemesterQuery message,
+    public async Task<OperationResult<IReadOnlyList<TermResponse>>> Handle(
+        GetTermsBySemesterQuery message,
         CancellationToken cancellationToken = default
     )
     {
@@ -35,46 +35,36 @@ internal sealed class GetCourseOfferingsBySemesterQueryHandler(
         if (!semesterExists)
             throw ResponseCatalog.Semester.NotFound.ToException();
 
-        string cacheKey = CacheKeys.CourseOfferingsBySemester(message.SemesterId);
-        IReadOnlyList<CourseOfferingResponse>? cachedItems =
-            await cacheService.GetAsync<IReadOnlyList<CourseOfferingResponse>>(cacheKey);
+        string cacheKey = CacheKeys.TermsBySemester(message.SemesterId);
+        IReadOnlyList<TermResponse>? cachedTerms = await cacheService.GetAsync<IReadOnlyList<TermResponse>>(cacheKey);
 
-        if (cachedItems is not null)
+        if (cachedTerms is not null)
         {
-            return ResponseCatalog.CourseOffering.Retrieved
-                .As<IReadOnlyList<CourseOfferingResponse>>()
-                .WithData(cachedItems)
+            return ResponseCatalog.Term.Retrieved
+                .As<IReadOnlyList<TermResponse>>()
+                .WithData(cachedTerms)
                 .ToOperationResult();
         }
 
-        List<CourseOfferingResponse> offerings = await db.CourseOfferings
+        List<TermResponse> terms = await db.Terms
             .AsNoTracking()
             .Where(item => item.SemesterId == message.SemesterId && item.Semester.OrganizationId == message.OrganizationId)
-            .OrderBy(item => item.Term.Ordinal)
-            .ThenBy(item => item.Course.Code)
-            .Select(item => new CourseOfferingResponse(
+            .OrderBy(item => item.Ordinal)
+            .Select(item => new TermResponse(
                 item.Id,
-                item.CourseId,
-                item.Course.Name,
-                item.Course.Code,
                 item.SemesterId,
-                item.TermId,
-                item.Term.Ordinal,
+                item.Ordinal,
                 item.Semester.StartYear,
                 item.Semester.OrganizationId,
                 item.CreatedAt
             ))
             .ToListAsync(cancellationToken);
 
-        await cacheService.SetAsync(
-            cacheKey,
-            offerings,
-            cacheTtlOptions.Value.CourseOfferingsBySemester.Ttl
-        );
+        await cacheService.SetAsync(cacheKey, terms, cacheTtlOptions.Value.TermsBySemester.Ttl);
 
-        return ResponseCatalog.CourseOffering.Retrieved
-            .As<IReadOnlyList<CourseOfferingResponse>>()
-            .WithData(offerings)
+        return ResponseCatalog.Term.Retrieved
+            .As<IReadOnlyList<TermResponse>>()
+            .WithData(terms)
             .ToOperationResult();
     }
 }

@@ -36,10 +36,10 @@ internal sealed class GetSemestersQueryHandler(
         List<SemesterResponse> semesters = await db.Semesters
             .AsNoTracking()
             .Where(item => item.OrganizationId == message.OrganizationId)
-            .OrderByDescending(item => item.Session)
+            .OrderByDescending(item => item.StartYear)
             .Select(item => new SemesterResponse(
                 item.Id,
-                item.Session,
+                item.StartYear,
                 item.OrganizationId,
                 item.CreatedAt
             ))

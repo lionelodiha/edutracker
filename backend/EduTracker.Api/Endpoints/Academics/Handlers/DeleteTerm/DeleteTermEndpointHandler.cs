@@ -1,26 +1,27 @@
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Responses;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Features.Academics.Semesters.CreateSemester;
+using EduTracker.Application.Features.Academics.Terms.DeleteTerm;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EduTracker.Api.Endpoints.Academics.Handlers.CreateSemester;
+namespace EduTracker.Api.Endpoints.Academics.Handlers.DeleteTerm;
 
-internal static class CreateSemesterEndpointHandler
+internal static class DeleteTermEndpointHandler
 {
     public static async Task<IResult> Handle(
         HttpContext httpContext,
-        [FromBody] CreateSemesterRequest request,
+        Guid id,
+        [FromQuery] Guid organizationId,
         IMediator mediator,
         CancellationToken cancellationToken = default
     )
     {
         Guid? actorId = httpContext.User.GetUserId();
         var result = await mediator.Send(
-            new CreateSemesterCommand(actorId, request.OrganizationId, request.StartYear),
+            new DeleteTermCommand(actorId, organizationId, id),
             cancellationToken
         );
 
-        return Results.Created($"/api/semesters/{result.Data}", result.ToApiResponse());
+        return Results.Ok(result.ToApiResponse());
     }
 }
