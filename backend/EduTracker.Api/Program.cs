@@ -2,19 +2,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EduTracker.Api.Authentication;
 using EduTracker.Api.Constants.Auth;
-using EduTracker.Api.Endpoints.Auth;
-using EduTracker.Api.Endpoints.Base;
-using EduTracker.Api.Endpoints.CourseOfferings;
-using EduTracker.Api.Endpoints.Courses;
-using EduTracker.Api.Endpoints.OrganizationInvites;
-using EduTracker.Api.Endpoints.OrganizationMembers;
-using EduTracker.Api.Endpoints.Organizations;
-using EduTracker.Api.Endpoints.Semesters;
-using EduTracker.Api.Endpoints.Sessions;
-using EduTracker.Api.Endpoints.Terms;
-using EduTracker.Api.Endpoints.Users;
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Cors;
+using EduTracker.Api.Extensions.Endpoints;
 using EduTracker.Api.Extensions.OpenApi;
 using EduTracker.Api.Hosting;
 using EduTracker.Api.Middleware;
@@ -36,6 +26,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices([typeof(IMediator).Assembly]);
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddEndpointModules();
 
 builder.Services.AddAuthentication(AuthenticationSchemes.Session)
     .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(
@@ -86,16 +77,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapBaseEndpoints();
-app.MapAuthEndpoints();
-app.MapSessionEndpoints();
-app.MapUserEndpoints();
-app.MapOrganizationEndpoints();
-app.MapOrganizationMemberEndpoints();
-app.MapOrganizationInviteEndpoints();
-app.MapCourseEndpoints();
-app.MapSemesterEndpoints();
-app.MapTermEndpoints();
-app.MapCourseOfferingEndpoints();
+app.MapEndpointModules();
 
 app.Run();
