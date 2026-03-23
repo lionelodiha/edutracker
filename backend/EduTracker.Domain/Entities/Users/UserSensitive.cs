@@ -59,9 +59,12 @@ public sealed class UserSensitive : ISensitiveData
         if (isRequired && string.IsNullOrWhiteSpace(name))
             throw new ArgumentException($"{paramName} is required", paramName);
 
-        if (name is null) return;
+        if (name is null)
+            return;
 
-        if (name.Length < UserLimits.NameMinLength || name.Length > UserLimits.NameMaxLength)
+        int nameLength = name.Length;
+
+        if (nameLength < UserLimits.NameMinLength || nameLength > UserLimits.NameMaxLength)
             throw new ArgumentException(
                 $"{paramName} must be between {UserLimits.NameMinLength} and {UserLimits.NameMaxLength} characters",
                 paramName

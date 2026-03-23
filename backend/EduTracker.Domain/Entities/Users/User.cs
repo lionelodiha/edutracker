@@ -32,7 +32,7 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
     public string EmailHash { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
 
-    public bool IsLocked { get; private set; } = false;
+    public bool IsLocked { get; private set; }
     public UserRole Role { get; private set; } = UserRole.User;
 
     public void SetEncryptedData(byte[] newData)
@@ -116,7 +116,9 @@ public sealed class User : IEntity, IAuditable, IHasSensitiveData<UserSensitive>
         if (string.IsNullOrWhiteSpace(userName))
             throw new ArgumentException("UserName cannot be null or empty.", nameof(userName));
 
-        if (userName.Length < UserLimits.UserNameMinLength || userName.Length > UserLimits.UserNameMaxLength)
+        int length = userName.Length;
+
+        if (length < UserLimits.UserNameMinLength || length > UserLimits.UserNameMaxLength)
             throw new ArgumentException(
                 $"UserName must be between {UserLimits.UserNameMinLength} and {UserLimits.UserNameMaxLength} characters.",
                 nameof(userName)
