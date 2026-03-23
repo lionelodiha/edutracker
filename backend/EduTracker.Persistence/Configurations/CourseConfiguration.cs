@@ -38,6 +38,6 @@ internal sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
             .WithMany()
             .HasForeignKey(c => c.OrganizationId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
