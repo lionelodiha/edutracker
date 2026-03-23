@@ -1,21 +1,20 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
-using System.Collections.ObjectModel;
+using EduTracker.Domain.Entities.Organizations;
 
 namespace EduTracker.Domain.Entities.Academics;
 
 public sealed class Course : IEntity, IAuditable
 {
     public AuditState AuditState { get; private set; } = new();
-    private readonly List<CourseOffering> _courseOfferings = [];
 
     private Course() { }
 
-    public Course(string name, string code, Guid organizationId)
+    public Course(Guid organizationId, string name, string code)
     {
+        OrganizationId = organizationId;
         Name = ValidateName(name);
         Code = ValidateCode(code);
-        OrganizationId = ValidateOrganizationId(organizationId);
 
         AuditState.UpdateAudit();
     }
@@ -27,40 +26,30 @@ public sealed class Course : IEntity, IAuditable
 
     public string Name { get; private set; } = string.Empty;
     public string Code { get; private set; } = string.Empty;
+
     public Guid OrganizationId { get; private set; }
+    public Organization Organization { get; private set; } = null!;
 
-    public IReadOnlyCollection<CourseOffering> CourseOfferings => new ReadOnlyCollection<CourseOffering>(_courseOfferings);
-
-    public void UpdateDetails(string name, string code)
+    public void UpdateName(string name)
     {
-        bool changed = false;
-
         string validatedName = ValidateName(name);
-        if (Name != validatedName)
-        {
-            Name = validatedName;
-            changed = true;
-        }
 
-        string validatedCode = ValidateCode(code);
-        if (Code != validatedCode)
-        {
-            Code = validatedCode;
-            changed = true;
-        }
-
-        if (!changed)
+        if (Name == validatedName)
             return;
 
+        Name = validatedName;
         AuditState.UpdateAudit();
     }
 
-    private static Guid ValidateOrganizationId(Guid organizationId)
+    public void UpdateCode(string code)
     {
-        if (organizationId == Guid.Empty)
-            throw new ArgumentException("Organization ID is required.", nameof(organizationId));
+        string validatedCode = ValidateCode(code);
 
-        return organizationId;
+        if (Code == validatedCode)
+            return;
+
+        Code = validatedCode;
+        AuditState.UpdateAudit();
     }
 
     private static string ValidateName(string name)
@@ -69,10 +58,17 @@ public sealed class Course : IEntity, IAuditable
             throw new ArgumentException("Course name is required.", nameof(name));
 
         string normalizedName = name.Trim();
+        int normalizedLength = normalizedName.Length;
 
-        if (normalizedName.Length > AcademicLimits.CourseNameMaxLength)
+        if (normalizedLength < AcademicLimits.CourseNameMinLength || normalizedLength > AcademicLimits.CourseNameMaxLength)
             throw new ArgumentException(
-                $"Course name cannot exceed {AcademicLimits.CourseNameMaxLength} characters.",
+                $"Course name must be between {AcademicLimits.CourseNameMinLength} and {AcademicLimits.CourseNameMaxLength} characters.",
+                nameof(name)
+            );
+
+        if (!AcademicLimits.CourseNameRegex().IsMatch(normalizedName))
+            throw new ArgumentException(
+                "Course name can only contain letters, spaces, hyphens, and parentheses.",
                 nameof(name)
             );
 
@@ -85,10 +81,17 @@ public sealed class Course : IEntity, IAuditable
             throw new ArgumentException("Course code is required.", nameof(code));
 
         string normalizedCode = code.Trim().ToUpperInvariant();
+        int normalizedCodeLength = normalizedCode.Length;
 
-        if (normalizedCode.Length > AcademicLimits.CourseCodeMaxLength)
+        if (normalizedCodeLength < AcademicLimits.CourseCodeMinLength || normalizedCodeLength > AcademicLimits.CourseCodeMaxLength)
             throw new ArgumentException(
-                $"Course code cannot exceed {AcademicLimits.CourseCodeMaxLength} characters.",
+                $"Course code must be between {AcademicLimits.CourseCodeMinLength} and {AcademicLimits.CourseCodeMaxLength} characters.",
+                nameof(code)
+            );
+
+        if (!AcademicLimits.CourseCodeRegex().IsMatch(normalizedCode))
+            throw new ArgumentException(
+                "Course code can only contain uppercase letters, numbers, hyphens, and underscores.",
                 nameof(code)
             );
 
