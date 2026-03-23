@@ -17,7 +17,7 @@ using EduTracker.Api.Endpoints.Academics.Handlers.GetTermById;
 using EduTracker.Api.Endpoints.Academics.Handlers.GetTermsBySemester;
 using EduTracker.Api.Endpoints.Academics.Handlers.UpdateCourse;
 using EduTracker.Api.Models;
-using EduTracker.Application.Features.Academics.Models;
+using EduTracker.Application.Features.Models;
 
 namespace EduTracker.Api.Endpoints.Academics;
 

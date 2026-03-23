@@ -1,7 +1,7 @@
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Responses;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Features.Academics.CourseOfferings.GetCourseOfferingsBySemester;
+using EduTracker.Application.Features.CourseOfferings.GetCourseOfferingsBySemester;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EduTracker.Api.Endpoints.Academics.Handlers.GetCourseOfferingsBySemester;

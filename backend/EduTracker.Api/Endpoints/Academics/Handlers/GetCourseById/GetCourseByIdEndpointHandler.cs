@@ -1,7 +1,7 @@
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Responses;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Features.Academics.Courses.GetCourseById;
+using EduTracker.Application.Features.Courses.GetCourseById;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EduTracker.Api.Endpoints.Academics.Handlers.GetCourseById;

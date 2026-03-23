@@ -1,4 +1,4 @@
-using EduTracker.Application.Features.Academics.Models;
+using EduTracker.Application.Features.Models;
 using EduTracker.Domain.Entities.Academics;
 
 namespace EduTracker.Application.Extensions.Entities;

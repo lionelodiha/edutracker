@@ -15,11 +15,6 @@ internal sealed class GetUsersQueryValidator : AbstractValidator<GetUsersQuery>
             .WithMessage($"Limit cannot exceed {MaxPageSize}.")
             .When(x => x.Limit.HasValue);
 
-        RuleFor(x => x.Cursor)
-            .Must(guid => guid != Guid.Empty)
-            .WithMessage("Cursor must be a valid GUID.")
-            .When(x => x.Cursor.HasValue);
-
         RuleFor(x => x.UserName)
             .Cascade(CascadeMode.StopOnFirstFailure)
             .MinimumLength(1)

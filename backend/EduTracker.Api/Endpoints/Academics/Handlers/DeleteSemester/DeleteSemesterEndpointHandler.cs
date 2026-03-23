@@ -1,7 +1,7 @@
 using EduTracker.Api.Extensions.Claims;
 using EduTracker.Api.Extensions.Responses;
 using EduTracker.Application.CQRS.Messaging;
-using EduTracker.Application.Features.Academics.Semesters.DeleteSemester;
+using EduTracker.Application.Features.Semesters.DeleteSemester;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EduTracker.Api.Endpoints.Academics.Handlers.DeleteSemester;
