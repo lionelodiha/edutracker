@@ -31,9 +31,6 @@ public sealed class Organization : IEntity, IAuditable
 
     public void TransferOwnership(Guid newOwnerUserId)
     {
-        if (newOwnerUserId == Guid.Empty)
-            throw new ArgumentException("New owner user ID is required.", nameof(newOwnerUserId));
-
         if (OwnerUserId == newOwnerUserId)
             return;
 
@@ -75,7 +72,9 @@ public sealed class Organization : IEntity, IAuditable
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Organization name is required.", nameof(name));
 
-        if (name.Length < OrganizationLimits.NameMinLength || name.Length > OrganizationLimits.NameMaxLength)
+        int length = name.Length;
+
+        if (length < OrganizationLimits.NameMinLength || length > OrganizationLimits.NameMaxLength)
             throw new ArgumentException(
                 $"Organization name must be between {OrganizationLimits.NameMinLength} and {OrganizationLimits.NameMaxLength} characters.",
                 nameof(name)

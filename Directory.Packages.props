@@ -14,7 +14,7 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.13.8" />
     <PackageVersion Include="Scrutor" Version="7.0.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.12.1" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.12.4" />
   </ItemGroup>
 
 </Project>

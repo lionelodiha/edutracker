@@ -3,14 +3,11 @@ using EduTracker.Api.Endpoints.Base.Handlers.GetInfo;
 
 namespace EduTracker.Api.Endpoints.Base;
 
-internal static class BaseEndpoints
+internal sealed class BaseEndpoints : IEndpointModule
 {
-    extension(IEndpointRouteBuilder app)
+    public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        public void MapBaseEndpoints()
-        {
-            app.MapGet(ApiRoutes.ApiBasePath, GetInfoEndpointHandler.Handle)
-                .ExcludeFromDescription();
-        }
+        app.MapGet(ApiRoutes.ApiBasePath, GetInfoEndpointHandler.Handle)
+            .ExcludeFromDescription();
     }
 }
