@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await loginUserEndpointHandler({
           body: { identifier, password, rememberMe },
         });
-        if (result.response.ok) {
+        if (result.response?.ok) {
           await fetchUser();
           return { ok: true };
         }
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             lastName: data.lastName,
           },
         });
-        if (result.response.ok || result.response.status === 201) {
+        if (result.response?.ok || result.response?.status === 201) {
           return { ok: true };
         }
         return { ok: false, error: extractError(result) };

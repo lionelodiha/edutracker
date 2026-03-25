@@ -40,7 +40,7 @@ export default function OrganizationsPage() {
             const result = await createOrganizationEndpointHandler({
                 body: { name: newName },
             });
-            if (result.response.ok || result.response.status === 201) {
+            if (result.response?.ok || result.response?.status === 201) {
                 setShowCreate(false);
                 setNewName("");
                 await fetchOrgs();

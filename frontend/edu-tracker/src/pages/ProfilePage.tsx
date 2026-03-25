@@ -89,7 +89,7 @@ export default function ProfilePage() {
                     lastName: profile.lastName || null,
                 },
             });
-            if (result.response.ok) {
+            if (result.response?.ok) {
                 setProfileMsg({ type: "success", text: "Profile updated successfully!" });
                 await refreshUser();
             } else {
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                     logoutAll: false,
                 },
             });
-            if (result.response.ok) {
+            if (result.response?.ok) {
                 setPwMsg({ type: "success", text: "Password updated successfully!" });
                 setPasswords({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
             } else {

@@ -73,7 +73,7 @@ export default function OrganizationDetailsPage() {
                 body: { userId: targetUserId, role: inviteRole }
             });
 
-            if (inviteRes.response.ok) {
+            if (inviteRes.response?.ok) {
                 setShowInvite(false);
                 setInviteUsername("");
                 setInviteRole("Member");
