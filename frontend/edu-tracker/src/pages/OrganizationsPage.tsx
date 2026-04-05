@@ -19,7 +19,7 @@ export default function OrganizationsPage() {
     const [error, setError] = useState<string | null>(null);
 
     const fetchOrgs = async () => {
-        client.setConfig({ baseUrl: API_BASE });
+        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         try {
             const r = await getOrganizationsEndpointHandler();
             if (r.data?.data) setOrgs(r.data.data);
@@ -36,7 +36,7 @@ export default function OrganizationsPage() {
         setError(null);
         setCreating(true);
         try {
-            client.setConfig({ baseUrl: API_BASE });
+            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             const result = await createOrganizationEndpointHandler({
                 body: { name: newName },
             });

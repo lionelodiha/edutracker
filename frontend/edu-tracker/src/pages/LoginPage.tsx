@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
-    const { login } = useAuth();
+    const { login, isAuthenticated, isLoading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
@@ -11,6 +11,15 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!authLoading && isAuthenticated && !showSuccess) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [authLoading, isAuthenticated, showSuccess, navigate]);
+
+    if (authLoading) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,7 +28,10 @@ export default function LoginPage() {
         const result = await login(identifier, password, rememberMe);
         setLoading(false);
         if (result.ok) {
-            navigate("/dashboard");
+            setShowSuccess(true);
+            setTimeout(() => {
+                navigate("/dashboard");
+            }, 2000);
         } else {
             setError(result.error || "Login failed.");
         }
@@ -61,6 +73,18 @@ export default function LoginPage() {
 
                 {/* Card */}
                 <div className="auth-card" style={{ padding: "2rem" }}>
+                    {showSuccess ? (
+                        <div className="success-anim-container">
+                            <div className="success-anim-circle">
+                                <svg className="success-anim-svg" viewBox="0 0 52 52">
+                                    <circle cx="26" cy="26" r="24" />
+                                    <path d="M14 26 L22 34 L38 16" />
+                                </svg>
+                            </div>
+                            <div className="success-anim-title">Login Successful!</div>
+                            <div className="success-anim-text">Redirecting to dashboard...</div>
+                        </div>
+                    ) : (
                     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.15rem" }}>
                         {error && (
                             <div className="alert alert-error fade-in">
@@ -132,6 +156,7 @@ export default function LoginPage() {
                             )}
                         </button>
                     </form>
+                    )}
                 </div>
 
                 <div style={{ textAlign: "center", marginTop: "1.5rem" }}>

@@ -18,6 +18,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Semester> Semesters => Set<Semester>();
     public DbSet<Term> Terms => Set<Term>();
     public DbSet<CourseOffering> CourseOfferings => Set<CourseOffering>();
+    public DbSet<Class> Classes => Set<Class>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

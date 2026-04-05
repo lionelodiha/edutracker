@@ -4,9 +4,12 @@ import { useAuth } from "../../context/AuthContext";
 import {
     getOrganizationsEndpointHandler,
     getCurrentUserSessionsEndpointHandler,
+    getUserInvitesEndpointHandler,
+    acceptOrganizationInviteEndpointHandler,
+    rejectOrganizationInviteEndpointHandler,
 } from "../../api";
 import { client } from "../../api/client.gen";
-import type { OrganizationListItemResponse, SessionData } from "../../api";
+import type { OrganizationListItemResponse, SessionData, UserOrganizationInviteResponse } from "../../api";
 
 const API_BASE = "http://localhost:3187";
 
@@ -135,11 +138,21 @@ export default function DashboardPage() {
     const { user } = useAuth();
     const [orgs, setOrgs] = useState<OrganizationListItemResponse[]>([]);
     const [sessions, setSessions] = useState<SessionData[]>([]);
+    const [invites, setInvites] = useState<UserOrganizationInviteResponse[]>([]);
     const [orgsLoading, setOrgsLoading] = useState(true);
     const [sessionsLoading, setSessionsLoading] = useState(true);
+    const [invitesLoading, setInvitesLoading] = useState(true);
+    const [respondingInvite, setRespondingInvite] = useState<string | null>(null);
+
+    const fetchInvites = () => {
+        getUserInvitesEndpointHandler()
+            .then((r) => { if (r.data?.data) setInvites(r.data.data); })
+            .catch(() => {})
+            .finally(() => setInvitesLoading(false));
+    };
 
     useEffect(() => {
-        client.setConfig({ baseUrl: API_BASE });
+        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
 
         getOrganizationsEndpointHandler()
             .then((r) => { if (r.data?.data) setOrgs(r.data.data); })
@@ -150,7 +163,28 @@ export default function DashboardPage() {
             .then((r) => { if (r.data?.data) setSessions(r.data.data); })
             .catch(() => {})
             .finally(() => setSessionsLoading(false));
+
+        fetchInvites();
     }, []);
+
+    const handleInviteResponse = async (inviteId: string, action: "accept" | "reject") => {
+        setRespondingInvite(inviteId);
+        try {
+            if (action === "accept") {
+                await acceptOrganizationInviteEndpointHandler({ path: { inviteId } });
+                // refresh orgs list since user just joined one
+                getOrganizationsEndpointHandler()
+                    .then((r) => { if (r.data?.data) setOrgs(r.data.data); })
+                    .catch(() => {});
+            } else {
+                await rejectOrganizationInviteEndpointHandler({ path: { inviteId } });
+            }
+            setInvites((prev) => prev.filter((inv) => inv.id !== inviteId));
+        } catch (err) {
+            console.error("Failed to respond to invite", err);
+        }
+        setRespondingInvite(null);
+    };
 
     const greeting = () => {
         const h = new Date().getHours();
@@ -329,6 +363,76 @@ export default function DashboardPage() {
                     </div>
                 )}
             </section>
+
+            {/* ── Pending Invites ── */}
+            {(invitesLoading || invites.length > 0) && (
+                <section>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.125rem" }}>
+                        <div>
+                            <h2 style={{ fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.01em" }}>Pending Invites</h2>
+                            {!invitesLoading && invites.length > 0 && (
+                                <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>
+                                    {invites.length} invite{invites.length !== 1 ? "s" : ""} awaiting your response
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {invitesLoading ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            {[1, 2].map((i) => (
+                                <div key={i} className="card" style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+                                    <div className="skeleton" style={{ width: 44, height: 44, borderRadius: 11, flexShrink: 0 }} />
+                                    <div style={{ flex: 1 }}>
+                                        <div className="skeleton" style={{ height: 14, width: "40%", borderRadius: 6, marginBottom: 8 }} />
+                                        <div className="skeleton" style={{ height: 10, width: "25%", borderRadius: 6 }} />
+                                    </div>
+                                    <div className="skeleton" style={{ width: 140, height: 32, borderRadius: 8 }} />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            {invites.map((inv) => (
+                                <div key={inv.id} className="card" style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+                                    <div
+                                        style={{
+                                            width: 44, height: 44, borderRadius: 11, flexShrink: 0,
+                                            background: "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            fontWeight: 800, fontSize: "1.1rem", color: "#fff",
+                                        }}
+                                    >
+                                        {inv.organizationName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" }}>{inv.organizationName}</div>
+                                        <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
+                                            Invited by <strong>@{inv.invitedByUserName}</strong> · expires {new Date(inv.expiresAt).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                                        <button
+                                            className="btn btn-primary btn-sm"
+                                            disabled={respondingInvite === inv.id}
+                                            onClick={() => handleInviteResponse(inv.id, "accept")}
+                                        >
+                                            {respondingInvite === inv.id ? "..." : "Accept"}
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            disabled={respondingInvite === inv.id}
+                                            onClick={() => handleInviteResponse(inv.id, "reject")}
+                                        >
+                                            Decline
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            )}
 
             {/* ── Sessions ── */}
             <section>

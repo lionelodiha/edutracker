@@ -42,13 +42,33 @@ internal sealed class InviteOrganizationMemberCommandHandler(
         if (!isActive || !isPrivilegedRole)
             throw ResponseCatalog.Authorization.Forbidden.ToException();
 
-        bool targetExists = await db.Users.AnyAsync(u => u.Id == message.UserId, cancellationToken);
+        Guid targetUserId;
 
-        if (!targetExists)
+        if (message.UserId.HasValue)
+        {
+            bool targetExists = await db.Users.AnyAsync(u => u.Id == message.UserId.Value, cancellationToken);
+            if (!targetExists)
+                throw ResponseCatalog.User.NotFound.ToException();
+            targetUserId = message.UserId.Value;
+        }
+        else if (!string.IsNullOrWhiteSpace(message.UserName))
+        {
+            string normalizedUserName = message.UserName.Trim().ToLowerInvariant();
+            Guid foundId = await db.Users
+                .Where(u => u.UserName.ToLower() == normalizedUserName)
+                .Select(u => u.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (foundId == default)
+                throw ResponseCatalog.User.NotFound.ToException();
+            targetUserId = foundId;
+        }
+        else
+        {
             throw ResponseCatalog.User.NotFound.ToException();
+        }
 
         bool alreadyMember = await db.OrganizationMembers
-            .AnyAsync(m => m.OrganizationId == message.OrganizationId && m.UserId == message.UserId, cancellationToken);
+            .AnyAsync(m => m.OrganizationId == message.OrganizationId && m.UserId == targetUserId, cancellationToken);
 
         if (alreadyMember)
             throw ResponseCatalog.Organization.AlreadyMember.ToException();
@@ -58,7 +78,7 @@ internal sealed class InviteOrganizationMemberCommandHandler(
         OrganizationInvite? existingInvite = await db.OrganizationInvites
             .FirstOrDefaultAsync(
                 i => i.OrganizationId == message.OrganizationId
-                    && i.InvitedUserId == message.UserId
+                    && i.InvitedUserId == targetUserId
                     && i.Status == OrganizationInviteStatus.Pending,
                 cancellationToken
             );
@@ -81,7 +101,7 @@ internal sealed class InviteOrganizationMemberCommandHandler(
 
         OrganizationInvite invite = new(
             organizationId: message.OrganizationId,
-            invitedUserId: message.UserId,
+            invitedUserId: targetUserId,
             invitedByUserId: message.ActorId.Value,
             expiresAt: expiresAt
         );

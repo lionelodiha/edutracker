@@ -6,5 +6,6 @@ namespace EduTracker.Application.Features.OrganizationInvites.InviteOrganization
 public sealed record InviteOrganizationMemberCommand(
     Guid? ActorId,
     Guid OrganizationId,
-    Guid UserId
+    Guid? UserId,
+    string? UserName
 ) : IMessage<OperationResult<Guid>>;
