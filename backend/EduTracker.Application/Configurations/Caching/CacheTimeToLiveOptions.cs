@@ -9,6 +9,12 @@ public sealed record CacheTimeToLiveOptions
     public CacheOptions OrganizationMembers { get; init; } = default!;
     public CacheOptions CourseById { get; init; } = default!;
     public CacheOptions Courses { get; init; } = default!;
+    public CacheOptions ClassById { get; init; } = default!;
+    public CacheOptions Classes { get; init; } = default!;
+    public CacheOptions TeacherById { get; init; } = default!;
+    public CacheOptions Teachers { get; init; } = default!;
+    public CacheOptions StudentById { get; init; } = default!;
+    public CacheOptions Students { get; init; } = default!;
     public CacheOptions SemesterById { get; init; } = default!;
     public CacheOptions Semesters { get; init; } = default!;
     public CacheOptions TermById { get; init; } = default!;

@@ -152,3 +152,35 @@ Sensitive identifiers are hashed or encrypted at rest. Passwords are stored usin
 | POST | `/api/organizations/invites/{inviteId}/reject` | Session | Reject invite for current user |
 | POST | `/api/organizations/{id}/invites/{inviteId}/cancel` | Session | Cancel invite (owner/moderator) |
 | GET | `/api/organizations/invites` | Session | List current user invites |
+
+### Classes
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| POST | `/api/classes` | Session | Create class (owner/moderator) |
+| GET | `/api/classes?organizationId={organizationId}` | Session | List classes for organization |
+| GET | `/api/classes/{id}?organizationId={organizationId}` | Session | Get class by id |
+| PATCH | `/api/classes/{id}` | Session | Update class (owner/moderator) |
+| DELETE | `/api/classes/{id}?organizationId={organizationId}` | Session | Delete class (owner/moderator) |
+
+### Teachers
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| POST | `/api/teachers` | Session | Create teacher profile for a user (owner/moderator) |
+| POST | `/api/teachers/join` | Session | Current user joins organization as teacher |
+| GET | `/api/teachers?organizationId={organizationId}` | Session | List teachers for organization |
+| GET | `/api/teachers/{id}?organizationId={organizationId}` | Session | Get teacher by id |
+| PATCH | `/api/teachers/{id}` | Session | Update teacher profile (owner/moderator) |
+| DELETE | `/api/teachers/{id}?organizationId={organizationId}` | Session | Delete teacher profile (owner/moderator) |
+
+### Students
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| POST | `/api/students` | Session | Create student profile for a user (owner/moderator) |
+| POST | `/api/students/join` | Session | Current user joins organization as student |
+| GET | `/api/students?organizationId={organizationId}` | Session | List students for organization |
+| GET | `/api/students/{id}?organizationId={organizationId}` | Session | Get student by id |
+| PATCH | `/api/students/{id}` | Session | Update student profile or class assignment (owner/moderator) |
+| DELETE | `/api/students/{id}?organizationId={organizationId}` | Session | Delete student profile (owner/moderator) |

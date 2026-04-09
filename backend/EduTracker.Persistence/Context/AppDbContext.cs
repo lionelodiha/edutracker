@@ -15,6 +15,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<OrganizationInvite> OrganizationInvites => Set<OrganizationInvite>();
 
     public DbSet<Course> Courses => Set<Course>();
+    public DbSet<AcademicClass> Classes => Set<AcademicClass>();
+    public DbSet<Teacher> Teachers => Set<Teacher>();
+    public DbSet<Student> Students => Set<Student>();
     public DbSet<Semester> Semesters => Set<Semester>();
     public DbSet<Term> Terms => Set<Term>();
     public DbSet<CourseOffering> CourseOfferings => Set<CourseOffering>();

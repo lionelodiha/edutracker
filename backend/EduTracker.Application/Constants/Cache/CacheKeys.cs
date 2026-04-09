@@ -23,6 +23,24 @@ internal static class CacheKeys
     public static string Courses(Guid organizationId)
         => $"edu:courses:organization:{organizationId:N}";
 
+    public static string ClassById(Guid classId)
+        => $"edu:class:by-id:{classId:N}";
+
+    public static string Classes(Guid organizationId)
+        => $"edu:classes:organization:{organizationId:N}";
+
+    public static string TeacherById(Guid teacherId)
+        => $"edu:teacher:by-id:{teacherId:N}";
+
+    public static string Teachers(Guid organizationId)
+        => $"edu:teachers:organization:{organizationId:N}";
+
+    public static string StudentById(Guid studentId)
+        => $"edu:student:by-id:{studentId:N}";
+
+    public static string Students(Guid organizationId)
+        => $"edu:students:organization:{organizationId:N}";
+
     public static string SemesterById(Guid semesterId)
         => $"edu:semester:by-id:{semesterId:N}";
 

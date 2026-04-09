@@ -21,4 +21,28 @@ public static partial class AcademicLimits
 
     public const int MaxPastYears = 30;
     public const int MaxFutureYears = 5;
+
+    public const int ClassNameMinLength = 2;
+    public const int ClassNameMaxLength = 100;
+
+    [GeneratedRegex(@"^[A-Za-z0-9\s\-\(\)]+$")]
+    public static partial Regex ClassNameRegex();
+
+    public const int ClassCodeMinLength = 2;
+    public const int ClassCodeMaxLength = 20;
+
+    [GeneratedRegex(@"^[A-Z0-9_-]+$")]
+    public static partial Regex ClassCodeRegex();
+
+    public const int TeacherStaffIdMinLength = 3;
+    public const int TeacherStaffIdMaxLength = 30;
+
+    [GeneratedRegex(@"^[A-Z0-9_-]+$")]
+    public static partial Regex TeacherStaffIdRegex();
+
+    public const int StudentNumberMinLength = 3;
+    public const int StudentNumberMaxLength = 30;
+
+    [GeneratedRegex(@"^[A-Z0-9_-]+$")]
+    public static partial Regex StudentNumberRegex();
 }
