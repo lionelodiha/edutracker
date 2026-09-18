@@ -14,9 +14,13 @@ export default function Modal({ titleId, onClose, children, maxWidth }: ModalPro
     // function on every parent render (i.e. every keystroke). Reading it
     // through a ref keeps the effect below mount-only: without this the
     // effect re-ran per keystroke and focus() yanked the caret out of
-    // whatever input the user was typing in.
+    // whatever input the user was typing in. Assigned in an effect (not
+    // during render) so the ref is always current without breaking the
+    // rules of hooks.
     const onCloseRef = useRef(onClose);
-    onCloseRef.current = onClose;
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    });
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {

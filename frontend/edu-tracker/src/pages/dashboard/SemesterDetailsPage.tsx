@@ -12,6 +12,7 @@ import {
 } from "../../api";
 import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
+import { apiErrorMessage, thrownMessage } from "../../utils/apiError";
 import type { SemesterResponse, TermResponse, CourseOfferingResponse, CourseResponse } from "../../api";
 
 const API_BASE = "http://localhost:3187";
@@ -136,11 +137,10 @@ export default function SemesterDetailsPage() {
                 setNewTermOrdinal(newTermOrdinal + 1);
                 await fetchData();
             } else {
-                const d = res.data as any;
-                setTermError(d?.message || "Failed to create term.");
+                setTermError(apiErrorMessage(res.data, "Failed to create term."));
             }
-        } catch (err: any) {
-            setTermError(err?.message || "Error creating term.");
+        } catch (err: unknown) {
+            setTermError(thrownMessage(err, "Error creating term."));
         }
         setSubmittingTerm(false);
     };
@@ -167,11 +167,10 @@ export default function SemesterDetailsPage() {
                 setShowOfferingCreate(false);
                 await fetchData();
             } else {
-                const d = res.data as any;
-                setOfferingError(d?.message || "Failed to add course offering.");
+                setOfferingError(apiErrorMessage(res.data, "Failed to add course offering."));
             }
-        } catch (err: any) {
-            setOfferingError(err?.message || "Error adding offering.");
+        } catch (err: unknown) {
+            setOfferingError(thrownMessage(err, "Error adding offering."));
         }
         setSubmittingOffering(false);
     };

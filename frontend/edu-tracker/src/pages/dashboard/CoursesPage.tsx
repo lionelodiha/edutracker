@@ -7,6 +7,7 @@ import {
 } from "../../api";
 import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
+import { apiErrorMessage, thrownMessage } from "../../utils/apiError";
 import type { CourseResponse } from "../../api";
 
 const API_BASE = "http://localhost:3187";
@@ -49,7 +50,10 @@ export default function CoursesPage() {
             if (res.data?.data) {
                 setCourses(res.data.data);
             }
-        } catch {}
+        } catch {
+            // A failed list fetch keeps the previous (possibly empty) state;
+            // the page renders the empty state rather than an error.
+        }
         setLoading(false);
     };
 
@@ -71,11 +75,10 @@ export default function CoursesPage() {
                 setNewCode("");
                 await fetchCourses();
             } else {
-                const d = res.data as any;
-                setError(d?.message || "Failed to create course.");
+                setError(apiErrorMessage(res.data, "Failed to create course."));
             }
-        } catch (err: any) {
-            setError(err?.message || "Error creating course.");
+        } catch (err: unknown) {
+            setError(thrownMessage(err, "Error creating course."));
         }
         setSubmitting(false);
     };

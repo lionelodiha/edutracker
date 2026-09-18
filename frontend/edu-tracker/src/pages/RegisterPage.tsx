@@ -41,9 +41,11 @@ export default function RegisterPage() {
         }
     }, [authLoading, isAuthenticated, showSuccess, navigate]);
 
-    if (authLoading) return null;
-
     const strength = useMemo(() => getPasswordStrength(form.password), [form.password]);
+
+    // After every hook: returning early above useMemo changed the hook order
+    // between renders and crashed the page as soon as auth finished loading.
+    if (authLoading) return null;
 
     const update = (field: string, value: string) =>
         setForm((prev) => ({ ...prev, [field]: value }));

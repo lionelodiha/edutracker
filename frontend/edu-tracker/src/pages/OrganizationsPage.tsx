@@ -49,7 +49,10 @@ export default function OrganizationsPage() {
         try {
             const r = await getOrganizationsEndpointHandler();
             if (r.data?.data) setOrgs(r.data.data);
-        } catch { }
+        } catch {
+            // A failed list fetch keeps the previous (possibly empty) state;
+            // the page renders the empty state rather than an error.
+        }
         setLoading(false);
     };
 
@@ -71,22 +74,33 @@ export default function OrganizationsPage() {
                 setNewName("");
                 await fetchOrgs();
             } else {
-                const errBody = result.error || result.data as any;
+                const errBody = (result.error ?? result.data) as {
+                    message?: unknown;
+                    title?: unknown;
+                    details?: unknown;
+                } | string | null | undefined;
                 let errorMsg = "Failed to create organization.";
-                if (errBody) {
-                    if (errBody.message) errorMsg = errBody.message;
-                    else if (errBody.title) errorMsg = errBody.title;
-                    else if (typeof errBody === 'string') errorMsg = errBody;
+                if (typeof errBody === "string") {
+                    errorMsg = errBody;
+                } else if (errBody) {
+                    if (typeof errBody.message === "string" && errBody.message) errorMsg = errBody.message;
+                    else if (typeof errBody.title === "string" && errBody.title) errorMsg = errBody.title;
 
-                    if (errBody.details && Array.isArray(errBody.details)) {
-                        errorMsg += " " + errBody.details.map((d: any) => d.message || d).join(" ");
+                    if (Array.isArray(errBody.details)) {
+                        errorMsg += " " + errBody.details.map((d: unknown) =>
+                            typeof d === "string"
+                                ? d
+                                : typeof d === "object" && d !== null && "message" in d
+                                    ? String((d as { message: unknown }).message ?? d)
+                                    : String(d),
+                        ).join(" ");
                     }
                 }
                 setError(errorMsg);
                 console.error("Create organization failed:", result);
             }
-        } catch (err: any) {
-            setError(err?.message || "Failed to create organization.");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message || "Failed to create organization." : "Failed to create organization.");
             console.error("Create organization exception:", err);
         }
         setCreating(false);

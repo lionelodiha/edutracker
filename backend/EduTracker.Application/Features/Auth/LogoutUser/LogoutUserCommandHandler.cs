@@ -22,7 +22,11 @@ internal sealed class LogoutUserCommandHandler(
             UserSession? activeSession = await db.UserSessions
                 .FirstOrDefaultAsync(s => s.Id == message.SessionId && !s.IsRevoked, cancellationToken);
 
-            activeSession?.Revoke();
+            if (activeSession is not null)
+            {
+                activeSession.Revoke();
+                await db.SaveChangesAsync(cancellationToken);
+            }
 
             await cacheService.RemoveAsync(CacheKeys.SessionById(message.SessionId.Value));
         }

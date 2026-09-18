@@ -4,6 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Vulnerability advisories (NU1900/NU1903) are triaged via Dependabot + Trivy
+         in Stage 07, not by breaking every build. Everything else is an error on CI
+         via `dotnet build -warnaserror`; locally warnings stay warnings. -->
+    <WarningsNotAsErrors>NU1900;NU1903</WarningsNotAsErrors>
   </PropertyGroup>
 
 </Project>

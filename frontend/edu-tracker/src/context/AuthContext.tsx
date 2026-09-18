@@ -8,6 +8,8 @@ import {
 import { client } from "../api/client.gen";
 import type { UserResponse } from "../api";
 
+import { apiErrorMessage } from "../utils/apiError";
+
 const API_BASE = "http://localhost:3187";
 
 type AuthState = {
@@ -55,17 +57,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUser().finally(() => setIsLoading(false));
   }, [fetchUser]);
 
-  const extractError = (result: any): string => {
+  const extractError = (result: { error?: unknown; data?: unknown }): string => {
     // hey-api puts error bodies in result.error for non-2xx
-    const errBody = result.error || result.data;
+    const errBody = (result.error ?? result.data) as {
+      message?: unknown;
+      details?: unknown;
+    } | null | undefined;
     if (!errBody) return "An unexpected error occurred.";
-    const msg = errBody.message || "";
     const details = errBody.details;
     if (Array.isArray(details) && details.length > 0) {
-      const msgs = details.map((d: any) => d.message).filter(Boolean);
+      const msgs = details
+        .map((d: unknown) =>
+          typeof d === "string"
+            ? d
+            : typeof d === "object" && d !== null && "message" in d &&
+                typeof (d as { message: unknown }).message === "string"
+              ? ((d as { message: string }).message as string)
+              : "",
+        )
+        .filter(Boolean);
       if (msgs.length > 0) return msgs.join(" ");
     }
-    return msg || "An unexpected error occurred.";
+    return apiErrorMessage(errBody, "An unexpected error occurred.");
   };
 
   const login = useCallback(
@@ -81,8 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { ok: true };
         }
         return { ok: false, error: extractError(result) };
-      } catch (e: any) {
-        return { ok: false, error: e?.message || "Login failed." };
+      } catch (e: unknown) {
+        return { ok: false, error: e instanceof Error ? e.message || "Login failed." : "Login failed." };
       }
     },
     [fetchUser]
@@ -113,8 +126,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { ok: true };
         }
         return { ok: false, error: extractError(result) };
-      } catch (e: any) {
-        return { ok: false, error: e?.message || "Registration failed." };
+      } catch (e: unknown) {
+        return { ok: false, error: e instanceof Error ? e.message || "Registration failed." : "Registration failed." };
       }
     },
     []
