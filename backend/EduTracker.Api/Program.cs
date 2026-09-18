@@ -21,7 +21,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCustomCors(builder.Configuration);
 
-builder.Services.AddPersistenceServices(builder.Configuration.GetConnectionString("Database"));
+builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices([typeof(IMediator).Assembly]);
 
@@ -80,3 +80,8 @@ app.UseAuthorization();
 app.MapEndpointModules();
 
 app.Run();
+
+// Top-level statements compile into an internal Program class, which a test
+// project cannot reach. WebApplicationFactory<Program> needs it public.
+// One line, and it is the reason integration tests are possible at all.
+public partial class Program { }

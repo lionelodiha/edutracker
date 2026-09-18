@@ -8,6 +8,7 @@ import {
     revokeAllCurrentUserSessionsEndpointHandler
 } from "../api";
 import { client } from "../api/client.gen";
+import { apiErrorMessage, thrownMessage } from "../utils/apiError";
 import type { SessionData } from "../api";
 
 const API_BASE = "http://localhost:3187";
@@ -57,7 +58,10 @@ export default function ProfilePage() {
             if (r.data?.data) {
                 setSessions(r.data.data);
             }
-        } catch {}
+        } catch {
+            // A failed sessions fetch keeps the previous state; the tab
+            // renders what it has rather than an error.
+        }
         setSessionsLoading(false);
     };
 
@@ -73,7 +77,10 @@ export default function ProfilePage() {
             client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             await revokeCurrentUserSessionEndpointHandler({ path: { id: sessionId } });
             fetchSessions();
-        } catch {}
+        } catch {
+            // Revocation is best-effort from this tab; the list refresh on
+            // next visit shows the true state.
+        }
     };
 
     const handleRevokeAllSessions = async () => {
@@ -82,7 +89,10 @@ export default function ProfilePage() {
             client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             await revokeAllCurrentUserSessionsEndpointHandler({ query: { keepCurrentUserSession: true } });
             fetchSessions();
-        } catch {}
+        } catch {
+            // Revocation is best-effort from this tab; the list refresh on
+            // next visit shows the true state.
+        }
     };
 
     const handleProfileSave = async (e: React.FormEvent) => {
@@ -103,11 +113,10 @@ export default function ProfilePage() {
                 setProfileMsg({ type: "success", text: "Profile updated successfully." });
                 await refreshUser();
             } else {
-                const d = result.data as any;
-                setProfileMsg({ type: "error", text: d?.message || "Failed to update profile." });
+                setProfileMsg({ type: "error", text: apiErrorMessage(result.data, "Failed to update profile.") });
             }
-        } catch (err: any) {
-            setProfileMsg({ type: "error", text: err?.message || "Failed to update profile." });
+        } catch (err: unknown) {
+            setProfileMsg({ type: "error", text: thrownMessage(err, "Failed to update profile.") });
         }
         setProfileLoading(false);
     };
@@ -133,11 +142,10 @@ export default function ProfilePage() {
                 setPwMsg({ type: "success", text: "Password updated successfully." });
                 setPasswords({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
             } else {
-                const d = result.data as any;
-                setPwMsg({ type: "error", text: d?.message || "Failed to update password." });
+                setPwMsg({ type: "error", text: apiErrorMessage(result.data, "Failed to update password.") });
             }
-        } catch (err: any) {
-            setPwMsg({ type: "error", text: err?.message || "Failed to update password." });
+        } catch (err: unknown) {
+            setPwMsg({ type: "error", text: thrownMessage(err, "Failed to update password.") });
         }
         setPwLoading(false);
     };

@@ -48,3 +48,13 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+# build and tool output that keeps getting committed
+# (*.log and dist/ are already covered above)
+lint.txt
+tmp_*.txt
+TestResults/
+coverage/
+# Playwright output (frontend/edu-tracker/test-results, playwright-report)
+test-results/
+playwright-report/

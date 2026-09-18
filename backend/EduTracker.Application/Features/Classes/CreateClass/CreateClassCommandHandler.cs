@@ -2,7 +2,6 @@ using EduTracker.Application.Constants.Responses;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Application.Extensions.Responses;
 using EduTracker.Application.Models;
-using EduTracker.Application.Services;
 using EduTracker.Domain.Entities.Academics;
 using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Persistence.Context;
@@ -11,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EduTracker.Application.Features.Classes.CreateClass;
 
 internal sealed class CreateClassCommandHandler(
-    AppDbContext db,
-    ICacheService cacheService
+    AppDbContext db
 ) : IHandler<CreateClassCommand, OperationResult<Guid>>
 {
     public async Task<OperationResult<Guid>> Handle(CreateClassCommand message, CancellationToken cancellationToken = default)

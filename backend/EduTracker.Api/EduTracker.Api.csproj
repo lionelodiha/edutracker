@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.OpenApi" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,6 +20,12 @@
     <ProjectReference Include="..\EduTracker.Application\EduTracker.Application.csproj" />
     <ProjectReference Include="..\EduTracker.Infrastructure\EduTracker.Infrastructure.csproj" />
     <ProjectReference Include="..\EduTracker.Persistence\EduTracker.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Almost every type in this repo is internal: handlers, endpoint
+         modules, ResponseCatalog. Without this the tests can see nothing. -->
+    <InternalsVisibleTo Include="EduTracker.Api.IntegrationTests" />
   </ItemGroup>
 
 </Project>

@@ -11,9 +11,9 @@ public sealed class PortalInvite : IEntity
     private PortalInvite() { }
 
     public PortalInvite(
-        Guid organizationId, 
-        string email, 
-        OrganizationMemberRole role, 
+        Guid organizationId,
+        string email,
+        OrganizationMemberRole role,
         Guid invitedByUserId,
         byte[] tokenHash)
     {
