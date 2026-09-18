@@ -31,9 +31,17 @@ name: deploy
 #   in the repo. CI authenticates to GHCR with GITHUB_TOKEN; no long-lived
 #   cloud credential is stored (Stage 07 hardens this with OIDC).
 
+# Manual only, for now. The pipeline is complete but there is nowhere to
+# deploy to yet: no staging host, and none of the ~20 STAGING_*/PRODUCTION_*
+# secrets exist. Left on `push: main` it fails on every merge, and a red X
+# that everyone learns to ignore destroys the signal CI exists to give.
+#
+# Restore the push trigger once H1 is done — a staging host provisioned and
+# its secrets added under Settings > Environments:
+#
+#   push:
+#     branches: [main]
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       api_image:
