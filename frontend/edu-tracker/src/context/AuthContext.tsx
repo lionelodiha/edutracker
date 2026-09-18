@@ -35,20 +35,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      client.setConfig({ baseUrl: API_BASE });
+      client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
       const result = await getCurrentUserEndpointHandler();
+      console.log('[fetchUser] result:', result);
       if (result.data?.success && result.data.data) {
         setUser(result.data.data);
       } else {
+        console.log('[fetchUser] no user data, error:', result.error);
         setUser(null);
       }
-    } catch {
+    } catch (e) {
+      console.log('[fetchUser] exception:', e);
       setUser(null);
     }
   }, []);
 
   useEffect(() => {
-    client.setConfig({ baseUrl: API_BASE });
+    client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
     fetchUser().finally(() => setIsLoading(false));
   }, [fetchUser]);
 
@@ -68,11 +71,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (identifier: string, password: string, rememberMe = false) => {
       try {
-        client.setConfig({ baseUrl: API_BASE });
+        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         const result = await loginUserEndpointHandler({
           body: { identifier, password, rememberMe },
         });
-        if (result.response.ok) {
+        console.log('[login] result:', result, 'response.ok:', result.response?.ok, 'status:', result.response?.status);
+        if (result.response?.ok) {
           await fetchUser();
           return { ok: true };
         }
@@ -94,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lastName: string;
     }) => {
       try {
-        client.setConfig({ baseUrl: API_BASE });
+        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         const result = await registerUserEndpointHandler({
           body: {
             userName: data.userName,
@@ -105,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             lastName: data.lastName,
           },
         });
-        if (result.response.ok || result.response.status === 201) {
+        if (result.response?.ok || result.response?.status === 201) {
           return { ok: true };
         }
         return { ok: false, error: extractError(result) };
@@ -118,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      client.setConfig({ baseUrl: API_BASE });
+      client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
       await logoutUserEndpointHandler();
     } catch {
       // ignore

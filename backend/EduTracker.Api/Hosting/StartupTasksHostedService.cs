@@ -20,7 +20,7 @@ internal sealed class StartupTasksHostedService(
     {
         appLifetime.ApplicationStarted.Register(() =>
         {
-            _ = Task.Run(() => RunStartupTasksAsync(cancellationToken));
+            _ = Task.Run(() => RunStartupTasksAsync(CancellationToken.None));
         });
 
         return Task.CompletedTask;

@@ -1,5 +1,6 @@
 namespace EduTracker.Api.Endpoints.OrganizationInvites.Handlers.InviteOrganizationMember;
 
 internal sealed record InviteOrganizationMemberRequest(
-    Guid UserId
+    Guid? UserId,
+    string? UserName
 );

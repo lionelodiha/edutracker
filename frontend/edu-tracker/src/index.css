@@ -1,52 +1,52 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════
-   EduTracker – Premium Light Theme Design System
+   EduTracker – Premium Dark Theme Design System
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   /* ─── Core palette ─── */
-  --bg-primary: #f8f9fc;
-  --bg-secondary: #ffffff;
-  --bg-elevated: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f3f4f8;
-  --bg-input: #f3f4f8;
+  --bg-primary: #0a0b0f;
+  --bg-secondary: #12131a;
+  --bg-elevated: #1a1b23;
+  --bg-card: #12131a;
+  --bg-card-hover: #1a1b23;
+  --bg-input: #0a0b0f;
 
   /* ─── Borders ─── */
-  --border: rgba(0, 0, 0, 0.07);
-  --border-hover: rgba(0, 0, 0, 0.13);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
   --border-focus: rgba(99, 102, 241, 0.5);
 
   /* ─── Text ─── */
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-primary: #f8f9fa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
 
   /* ─── Accent / Brand ─── */
-  --accent: #6366f1;
-  --accent-light: #4f46e5;
-  --accent-dark: #4338ca;
-  --accent-glow: rgba(99, 102, 241, 0.08);
-  --accent-glow-strong: rgba(99, 102, 241, 0.14);
+  --accent: #818cf8;
+  --accent-light: #a5b4fc;
+  --accent-dark: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --accent-glow-strong: rgba(99, 102, 241, 0.25);
 
   /* ─── Semantic ─── */
-  --success: #16a34a;
-  --success-bg: rgba(22, 163, 74, 0.08);
-  --warn: #d97706;
-  --warn-bg: rgba(217, 119, 6, 0.08);
-  --error: #dc2626;
-  --error-bg: rgba(220, 38, 38, 0.06);
+  --success: #4ade80;
+  --success-bg: rgba(74, 222, 128, 0.12);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.12);
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.12);
 
-  /* ─── Gradients ─── */
-  --grad-brand: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
-  --grad-brand-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(168, 85, 247, 0.04));
+  /* ─── Brand (solid color, no gradients) ─── */
+  --grad-brand: #6366f1;
+  --grad-brand-subtle: rgba(99, 102, 241, 0.08);
 
-  /* ─── Org / avatar gradient ─── */
+  /* ─── Org / avatar accent ─── */
   --gradient-start: #6366f1;
-  --gradient-end: #8b5cf6;
+  --gradient-end: #4f46e5;
 
   /* ─── Radius ─── */
   --r-sm: 8px;
@@ -57,11 +57,11 @@
   --r-full: 9999px;
 
   /* ─── Shadows ─── */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.08);
-  --shadow-glow: 0 0 32px rgba(99, 102, 241, 0.08);
-  --shadow-glow-lg: 0 0 60px rgba(99, 102, 241, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 32px rgba(99, 102, 241, 0.15);
+  --shadow-glow-lg: 0 0 60px rgba(99, 102, 241, 0.25);
 
   /* ─── Transitions ─── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -160,7 +160,7 @@ a:hover {
   height: 550px;
   bottom: -25%;
   right: -10%;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.1), transparent 70%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08), transparent 70%);
   animation: orbFloat2 22s ease-in-out infinite;
 }
 
@@ -419,10 +419,10 @@ a:hover {
 
 /* ─── Glass card ─── */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(18, 19, 26, 0.6);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-2xl);
 }
 
@@ -566,10 +566,7 @@ a:hover {
 .stat-value {
   font-size: 2rem;
   font-weight: 800;
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
   line-height: 1.2;
 }
 
@@ -660,10 +657,20 @@ a:hover {
   inset: 0;
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: flex-start;   /* not center — margin:auto centres when it fits, pins to top when tall */
   justify-content: center;
-  background: rgba(0, 0, 0, 0.25);
+  padding: 2rem 1rem;
+
+  /* 0.72 actually hides the page on a dark ground. The blur is now a
+     refinement rather than the only thing separating the layers. */
+  background: rgba(3, 5, 10, 0.72);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* ONE scroll container for the whole dialog. The content no longer
+     scrolls independently, so there is no clipped inner edge. */
+  overflow-y: auto;
+  overscroll-behavior: contain;   /* stops the page behind scrolling too */
 }
 
 .modal-content {
@@ -672,9 +679,20 @@ a:hover {
   border-radius: var(--r-2xl);
   padding: 2rem;
   max-width: 480px;
-  width: 92%;
+  width: 100%;
   box-shadow: var(--shadow-lg);
   animation: modalIn 0.3s var(--ease-out) forwards;
+
+  /* margin auto centres it vertically while there is room, and degrades to
+     top-aligned once the dialog is taller than the viewport — which is
+     exactly the case that was clipping before. */
+  margin: auto;
+
+  /* No max-height and no overflow here. The overlay scrolls instead. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-content { animation: none; }
 }
 
 @keyframes modalIn {
@@ -685,7 +703,7 @@ a:hover {
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 }
 
@@ -701,8 +719,77 @@ a:hover {
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
+}
+
+@keyframes scaleUpFade {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+.success-anim-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  animation: scaleUpFade 0.6s var(--ease-out) forwards;
+}
+
+.success-anim-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
+}
+
+.success-anim-svg {
+  width: 40px;
+  height: 40px;
+  stroke: var(--success);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.success-anim-svg circle {
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: drawCircle 0.6s ease-out forwards;
+}
+
+.success-anim-svg path {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: drawCheck 0.4s ease-out 0.4s forwards;
+}
+
+.success-anim-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.success-anim-text {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
 }
 
 .fade-in {
@@ -745,12 +832,9 @@ a:hover {
   animation: float 4s ease-in-out infinite;
 }
 
-/* ─── Gradient text ─── */
+/* ─── Accent text (solid) ─── */
 .text-gradient {
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
 }
 
 /* ─── Glow ring on hover ─── */
@@ -853,21 +937,6 @@ a:hover {
   background: var(--accent-glow-strong);
 }
 
-/* ─── Testimonial card ─── */
-.testimonial-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 1.5rem;
-  transition: all 0.3s var(--ease-out);
-  box-shadow: var(--shadow-sm);
-}
-
-.testimonial-card:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
-}
-
 /* ─── CTA section glow ─── */
 .cta-glow {
   position: relative;
@@ -887,10 +956,10 @@ a:hover {
    ═══════════════════════════════════════════════════════ */
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(18, 19, 26, 0.75);
   backdrop-filter: blur(32px) saturate(1.6);
   -webkit-backdrop-filter: blur(32px) saturate(1.6);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-2xl);
   box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
@@ -948,7 +1017,7 @@ a:hover {
 }
 
 .landing-nav.scrolled {
-  background: rgba(248, 249, 252, 0.88);
+  background: rgba(10, 11, 15, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -1218,4 +1287,343 @@ a:hover {
   background-size: 800px 100%;
   animation: shimmer 1.4s ease-in-out infinite;
   border-radius: var(--r-sm);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Landing – Editorial
+   ═══════════════════════════════════════════════════════ */
+
+.landing-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.landing-links a {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.landing-links a:hover {
+  color: var(--text-primary);
+}
+
+@media (max-width: 760px) {
+  .landing-links {
+    display: none;
+  }
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.kicker::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.font-display {
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+@media (max-width: 960px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.hero-h1 {
+  font-size: clamp(2.6rem, 5.2vw, 4.2rem);
+  font-weight: 560;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-top: 1.25rem;
+}
+
+.hero-h1 em {
+  font-style: italic;
+  color: var(--accent-light);
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 34rem;
+  margin-top: 1.25rem;
+}
+
+.check-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.check-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.check-list svg {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.strip-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .strip-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .strip-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.strip-cell {
+  border-top: 1px solid var(--border-hover);
+  padding-top: 1.25rem;
+}
+
+.strip-num {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+.strip-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0.6rem 0 0.4rem;
+}
+
+.strip-text {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.section-head {
+  max-width: 640px;
+  margin-bottom: 3rem;
+}
+
+.section-h2 {
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  font-weight: 560;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-top: 1rem;
+}
+
+.section-sub {
+  color: var(--text-secondary);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  margin-top: 1rem;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.25rem;
+}
+
+.bento-cell {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.bento-cell:hover {
+  border-color: var(--border-hover);
+}
+
+.span-3 {
+  grid-column: span 3;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .span-3,
+  .span-2 {
+    grid-column: span 6;
+  }
+}
+
+.bento-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-glow-strong);
+  color: var(--accent);
+}
+
+.bento-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1rem 0 0.5rem;
+}
+
+.bento-text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.hierarchy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+}
+
+.hierarchy span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  color: var(--accent);
+  background: var(--accent-glow-strong);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+}
+
+.hierarchy i {
+  font-style: normal;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 800px) {
+  .step-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step {
+  border-top: 2px solid var(--accent);
+  padding-top: 1.25rem;
+}
+
+.step-num {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.step-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0.6rem 0 0.4rem;
+}
+
+.step-text {
+  font-size: 0.87rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.cta-split {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 800px) {
+  .cta-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 700px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-col h4 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.9rem;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.6rem;
+}
+
+.footer-col a:hover {
+  color: var(--text-primary);
+}
+
+.mockup-caption {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.9rem;
 }

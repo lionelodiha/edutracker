@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import Logo from "../components/LogoLockup";
 
 function getPasswordStrength(pw: string): { level: number; label: string } {
     if (!pw) return { level: 0, label: "" };
@@ -18,19 +19,29 @@ function getPasswordStrength(pw: string): { level: number; label: string } {
 }
 
 export default function RegisterPage() {
-    const { register, login } = useAuth();
+    const { register, isAuthenticated, isLoading: authLoading } = useAuth();
     const navigate = useNavigate();
+    const [params] = useSearchParams();
     const [form, setForm] = useState({
         firstName: "",
         lastName: "",
         userName: "",
-        email: "",
+        email: params.get("email") ?? "",
         password: "",
         confirmPassword: "",
     });
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!authLoading && isAuthenticated && !showSuccess) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [authLoading, isAuthenticated, showSuccess, navigate]);
+
+    if (authLoading) return null;
 
     const strength = useMemo(() => getPasswordStrength(form.password), [form.password]);
 
@@ -56,13 +67,11 @@ export default function RegisterPage() {
         });
 
         if (result.ok) {
-            const loginResult = await login(form.email, form.password);
             setLoading(false);
-            if (loginResult.ok) {
-                navigate("/dashboard");
-            } else {
+            setShowSuccess(true);
+            setTimeout(() => {
                 navigate("/login");
-            }
+            }, 2500);
         } else {
             setLoading(false);
             setError(result.error || "Registration failed.");
@@ -82,21 +91,8 @@ export default function RegisterPage() {
             <div style={{ width: "100%", maxWidth: 460, position: "relative", zIndex: 1 }} className="fade-in">
                 {/* Logo */}
                 <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
-                    <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", textDecoration: "none", marginBottom: "0.75rem" }}>
-                        <div
-                            style={{
-                                width: 44, height: 44, borderRadius: 12,
-                                background: "var(--grad-brand)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontWeight: 800, fontSize: "1.1rem", color: "#fff",
-                                boxShadow: "0 4px 20px rgba(99, 102, 241, 0.3)",
-                            }}
-                        >
-                            E
-                        </div>
-                        <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em" }}>
-                            EduTracker
-                        </span>
+                    <Link to="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none", marginBottom: "0.75rem" }}>
+                        <Logo markSize={44} fontSize="1.5rem" />
                     </Link>
                     <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem", marginTop: "0.5rem" }}>
                         Create your account to get started.
@@ -105,6 +101,18 @@ export default function RegisterPage() {
 
                 {/* Card */}
                 <div className="auth-card" style={{ padding: "2rem" }}>
+                    {showSuccess ? (
+                        <div className="success-anim-container">
+                            <div className="success-anim-circle">
+                                <svg className="success-anim-svg" viewBox="0 0 52 52">
+                                    <circle cx="26" cy="26" r="24" />
+                                    <path d="M14 26 L22 34 L38 16" />
+                                </svg>
+                            </div>
+                            <div className="success-anim-title">Account Created!</div>
+                            <div className="success-anim-text">Redirecting to login...</div>
+                        </div>
+                    ) : (
                     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                         {error && (
                             <div className="alert alert-error fade-in">
@@ -196,6 +204,7 @@ export default function RegisterPage() {
                             )}
                         </button>
                     </form>
+                    )}
                 </div>
 
                 <div style={{ textAlign: "center", marginTop: "1.5rem" }}>

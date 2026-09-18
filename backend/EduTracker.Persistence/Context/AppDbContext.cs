@@ -1,3 +1,4 @@
+using EduTracker.Domain.Entities;
 using EduTracker.Domain.Entities.Academics;
 using EduTracker.Domain.Entities.Organizations;
 using EduTracker.Domain.Entities.Users;
@@ -18,6 +19,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Semester> Semesters => Set<Semester>();
     public DbSet<Term> Terms => Set<Term>();
     public DbSet<CourseOffering> CourseOfferings => Set<CourseOffering>();
+    public DbSet<Class> Classes => Set<Class>();
+    public DbSet<Faculty> Faculties => Set<Faculty>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<PortalInvite> PortalInvites => Set<PortalInvite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

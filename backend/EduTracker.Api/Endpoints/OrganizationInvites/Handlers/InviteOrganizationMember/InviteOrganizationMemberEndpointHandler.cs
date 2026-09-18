@@ -23,7 +23,8 @@ internal static class InviteOrganizationMemberEndpointHandler
         InviteOrganizationMemberCommand command = new(
             ActorId: actorId,
             OrganizationId: id,
-            UserId: request.UserId
+            UserId: request.UserId,
+            UserName: request.UserName
         );
 
         OperationResult<Guid> result = await mediator.Send(command, cancellationToken);

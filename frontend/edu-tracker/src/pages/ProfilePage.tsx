@@ -12,6 +12,16 @@ import type { SessionData } from "../api";
 
 const API_BASE = "http://localhost:3187";
 
+function MonitorIcon() {
+    return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+    );
+}
+
 export default function ProfilePage() {
     const { user, refreshUser } = useAuth();
     const [tab, setTab] = useState<"profile" | "password" | "sessions">("profile");
@@ -42,7 +52,7 @@ export default function ProfilePage() {
     const fetchSessions = async () => {
         setSessionsLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE });
+            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             const r = await getCurrentUserSessionsEndpointHandler();
             if (r.data?.data) {
                 setSessions(r.data.data);
@@ -60,7 +70,7 @@ export default function ProfilePage() {
     const handleRevokeSession = async (sessionId: string) => {
         if (!confirm("Are you sure you want to sign out of this session?")) return;
         try {
-            client.setConfig({ baseUrl: API_BASE });
+            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             await revokeCurrentUserSessionEndpointHandler({ path: { id: sessionId } });
             fetchSessions();
         } catch {}
@@ -69,7 +79,7 @@ export default function ProfilePage() {
     const handleRevokeAllSessions = async () => {
         if (!confirm("Are you sure you want to sign out of all other devices?")) return;
         try {
-            client.setConfig({ baseUrl: API_BASE });
+            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             await revokeAllCurrentUserSessionsEndpointHandler({ query: { keepCurrentUserSession: true } });
             fetchSessions();
         } catch {}
@@ -80,7 +90,7 @@ export default function ProfilePage() {
         setProfileMsg(null);
         setProfileLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE });
+            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             const result = await updateCurrentUserEndpointHandler({
                 body: {
                     userName: profile.userName || null,
@@ -89,8 +99,8 @@ export default function ProfilePage() {
                     lastName: profile.lastName || null,
                 },
             });
-            if (result.response.ok) {
-                setProfileMsg({ type: "success", text: "Profile updated successfully!" });
+            if (result.response?.ok) {
+                setProfileMsg({ type: "success", text: "Profile updated successfully." });
                 await refreshUser();
             } else {
                 const d = result.data as any;
@@ -111,7 +121,7 @@ export default function ProfilePage() {
         }
         setPwLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE });
+            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             const result = await updateCurrentUserPasswordEndpointHandler({
                 body: {
                     currentPassword: passwords.currentPassword,
@@ -119,8 +129,8 @@ export default function ProfilePage() {
                     logoutAll: false,
                 },
             });
-            if (result.response.ok) {
-                setPwMsg({ type: "success", text: "Password updated successfully!" });
+            if (result.response?.ok) {
+                setPwMsg({ type: "success", text: "Password updated successfully." });
                 setPasswords({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
             } else {
                 const d = result.data as any;
@@ -132,80 +142,89 @@ export default function ProfilePage() {
         setPwLoading(false);
     };
 
+    const fullName =
+        [user?.firstName, user?.middleName, user?.lastName].filter(Boolean).join(" ") ||
+        user?.userName || "Account";
+    const initials = user?.firstName
+        ? `${user.firstName.charAt(0)}${user.lastName?.charAt(0) || ""}`.toUpperCase()
+        : (user?.userName?.charAt(0) || "U").toUpperCase();
+
     return (
-        <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <div>
-                <h1 style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "0.25rem" }}>Profile Settings</h1>
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                    Manage your account details and security.
-                </p>
-            </div>
-
-            {/* User info card */}
-            <div className="card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <div
-                    style={{
-                        width: 56, height: 56, borderRadius: 14,
-                        background: "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontWeight: 700, fontSize: "1.25rem", flexShrink: 0,
-                    }}
-                >
-                    {user?.firstName?.charAt(0).toUpperCase() || "U"}
-                </div>
+        <div className="dz-page">
+            <div className="dz-page-head">
                 <div>
-                    <div style={{ fontWeight: 600, fontSize: "1.1rem" }}>
-                        {user?.firstName} {user?.middleName || ""} {user?.lastName}
+                    <h1 className="dz-page-title">Profile Settings</h1>
+                    <p className="dz-page-sub">Manage your account details, password, and signed-in devices.</p>
+                </div>
+            </div>
+
+            <div className="dz-card">
+                <div className="dz-hero">
+                    <div className="dz-avatar" style={{ width: 52, height: 52, fontSize: "1.15rem", background: "#8b5cf6", color: "#fff" }}>
+                        {initials}
                     </div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
-                        @{user?.userName} · <span className="badge badge-accent">{user?.role}</span>
+                    <div style={{ minWidth: 0 }}>
+                        <div className="dz-hero-name">{fullName}</div>
+                        <div className="dz-hero-sub">
+                            <span>@{user?.userName}</span>
+                            <span className="dz-status dz-status-gray">{user?.role || "User"}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div className="dz-segmented" role="tablist" aria-label="Profile sections">
                 <button
-                    className={`btn ${tab === "profile" ? "btn-primary" : "btn-secondary"} btn-sm`}
+                    role="tab"
+                    aria-selected={tab === "profile"}
+                    className={`dz-seg-btn ${tab === "profile" ? "active" : ""}`}
                     onClick={() => setTab("profile")}
                 >
                     Edit Profile
                 </button>
                 <button
-                    className={`btn ${tab === "password" ? "btn-primary" : "btn-secondary"} btn-sm`}
+                    role="tab"
+                    aria-selected={tab === "password"}
+                    className={`dz-seg-btn ${tab === "password" ? "active" : ""}`}
                     onClick={() => setTab("password")}
                 >
                     Change Password
                 </button>
                 <button
-                    className={`btn ${tab === "sessions" ? "btn-primary" : "btn-secondary"} btn-sm`}
+                    role="tab"
+                    aria-selected={tab === "sessions"}
+                    className={`dz-seg-btn ${tab === "sessions" ? "active" : ""}`}
                     onClick={() => setTab("sessions")}
                 >
                     Active Sessions
                 </button>
             </div>
 
-            {/* Profile form */}
             {tab === "profile" && (
-                <div className="card">
-                    <form onSubmit={handleProfileSave} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div className="dz-card">
+                    <div className="dz-card-head">
+                        <span className="dz-card-title">Account details</span>
+                    </div>
+                    <form onSubmit={handleProfileSave} className="dz-form">
                         {profileMsg && (
                             <div className={`alert ${profileMsg.type === "success" ? "alert-success" : "alert-error"}`}>
                                 {profileMsg.text}
                             </div>
                         )}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                        <div className="dz-form-grid-2">
                             <div>
-                                <label className="input-label">First Name</label>
+                                <label className="input-label" htmlFor="first-name">First Name</label>
                                 <input
+                                    id="first-name"
                                     className="input"
                                     value={profile.firstName}
                                     onChange={(e) => setProfile((p) => ({ ...p, firstName: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="input-label">Last Name</label>
+                                <label className="input-label" htmlFor="last-name">Last Name</label>
                                 <input
+                                    id="last-name"
                                     className="input"
                                     value={profile.lastName}
                                     onChange={(e) => setProfile((p) => ({ ...p, lastName: e.target.value }))}
@@ -213,129 +232,167 @@ export default function ProfilePage() {
                             </div>
                         </div>
                         <div>
-                            <label className="input-label">Middle Name (optional)</label>
+                            <label className="input-label" htmlFor="middle-name">Middle Name (optional)</label>
                             <input
+                                id="middle-name"
                                 className="input"
                                 value={profile.middleName}
                                 onChange={(e) => setProfile((p) => ({ ...p, middleName: e.target.value }))}
                             />
                         </div>
                         <div>
-                            <label className="input-label">Username</label>
+                            <label className="input-label" htmlFor="username">Username</label>
                             <input
+                                id="username"
                                 className="input"
                                 value={profile.userName}
                                 onChange={(e) => setProfile((p) => ({ ...p, userName: e.target.value }))}
                             />
                         </div>
-                        <button className="btn btn-primary" type="submit" disabled={profileLoading}>
-                            {profileLoading ? "Saving..." : "Save Changes"}
-                        </button>
+                        <div className="dz-form-actions" style={{ justifyContent: "flex-start" }}>
+                            <button className="dz-btn-green" type="submit" disabled={profileLoading}>
+                                {profileLoading ? "Saving…" : "Save Changes"}
+                            </button>
+                        </div>
                     </form>
                 </div>
             )}
 
-            {/* Password form */}
             {tab === "password" && (
-                <div className="card">
-                    <form onSubmit={handlePasswordSave} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div className="dz-card">
+                    <div className="dz-card-head">
+                        <span className="dz-card-title">Change password</span>
+                    </div>
+                    <form onSubmit={handlePasswordSave} className="dz-form">
                         {pwMsg && (
                             <div className={`alert ${pwMsg.type === "success" ? "alert-success" : "alert-error"}`}>
                                 {pwMsg.text}
                             </div>
                         )}
                         <div>
-                            <label className="input-label">Current Password</label>
+                            <label className="input-label" htmlFor="current-pw">Current Password</label>
                             <input
+                                id="current-pw"
                                 className="input"
                                 type="password"
                                 value={passwords.currentPassword}
                                 onChange={(e) => setPasswords((p) => ({ ...p, currentPassword: e.target.value }))}
                                 required
+                                autoComplete="current-password"
                             />
                         </div>
-                        <div>
-                            <label className="input-label">New Password</label>
-                            <input
-                                className="input"
-                                type="password"
-                                value={passwords.newPassword}
-                                onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
-                                required
-                            />
+                        <div className="dz-form-grid-2">
+                            <div>
+                                <label className="input-label" htmlFor="new-pw">New Password</label>
+                                <input
+                                    id="new-pw"
+                                    className="input"
+                                    type="password"
+                                    value={passwords.newPassword}
+                                    onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
+                                    required
+                                    autoComplete="new-password"
+                                />
+                            </div>
+                            <div>
+                                <label className="input-label" htmlFor="confirm-pw">Confirm New Password</label>
+                                <input
+                                    id="confirm-pw"
+                                    className="input"
+                                    type="password"
+                                    value={passwords.confirmNewPassword}
+                                    onChange={(e) => setPasswords((p) => ({ ...p, confirmNewPassword: e.target.value }))}
+                                    required
+                                    autoComplete="new-password"
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <label className="input-label">Confirm New Password</label>
-                            <input
-                                className="input"
-                                type="password"
-                                value={passwords.confirmNewPassword}
-                                onChange={(e) => setPasswords((p) => ({ ...p, confirmNewPassword: e.target.value }))}
-                                required
-                            />
+                        <div className="dz-form-actions" style={{ justifyContent: "flex-start" }}>
+                            <button className="dz-btn-green" type="submit" disabled={pwLoading}>
+                                {pwLoading ? "Updating…" : "Update Password"}
+                            </button>
                         </div>
-                        <button className="btn btn-primary" type="submit" disabled={pwLoading}>
-                            {pwLoading ? "Updating..." : "Update Password"}
-                        </button>
                     </form>
                 </div>
             )}
 
-            {/* Sessions view */}
             {tab === "sessions" && (
-                <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div className="dz-card" style={{ padding: 0, overflow: "hidden" }}>
+                    <div style={{ padding: "1.35rem 1.4rem 1rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
                         <div>
-                            <h2 style={{ fontSize: "1.2rem", fontWeight: 700 }}>Active Sessions</h2>
-                            <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
-                                Devices currently logged into your account.
-                            </p>
+                            <div className="dz-card-title">Active sessions</div>
+                            <div className="dz-reminder-meta" style={{ marginTop: "0.25rem" }}>
+                                {sessionsLoading ? "Loading devices…" : `${sessions.length} device${sessions.length === 1 ? "" : "s"} signed in.`}
+                            </div>
                         </div>
-                        <button className="btn btn-secondary btn-sm" onClick={handleRevokeAllSessions}>
-                            Revoke All Other Sessions
+                        <button className="dz-pill-btn" onClick={handleRevokeAllSessions}>
+                            Sign out other devices
                         </button>
                     </div>
 
                     {sessionsLoading ? (
-                        <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
-                            <div className="spinner" />
-                        </div>
-                    ) : sessions.length === 0 ? (
-                        <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>
-                            No active sessions found.
-                        </div>
-                    ) : (
-                        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-                            {sessions.map((s, index) => (
-                                <div 
-                                    key={s.sessionId}
-                                    style={{ 
-                                        padding: "1.5rem",
-                                        borderBottom: index < sessions.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between"
-                                    }}
-                                >
-                                    <div>
-                                        <div style={{ fontFamily: "monospace", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-                                            Session ID: {s.sessionId.substring(0, 8)}...
-                                        </div>
-                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.85rem", display: "flex", gap: "1rem" }}>
-                                            <span>Created: {new Date(s.createdAt).toLocaleDateString()}</span>
-                                            <span>Expires: {new Date(s.expiresAt).toLocaleDateString()}</span>
-                                            {s.rememberMe && <span className="badge badge-accent">Remembered</span>}
-                                        </div>
+                        <div className="dz-list" style={{ padding: "0 1.4rem 1.4rem" }}>
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="dz-row">
+                                    <div className="skeleton" style={{ width: 34, height: 34, borderRadius: 10 }} />
+                                    <div style={{ flex: 1 }}>
+                                        <div className="skeleton" style={{ height: 12, width: "45%", borderRadius: 6, marginBottom: 6 }} />
+                                        <div className="skeleton" style={{ height: 9, width: "35%", borderRadius: 5 }} />
                                     </div>
-                                    <button 
-                                        className="btn btn-secondary btn-sm" 
-                                        style={{ color: "var(--danger)" }}
-                                        onClick={() => handleRevokeSession(s.sessionId)}
-                                    >
-                                        Revoke Session
-                                    </button>
                                 </div>
                             ))}
+                        </div>
+                    ) : sessions.length === 0 ? (
+                        <div className="dz-empty">
+                            <span className="dz-empty-icon"><MonitorIcon /></span>
+                            <div className="dz-empty-title">No active sessions</div>
+                            <div className="dz-empty-text">Devices signed into your account will appear here.</div>
+                        </div>
+                    ) : (
+                        <div className="dz-table-wrap">
+                            <table className="dz-table">
+                                <thead>
+                                    <tr>
+                                        <th>Session</th>
+                                        <th>Created</th>
+                                        <th>Expires</th>
+                                        <th>Status</th>
+                                        <th className="dz-table-actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sessions.map((s) => (
+                                        <tr key={s.sessionId}>
+                                            <td>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+                                                    <div className="dz-tile" style={{ background: "var(--bg-input)", color: "var(--text-secondary)" }}>
+                                                        <MonitorIcon />
+                                                    </div>
+                                                    <div>
+                                                        <div className="mono">{s.sessionId.substring(0, 8)}…</div>
+                                                        {s.rememberMe && <div className="dz-note">Remembered device</div>}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style={{ color: "var(--text-secondary)" }}>{new Date(s.createdAt).toLocaleDateString()}</td>
+                                            <td style={{ color: "var(--text-secondary)" }}>{new Date(s.expiresAt).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className={`dz-status ${s.isRevoked ? "dz-status-red" : "dz-status-green"}`}>
+                                                    {s.isRevoked ? "Revoked" : "Active"}
+                                                </span>
+                                            </td>
+                                            <td className="dz-table-actions">
+                                                <button
+                                                    className="dz-btn-danger-ghost"
+                                                    onClick={() => handleRevokeSession(s.sessionId)}
+                                                >
+                                                    Revoke
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>

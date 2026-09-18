@@ -22,6 +22,43 @@ namespace EduTracker.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Class", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("course_offering_id");
+
+                    b.Property<Guid?>("InstructorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("instructor_id");
+
+                    b.Property<int>("MaxCapacity")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_capacity");
+
+                    b.HasKey("Id")
+                        .HasName("pk_classes");
+
+                    b.HasIndex("CourseOfferingId")
+                        .HasDatabaseName("ix_classes_course_offering_id");
+
+                    b.HasIndex("InstructorId")
+                        .HasDatabaseName("ix_classes_instructor_id");
+
+                    b.ToTable("Classes", (string)null);
+                });
+
             modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -81,6 +118,77 @@ namespace EduTracker.Persistence.Migrations
                         .HasDatabaseName("ix_course_offerings_term_id_course_id");
 
                     b.ToTable("course_offerings", (string)null);
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Department", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid?>("FacultyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_departments");
+
+                    b.HasIndex("FacultyId")
+                        .HasDatabaseName("ix_departments_faculty_id");
+
+                    b.HasIndex("OrganizationId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_departments_organization_id_name");
+
+                    b.ToTable("departments", (string)null);
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Faculty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_faculties");
+
+                    b.HasIndex("OrganizationId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_faculties_organization_id_name");
+
+                    b.ToTable("faculties", (string)null);
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Semester", b =>
@@ -222,6 +330,14 @@ namespace EduTracker.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
+                    b.Property<Guid?>("FacultyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("faculty_id");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
@@ -245,6 +361,12 @@ namespace EduTracker.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_organization_members");
 
+                    b.HasIndex("DepartmentId")
+                        .HasDatabaseName("ix_organization_members_department_id");
+
+                    b.HasIndex("FacultyId")
+                        .HasDatabaseName("ix_organization_members_faculty_id");
+
                     b.HasIndex("OrganizationId")
                         .HasDatabaseName("ix_organization_members_organization_id");
 
@@ -262,6 +384,78 @@ namespace EduTracker.Persistence.Migrations
                         .HasDatabaseName("ix_organization_members_organization_id_user_id");
 
                     b.ToTable("organization_members", (string)null);
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.PortalInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("ConsumedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consumed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("email");
+
+                    b.Property<byte[]>("EmailHash")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea")
+                        .HasColumnName("email_hash");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("InvitedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_by_user_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("role");
+
+                    b.Property<byte[]>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_portal_invites");
+
+                    b.HasIndex("Email")
+                        .HasDatabaseName("ix_portal_invites_email");
+
+                    b.HasIndex("InvitedByUserId")
+                        .HasDatabaseName("ix_portal_invites_invited_by_user_id");
+
+                    b.HasIndex("OrganizationId", "EmailHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_portal_invites_organization_id_email_hash")
+                        .HasFilter("consumed_at IS NULL");
+
+                    b.ToTable("portal_invites", (string)null);
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
@@ -362,6 +556,52 @@ namespace EduTracker.Persistence.Migrations
                     b.ToTable("user_sessions", (string)null);
                 });
 
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Class", b =>
+                {
+                    b.HasOne("EduTracker.Domain.Entities.Academics.CourseOffering", "CourseOffering")
+                        .WithMany()
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_classes_course_offerings_course_offering_id");
+
+                    b.HasOne("EduTracker.Domain.Entities.Users.User", "Instructor")
+                        .WithMany()
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_classes_users_instructor_id");
+
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("ClassId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("CreatedAt");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("UpdatedAt");
+
+                            b1.HasKey("ClassId");
+
+                            b1.ToTable("Classes");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ClassId")
+                                .HasConstraintName("fk_classes_classes_id");
+                        });
+
+                    b.Navigation("AuditState")
+                        .IsRequired();
+
+                    b.Navigation("CourseOffering");
+
+                    b.Navigation("Instructor");
+                });
+
             modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Course", b =>
                 {
                     b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
@@ -445,6 +685,90 @@ namespace EduTracker.Persistence.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Term");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Department", b =>
+                {
+                    b.HasOne("EduTracker.Domain.Entities.Academics.Faculty", "Faculty")
+                        .WithMany("Departments")
+                        .HasForeignKey("FacultyId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_departments_faculties_faculty_id");
+
+                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_departments_organizations_organization_id");
+
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("DepartmentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("created_at");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("updated_at");
+
+                            b1.HasKey("DepartmentId");
+
+                            b1.ToTable("departments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DepartmentId")
+                                .HasConstraintName("fk_departments_departments_id");
+                        });
+
+                    b.Navigation("AuditState")
+                        .IsRequired();
+
+                    b.Navigation("Faculty");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Faculty", b =>
+                {
+                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_faculties_organizations_organization_id");
+
+                    b.OwnsOne("EduTracker.Domain.Components.Auditing.AuditState", "AuditState", b1 =>
+                        {
+                            b1.Property<Guid>("FacultyId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("created_at");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("updated_at");
+
+                            b1.HasKey("FacultyId");
+
+                            b1.ToTable("faculties");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FacultyId")
+                                .HasConstraintName("fk_faculties_faculties_id");
+                        });
+
+                    b.Navigation("AuditState")
+                        .IsRequired();
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Semester", b =>
@@ -619,6 +943,18 @@ namespace EduTracker.Persistence.Migrations
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Organizations.OrganizationMember", b =>
                 {
+                    b.HasOne("EduTracker.Domain.Entities.Academics.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_organization_members_departments_department_id");
+
+                    b.HasOne("EduTracker.Domain.Entities.Academics.Faculty", "Faculty")
+                        .WithMany()
+                        .HasForeignKey("FacultyId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_organization_members_faculties_faculty_id");
+
                     b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")
@@ -659,9 +995,34 @@ namespace EduTracker.Persistence.Migrations
                     b.Navigation("AuditState")
                         .IsRequired();
 
+                    b.Navigation("Department");
+
+                    b.Navigation("Faculty");
+
                     b.Navigation("Organization");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.PortalInvite", b =>
+                {
+                    b.HasOne("EduTracker.Domain.Entities.Users.User", "InvitedByUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_portal_invites_users_invited_by_user_id");
+
+                    b.HasOne("EduTracker.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_portal_invites_organizations_organization_id");
+
+                    b.Navigation("InvitedByUser");
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("EduTracker.Domain.Entities.Users.User", b =>
@@ -752,6 +1113,11 @@ namespace EduTracker.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EduTracker.Domain.Entities.Academics.Faculty", b =>
+                {
+                    b.Navigation("Departments");
                 });
 #pragma warning restore 612, 618
         }

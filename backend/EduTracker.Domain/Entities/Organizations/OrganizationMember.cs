@@ -1,6 +1,7 @@
 using EduTracker.Domain.Abstractions;
 using EduTracker.Domain.Components.Auditing;
 using EduTracker.Domain.Entities.Users;
+using EduTracker.Domain.Entities.Academics;
 
 namespace EduTracker.Domain.Entities.Organizations;
 
@@ -29,6 +30,12 @@ public sealed class OrganizationMember : IEntity, IAuditable
     public Guid UserId { get; private set; }
     public User? User { get; private set; }
 
+    public Guid? FacultyId { get; private set; }
+    public Faculty? Faculty { get; private set; }
+
+    public Guid? DepartmentId { get; private set; }
+    public Department? Department { get; private set; }
+
     public OrganizationMemberRole Role { get; private set; } = OrganizationMemberRole.Member;
     public OrganizationMemberStatus Status { get; private set; } = OrganizationMemberStatus.Active;
 
@@ -40,6 +47,13 @@ public sealed class OrganizationMember : IEntity, IAuditable
             return;
 
         Role = validatedRole;
+        AuditState.UpdateAudit();
+    }
+
+    public void AssignToDepartment(Guid? facultyId, Guid? departmentId)
+    {
+        FacultyId = facultyId;
+        DepartmentId = departmentId;
         AuditState.UpdateAudit();
     }
 
