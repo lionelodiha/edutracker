@@ -229,7 +229,7 @@ export type CreateCourseRequest = {
 
 export type CreateDepartmentRequest = {
     organizationId: string;
-    facultyId?: null | string;
+    facultyId: null | string;
     name: string;
     description: null | string;
 };
