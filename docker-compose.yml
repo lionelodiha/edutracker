@@ -34,15 +34,21 @@ services:
   # ASP.NET Core backend. Replaces `dotnet run --project backend/EduTracker.Api`.
   # Listens on http://localhost:3187 (same URL the frontend is configured for).
   #
+  # Stage 03 profiles: `api` and `web` carry `profiles: ["full"]`, so most days
+  # `docker compose up -d` gives you Postgres + Redis only (API runs in your
+  # debugger), and `docker compose --profile full up -d --build` gives you the
+  # whole stack including the built frontend.
+  #
   # First-time setup (from repo root):
   #   1. Copy-Item .env.example .env   # then fill in the two Base64 keys
   #   2. docker compose up -d postgres redis
   #   3. $env:ConnectionStrings__Database = "Host=localhost;Port=5433;Username=edutracker;Password=edutracker_dev;Database=edutracker"
   #      dotnet ef database update --project backend/EduTracker.Persistence --startup-project backend/EduTracker.Api
   #      (one-time migration; the app does not auto-migrate on startup)
-  #   4. docker compose up -d --build
+  #   4. docker compose --profile full up -d --build
   #
   # Everyday use: `docker compose up -d` / `docker compose logs -f api`.
+  # Full stack:  `docker compose --profile full up -d` / `docker compose --profile full logs -f`.
   api:
     build:
       context: .
@@ -50,6 +56,7 @@ services:
     image: edutracker-api:local
     container_name: edutracker-api
     restart: unless-stopped
+    profiles: ["full"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,8 +70,42 @@ services:
       # Service names resolve inside the compose network; secrets come from .env
       ConnectionStrings__Database: "Host=postgres;Port=5432;Username=edutracker;Password=edutracker_dev;Database=edutracker"
       ConnectionStrings__Redis: "redis:6379"
+      # The built frontend (web service) calls the API from the browser,
+      # so its origin must be an allowed CORS origin.
+      Cors__AllowedOrigins__2: "http://localhost:8080"
     env_file:
       - .env
+    healthcheck:
+      # Readiness, not liveness: compose stops routing to a container that is
+      # not ready, but does not kill it. Liveness kills belong to the
+      # orchestrator in staging/production (Stage 05).
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Built frontend (Stage 03). nginx serves the Vite build on
+  # http://localhost:8080 with SPA fallback. The API URL the browser calls
+  # is baked in at CONTAINER START from API_BASE_URL (see
+  # frontend/edu-tracker/docker-entrypoint.sh), not at image build.
+  web:
+    build:
+      context: frontend/edu-tracker
+      dockerfile: Dockerfile
+    image: edutracker-web:local
+    container_name: edutracker-web
+    restart: unless-stopped
+    profiles: ["full"]
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Browser-facing API address. Default matches the local api service.
+      # Staging/production override this per environment (Stage 05).
+      API_BASE_URL: "http://localhost:3187"
 
 volumes:
   postgres_data:

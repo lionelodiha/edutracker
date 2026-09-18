@@ -9,8 +9,7 @@ import { client } from "../api/client.gen";
 import type { UserResponse } from "../api";
 
 import { apiErrorMessage } from "../utils/apiError";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../config";
 
 type AuthState = {
   user: UserResponse | null;
@@ -37,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+      client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
       const result = await getCurrentUserEndpointHandler();
       console.log('[fetchUser] result:', result);
       if (result.data?.success && result.data.data) {
@@ -53,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+    client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
     fetchUser().finally(() => setIsLoading(false));
   }, [fetchUser]);
 
@@ -84,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (identifier: string, password: string, rememberMe = false) => {
       try {
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         const result = await loginUserEndpointHandler({
           body: { identifier, password, rememberMe },
         });
@@ -111,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lastName: string;
     }) => {
       try {
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         const result = await registerUserEndpointHandler({
           body: {
             userName: data.userName,
@@ -135,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+      client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
       await logoutUserEndpointHandler();
     } catch {
       // ignore

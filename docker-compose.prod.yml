@@ -1,0 +1,58 @@
+# Stage 05 — staging/production overlay. Standalone file used ON THE HOST:
+#   API_IMAGE=ghcr.io/<owner>/edutracker/api:<sha> \
+#   WEB_IMAGE=ghcr.io/<owner>/edutracker/web:<sha> \
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Right-sized target (playbook Stage 05): one host/container service running
+# these two containers, one MANAGED Postgres (automated backups,
+# point-in-time recovery — children's academic records), one MANAGED Redis.
+# Not Kubernetes: it solves problems this product does not have yet.
+#
+# Required host environment (export before up, or keep in a host-side .env
+# that is NOT committed):
+#   API_IMAGE, WEB_IMAGE   GHCR tags; the deploy workflow sets these per release.
+#                          Every environment can name EXACTLY which commit it runs.
+#   DATABASE_URL           Npgsql connection string to managed Postgres.
+#   WEB_ORIGIN             Browser origin of the web service, e.g. https://app.example.com.
+#                          Must be an allowed CORS origin or browsers block the API.
+#   API_PUBLIC_URL         Browser-facing API address baked into /config.js at start,
+#                          e.g. https://api.example.com.
+#   DATA_KEY_1, EMAIL_HMAC_KEY
+#                          Same secrets as local .env (see .env.example).
+# Optional:
+#   API_PORT (default 3187), WEB_PORT (default 8080), REDIS_URL (empty = cache off).
+
+services:
+  api:
+    image: ${API_IMAGE:?Set API_IMAGE to ghcr.io/<owner>/edutracker/api:<sha>}
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-3187}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Database: ${DATABASE_URL:?Set DATABASE_URL to the managed Postgres connection string}
+      ConnectionStrings__Redis: ${REDIS_URL:-}
+      Cors__AllowedOrigins__0: ${WEB_ORIGIN:?Set WEB_ORIGIN to the browser origin, e.g. https://app.example.com}
+      DataEncryptionOptions__CurrentKeyVersion: "1"
+      DataEncryptionOptions__Keys__1: ${DATA_KEY_1:?Set DATA_KEY_1 (see .env.example)}
+      HashingOptions__EmailHmacKey: ${EMAIL_HMAC_KEY:?Set EMAIL_HMAC_KEY (see .env.example)}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    image: ${WEB_IMAGE:?Set WEB_IMAGE to ghcr.io/<owner>/edutracker/web:<sha>}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    environment:
+      # Browser-facing API address. Written into /config.js at container
+      # start, so this image runs unchanged in every environment.
+      API_BASE_URL: ${API_PUBLIC_URL:?Set API_PUBLIC_URL, e.g. https://api.example.com}
+    depends_on:
+      api:
+        condition: service_healthy

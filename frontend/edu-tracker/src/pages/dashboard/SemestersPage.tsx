@@ -9,8 +9,7 @@ import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
 import { apiErrorMessage, thrownMessage } from "../../utils/apiError";
 import type { SemesterResponse } from "../../api";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../../config";
 
 function PlusIcon() {
     return (
@@ -45,7 +44,7 @@ export default function SemestersPage() {
 
     const fetchSemesters = async () => {
         if (!organizationId) return;
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         try {
             const res = await getSemestersEndpointHandler({ query: { organizationId } });
             if (res.data?.data) {

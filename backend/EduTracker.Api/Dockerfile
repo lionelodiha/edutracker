@@ -22,6 +22,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 EXPOSE 8080
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+# curl powers the container HEALTHCHECK against /health/ready. Installed as
+# root before dropping to the unprivileged user.
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/publish .
 USER app
 ENTRYPOINT ["dotnet", "EduTracker.Api.dll"]

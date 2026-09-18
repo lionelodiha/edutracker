@@ -1,0 +1,321 @@
+name: deploy
+
+# Stage 05 — deployment, and the ability to undo it.
+#
+# Flow per push to main:
+#   1. build            CI builds api:<sha> + web:<sha>, pushes to GHCR.
+#   2. staging migrate  idempotent SQL applied as its own job. Nothing else
+#                       runs concurrently (concurrency group).
+#   3. staging roll     new containers start, pass readiness, old ones drain.
+#   4. smoke            readiness + web checks against staging. Must pass.
+#   5. approve          production environment has required reviewers in
+#                       repo Settings > Environments > production. The workflow
+#                       pauses here until a human approves.
+#   6. production migrate + roll (same gates as staging).
+#   7. watch            short readiness watch. Full burn-rate auto-rollback
+#                       arrives with the SLOs in Stage 06.
+#
+# Rollback (one action): Actions > deploy > Run workflow, enter the PREVIOUS
+# release's tags (see runbooks/rollback.md). Nothing else is needed when
+# migrations stay backwards compatible — see the expand-and-contract note in
+# the ci.yml migration step and never roll a migration backwards.
+#
+# Setup (one time, repo Settings):
+#   Environments: staging (no reviewers), production (required reviewers: 1).
+#   Staging secrets:  STAGING_DATABASE_URL, STAGING_HOST, STAGING_USER,
+#                     STAGING_SSH_KEY, STAGING_API_URL, STAGING_WEB_URL,
+#                     STAGING_WEB_ORIGIN, STAGING_API_PUBLIC_URL,
+#                     STAGING_DATA_KEY_1, STAGING_EMAIL_HMAC_KEY
+#   Production secrets: same names with PRODUCTION_ prefix.
+#   Managed Postgres/Redis connection strings live in these secrets, never
+#   in the repo. CI authenticates to GHCR with GITHUB_TOKEN; no long-lived
+#   cloud credential is stored (Stage 07 hardens this with OIDC).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      api_image:
+        description: "API image to deploy (rollback: previous ghcr.io/.../api:<sha>). Empty builds from this ref."
+        required: false
+        default: ""
+      web_image:
+        description: "Web image to deploy (rollback: previous ghcr.io/.../web:<sha>). Empty builds from this ref."
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false # never cancel a deploy halfway; overlapping mains queue
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      api_image: ${{ steps.tags.outputs.api_image }}
+      web_image: ${{ steps.tags.outputs.web_image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Rollback path: tags supplied, nothing to build.
+      - id: tags
+        run: |
+          if [ -n "${{ inputs.api_image }}" ]; then
+            echo "api_image=${{ inputs.api_image }}" >> "$GITHUB_OUTPUT"
+            echo "web_image=${{ inputs.web_image }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "api_image=${{ env.IMAGE_PREFIX }}/api:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "web_image=${{ env.IMAGE_PREFIX }}/web:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: docker/build-push-action@v6
+        if: inputs.api_image == ''
+        with:
+          context: .
+          file: backend/EduTracker.Api/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - uses: docker/build-push-action@v6
+        if: inputs.web_image == ''
+        with:
+          context: frontend/edu-tracker
+          file: frontend/edu-tracker/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  migrate-staging:
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment: staging
+    concurrency: staging-migration # the migration job never runs concurrently
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install dotnet-ef
+        run: |
+          dotnet tool install --global dotnet-ef
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      # Same idempotent script a reviewer saw on the PR (ci.yml). Applied
+      # here as its own gated step — never from app startup (Stage 04).
+      - name: Generate idempotent migration script
+        env:
+          ConnectionStrings__Database: Host=localhost;Database=edutracker;Username=edutracker;Password=dummy-deploy-script-only
+          ConnectionStrings__Redis: localhost:6379
+        run: |
+          dotnet ef migrations script --idempotent \
+            --project backend/EduTracker.Persistence \
+            --startup-project backend/EduTracker.Api \
+            --output migration.sql
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: staging-migration-sql
+          path: migration.sql
+
+      - name: Apply to staging
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migration.sql
+
+  deploy-staging:
+    needs: [build, migrate-staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ secrets.STAGING_WEB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Roll staging
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -eu
+            cd /srv/edutracker
+            export API_IMAGE="${{ needs.build.outputs.api_image }}"
+            export WEB_IMAGE="${{ needs.build.outputs.web_image }}"
+            export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
+            export WEB_ORIGIN="${{ secrets.STAGING_WEB_ORIGIN }}"
+            export API_PUBLIC_URL="${{ secrets.STAGING_API_PUBLIC_URL }}"
+            export DATA_KEY_1="${{ secrets.STAGING_DATA_KEY_1 }}"
+            export EMAIL_HMAC_KEY="${{ secrets.STAGING_EMAIL_HMAC_KEY }}"
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            # New containers must pass readiness before old ones drain.
+            docker compose -f docker-compose.prod.yml exec -T api \
+              curl -f http://localhost:8080/health/ready
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  smoke-staging:
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: API readiness
+        env:
+          API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf "$API_URL/health/ready" | grep -qi healthy; then
+              echo "staging API is ready"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::staging API never became ready"; exit 1
+
+      - name: Web serves the SPA
+        env:
+          WEB_URL: ${{ secrets.STAGING_WEB_URL }}
+        run: |
+          curl -sf "$WEB_URL" | grep -q '<div id="root"'
+
+      - name: Web runtime config points at staging
+        env:
+          WEB_URL: ${{ secrets.STAGING_WEB_URL }}
+          API_PUBLIC_URL: ${{ secrets.STAGING_API_PUBLIC_URL }}
+        run: |
+          curl -sf "$WEB_URL/config.js" | grep -q "$API_PUBLIC_URL"
+
+  migrate-production:
+    needs: [build, smoke-staging]
+    runs-on: ubuntu-latest
+    # Required reviewers on this environment = the human approval gate.
+    environment: production
+    concurrency: production-migration
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install dotnet-ef
+        run: |
+          dotnet tool install --global dotnet-ef
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Generate idempotent migration script
+        env:
+          ConnectionStrings__Database: Host=localhost;Database=edutracker;Username=edutracker;Password=dummy-deploy-script-only
+          ConnectionStrings__Redis: localhost:6379
+        run: |
+          dotnet ef migrations script --idempotent \
+            --project backend/EduTracker.Persistence \
+            --startup-project backend/EduTracker.Api \
+            --output migration.sql
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-migration-sql
+          path: migration.sql
+
+      - name: Apply to production
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migration.sql
+
+  deploy-production:
+    needs: [build, migrate-production]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_WEB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Roll production
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            set -eu
+            cd /srv/edutracker
+            export API_IMAGE="${{ needs.build.outputs.api_image }}"
+            export WEB_IMAGE="${{ needs.build.outputs.web_image }}"
+            export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
+            export WEB_ORIGIN="${{ secrets.PRODUCTION_WEB_ORIGIN }}"
+            export API_PUBLIC_URL="${{ secrets.PRODUCTION_API_PUBLIC_URL }}"
+            export DATA_KEY_1="${{ secrets.PRODUCTION_DATA_KEY_1 }}"
+            export EMAIL_HMAC_KEY="${{ secrets.PRODUCTION_EMAIL_HMAC_KEY }}"
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml exec -T api \
+              curl -f http://localhost:8080/health/ready
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  smoke-production:
+    needs: [deploy-production]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: API readiness
+        env:
+          API_URL: ${{ secrets.PRODUCTION_API_URL }}
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf "$API_URL/health/ready" | grep -qi healthy; then
+              echo "production API is ready"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::production API never became ready"; exit 1
+
+      - name: Web serves the SPA
+        env:
+          WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+        run: |
+          curl -sf "$WEB_URL" | grep -q '<div id="root"'
+
+      # Watch: poll readiness for five minutes after the roll. Error-rate
+      # and latency auto-rollback arrive with the burn-rate alerts in
+      # Stage 06; until then this catches the deploy that looked fine for
+      # thirty seconds and was not.
+      - name: Watch for five minutes
+        env:
+          API_URL: ${{ secrets.PRODUCTION_API_URL }}
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf "$API_URL/health/ready" > /dev/null
+            sleep 10
+          done
+          echo "steady for five minutes"

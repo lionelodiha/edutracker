@@ -14,8 +14,7 @@ import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
 import { apiErrorMessage, thrownMessage } from "../../utils/apiError";
 import type { SemesterResponse, TermResponse, CourseOfferingResponse, CourseResponse } from "../../api";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../../config";
 
 function PlusIcon() {
     return (
@@ -72,7 +71,7 @@ export default function SemesterDetailsPage() {
 
     const fetchData = async () => {
         if (!organizationId || !semesterId) return;
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         try {
             // Fetch Semester
             const semRes = await getSemesterByIdEndpointHandler({
