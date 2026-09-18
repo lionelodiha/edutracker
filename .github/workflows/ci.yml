@@ -212,13 +212,34 @@ jobs:
       # backend gained a required facultyId, the SDK was never
       # regenerated, so TypeScript could not see the field was missing.
       - name: Check the generated SDK is up to date
+        id: sdk_drift
         working-directory: frontend/edu-tracker
         run: |
           npm run openapi-ts
-          if ! git diff --exit-code -- src/api; then
-            echo "::error::The generated API client is stale. Run 'npm run openapi-ts' and commit the result."
-            exit 1
+          if git diff --quiet -- src/api; then
+            echo "SDK is current."
+            exit 0
           fi
+
+          echo "::error::The generated API client is stale. Run 'npm run openapi-ts' and commit the result."
+          echo "--- files that differ ---"
+          git diff --stat -- src/api
+          echo "--- diff ---"
+          git diff -- src/api
+          # Keep the regenerated files so they can be downloaded and
+          # committed directly. Regenerating needs a running API, which is
+          # not always convenient locally.
+          git diff -- src/api > "$RUNNER_TEMP/sdk.patch"
+          exit 1
+
+      - name: Upload the regenerated SDK
+        if: failure() && steps.sdk_drift.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-sdk
+          path: |
+            frontend/edu-tracker/src/api
+            ${{ runner.temp }}/sdk.patch
 
       - name: Stop API and show log on failure
         if: always()
