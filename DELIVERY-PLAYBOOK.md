@@ -10,6 +10,21 @@ Written for someone learning SRE on the job. Each stage explains the reasoning
 before the commands, because the commands change every two years and the reasoning
 does not.
 
+## The work splits into three parts
+
+| Part | Stages | Question it answers | Size |
+| --- | --- | --- | --- |
+| **1 · Build it safely** | 00–02 | Is it safe to merge this? | 2 weeks |
+| **2 · Ship it** | 03–05 | Can we release it, and undo it? | 1 week |
+| **3 · Operate it** | 06–08 | Is it up, and what do we do when it isn't? | 2 weeks, then ongoing |
+
+Work them in order. Each part is the cheapest thing that makes the next one worth
+doing — a pipeline with no tests just ships bugs faster, and a deploy you cannot
+observe is one you cannot safely repeat.
+
+The single exception: the **health endpoints** in Stage 06 are two hours with no
+dependencies, and Part 2 needs them. Pull those forward.
+
 ---
 
 ## Baseline: an honest ledger before any advice
@@ -40,6 +55,28 @@ is what the repository contains today, verified rather than assumed.
 >
 > The order below is not arbitrary. Each stage is the cheapest thing that makes the
 > next one worth doing.
+
+---
+
+# PART 1 — BUILD IT SAFELY
+
+**Stages 00–02 · about 2 weeks · no dependencies, start here**
+
+Everything in this part answers one question: *is it safe to merge this?* Right
+now nothing answers it, because nothing has ever been verified anywhere but a
+laptop.
+
+Do not start Part 2 before this is done. A deployment pipeline on top of no
+tests just ships bugs faster.
+
+**Part 1 is finished when** a pull request cannot merge without passing real
+tests on a machine that is not yours.
+
+| Stage | Work | Size |
+| --- | --- | --- |
+| 00 | Reproducible builds, dead code, formatting | half a day |
+| 01 | Test projects and the four tests that matter | 1 week |
+| 02 | GitHub Actions, branch protection, SDK drift check | 2 days |
 
 ---
 
@@ -333,6 +370,30 @@ require the branch to be up to date before merging.
 
 ---
 
+# PART 2 — SHIP IT
+
+**Stages 03–05 · about 1 week · needs Part 1**
+
+Part 1 proved the code is good. This part gets it onto a server without a human
+typing commands, and — more importantly — gets it back off again when something
+goes wrong.
+
+The theme here is **reversibility**. Any deploy you cannot undo is a deploy you
+will be frightened to make, and a team frightened of deploying ships in large,
+risky batches.
+
+**Part 2 is finished when** merging to `main` reaches staging with nobody typing
+a command, and you can roll production back to the previous release in one
+action.
+
+| Stage | Work | Size |
+| --- | --- | --- |
+| 03 | Frontend image, runtime config, compose profiles | 3 days |
+| 04 | Migrations as a reviewed, gated step | 2 days |
+| 05 | Staging, then production behind an approval | 3 days |
+
+---
+
 ## Stage 03 — Containers for the whole system (3 days)
 
 The backend is containerised and the frontend is not, so "run the stack" is still
@@ -468,6 +529,33 @@ when the data is children's academic records.
 > hypothesis. Once a quarter, restore to a scratch database and run the test suite
 > against it. Write down how long it took: that number is your real recovery time,
 > and it is the one you will be asked for.
+
+---
+
+# PART 3 — OPERATE IT
+
+**Stages 06–08 · about 2 weeks, then ongoing · Stage 06 can start during Part 1**
+
+Parts 1 and 2 got working code onto a server. This part is about the years
+afterwards: knowing whether it is up, knowing when it is getting worse, and
+knowing what to do at 9am on a Monday when three hundred teachers cannot sign
+in.
+
+This is the part that is actually SRE. It is also the part teams skip, and then
+debug production by guessing.
+
+**One exception to the ordering:** the health endpoints at the top of Stage 06
+are two hours of work, have no dependencies, and Part 2 needs them for container
+healthchecks and rolling deploys. Pull them forward into Part 1.
+
+**Part 3 is finished when** an alert fires, points at a runbook, and the runbook
+helps.
+
+| Stage | Work | Size |
+| --- | --- | --- |
+| 06 | Health, logs, traces, SLOs and burn-rate alerts | 1 week |
+| 07 | Rate limiting, secrets, supply chain, key rotation | 4 days |
+| 08 | Runbooks, incident severity, postmortems, DORA | ongoing |
 
 ---
 
