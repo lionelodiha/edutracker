@@ -159,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: ${{ secrets.STAGING_WEB_URL }}
+      url: ${{ vars.STAGING_WEB_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -263,7 +263,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: ${{ secrets.PRODUCTION_WEB_URL }}
+      url: ${{ vars.PRODUCTION_WEB_URL }}
     steps:
       - uses: actions/checkout@v4
 
