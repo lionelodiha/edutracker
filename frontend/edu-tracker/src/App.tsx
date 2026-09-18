@@ -11,6 +11,7 @@ import SemestersPage from "./pages/dashboard/SemestersPage";
 import CoursesPage from "./pages/dashboard/CoursesPage";
 import SemesterDetailsPage from "./pages/dashboard/SemesterDetailsPage";
 import ClassDetailsPage from "./pages/dashboard/ClassDetailsPage";
+import AttendancePage from "./pages/dashboard/AttendancePage";
 import TeacherDashboardPage from "./pages/dashboard/TeacherDashboardPage";
 import StudentDashboardPage from "./pages/dashboard/StudentDashboardPage";
 import SuperAdminDashboardPage from "./pages/dashboard/SuperAdminDashboardPage";
@@ -72,6 +73,7 @@ function App() {
             <Route path="organizations/:id/semesters" element={<SemestersPage />} />
             <Route path="organizations/:id/semesters/:semesterId" element={<SemesterDetailsPage />} />
             <Route path="organizations/:id/classes/:classId" element={<ClassDetailsPage />} />
+            <Route path="organizations/:id/classes/:classId/attendance" element={<AttendancePage />} />
             <Route path="organizations/:id/courses" element={<CoursesPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>

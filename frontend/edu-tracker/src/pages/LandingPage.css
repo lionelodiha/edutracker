@@ -1,0 +1,524 @@
+/* ═══════════════════════════════════════════════════════
+   Landing – tech-forward skin (scoped under .landing)
+   Color semantics:
+     cyan #22d3ee  = signal / structure / data (not clickable)
+     violet #8b5cf6 = interactive only (buttons, links, hover)
+   No gradient wallpaper. No glassmorphism. Sharp edges.
+   ═══════════════════════════════════════════════════════ */
+
+.landing {
+  --lz-bg: #0a0e14;
+  --lz-panel: #0d1320;
+  --lz-line: #1b2434;
+  --lz-line-soft: #141c2a;
+  --lz-live: #22d3ee;
+  --lz-action: #8b5cf6;
+  --lz-action-hi: #a78bfa;
+  --lz-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --lz-sans: "Space Grotesk", "Inter", -apple-system, "Segoe UI", sans-serif;
+  --lz-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  background: var(--lz-bg);
+}
+
+.landing ::selection {
+  background: rgba(139, 92, 246, 0.35);
+}
+
+/* ─── Blueprint grid texture + faint noise ─── */
+.landing .bg-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, black 25%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, black 25%, transparent 100%);
+}
+
+.landing::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── Directional glow behind hero console ─── */
+.landing .hero-grid {
+  position: relative;
+}
+
+.landing .hero-grid::before {
+  content: "";
+  position: absolute;
+  top: -5rem;
+  right: -9rem;
+  width: 540px;
+  height: 440px;
+  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.08), transparent 65%);
+  pointer-events: none;
+}
+
+/* ─── Typography: geometric sans headings, mono labels ─── */
+.landing .hero-h1,
+.landing .section-h2 {
+  font-family: var(--lz-sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.landing .hero-h1 em {
+  font-style: normal;
+  color: var(--lz-live);
+}
+
+.landing .kicker {
+  font-family: var(--lz-mono);
+  color: var(--lz-live);
+}
+
+.landing .kicker::before {
+  background: var(--lz-live);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+}
+
+/* ─── Buttons: sharp, violet = interactive ─── */
+.landing .btn {
+  border-radius: 8px;
+  transition: transform 0.18s var(--lz-ease), box-shadow 0.18s var(--lz-ease), background 0.18s var(--lz-ease), border-color 0.18s var(--lz-ease), color 0.18s var(--lz-ease);
+}
+
+.landing .btn-primary {
+  background: var(--lz-action);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.45), 0 8px 28px rgba(139, 92, 246, 0.28);
+}
+
+.landing .btn-primary:hover {
+  background: var(--lz-action-hi);
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.6), 0 10px 36px rgba(139, 92, 246, 0.4);
+}
+
+.landing .btn-ghost:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--text-primary);
+}
+
+.landing .btn-outline {
+  border-color: #2a3446;
+}
+
+.landing .btn-outline:hover {
+  border-color: var(--lz-action);
+  color: #fff;
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);
+}
+
+.landing .btn:focus-visible,
+.landing a:focus-visible {
+  outline: 2px solid var(--lz-action-hi);
+  outline-offset: 2px;
+}
+
+/* ─── Links: violet on hover (interactive) ─── */
+.landing .landing-links a:hover,
+.landing .footer-col a:hover {
+  color: var(--lz-action-hi);
+}
+
+/* ─── Checklist: cyan signal ─── */
+.landing .check-list svg {
+  color: var(--lz-live);
+}
+
+/* ─── Dashboard mockup: console framing, scanline, live tag ─── */
+.landing .mockup-window {
+  position: relative;
+  background: var(--lz-panel);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), 0 0 44px rgba(34, 211, 238, 0.07);
+  overflow: hidden;
+}
+
+.landing .mockup-window::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -15%;
+  height: 64px;
+  background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.06), transparent);
+  animation: landing-scan 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes landing-scan {
+  from { top: -15%; }
+  to { top: 110%; }
+}
+
+.landing .mockup-titlebar {
+  background: #0a0f18;
+  border-bottom: 1px solid #16202f;
+}
+
+.landing .mockup-addressbar-inner {
+  font-family: var(--lz-mono);
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+.landing .mockup-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--lz-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--lz-live);
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+.landing .mockup-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lz-live);
+  animation: landing-pulse 2.2s ease-out infinite;
+}
+
+@keyframes landing-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(34, 211, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+
+/* ─── Strip: mono data numbers in cyan ─── */
+.landing .strip-cell {
+  border-top: 1px solid var(--lz-line);
+}
+
+.landing .strip-num {
+  font-family: var(--lz-mono);
+  color: rgba(34, 211, 238, 0.75);
+}
+
+/* ─── Bento: sharp technical cards, cyan schematic icons ─── */
+.landing .bento-cell {
+  background: #0e141f;
+  border: 1px solid var(--lz-line);
+  border-radius: 12px;
+  transition: border-color 0.2s var(--lz-ease), box-shadow 0.2s var(--lz-ease), transform 0.2s var(--lz-ease);
+}
+
+.landing .bento-cell:hover {
+  border-color: rgba(34, 211, 238, 0.35);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.15), 0 18px 44px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+.landing .bento-icon {
+  background: rgba(34, 211, 238, 0.07);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  color: var(--lz-live);
+  border-radius: 10px;
+}
+
+.landing .hierarchy span {
+  font-family: var(--lz-mono);
+  color: var(--lz-live);
+  background: rgba(34, 211, 238, 0.06);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+}
+
+/* ─── Steps: glowing connector accent ─── */
+.landing .step {
+  border-top: 1px solid rgba(34, 211, 238, 0.45);
+  box-shadow: 0 -8px 24px -18px rgba(34, 211, 238, 0.6);
+}
+
+.landing .step-num {
+  font-family: var(--lz-mono);
+  color: var(--lz-live);
+}
+
+/* ─── CTA band: violet action glow ─── */
+.landing .landing-cta {
+  background: #0c1220;
+  border-top: 1px solid var(--lz-line-soft);
+  border-bottom: 1px solid var(--lz-line-soft);
+  overflow: hidden;
+}
+
+.landing .landing-cta::before {
+  content: "";
+  position: absolute;
+  bottom: -140px;
+  left: -100px;
+  width: 480px;
+  height: 340px;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.12), transparent 65%);
+  pointer-events: none;
+}
+
+/* ─── Footer framing ─── */
+.landing .landing-footer {
+  border-top: 1px solid var(--lz-line-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing .mockup-window::after,
+  .landing .mockup-live-dot {
+    animation: none;
+  }
+}
+
+/* ─── Change 01: hero email field ─── */
+.landing .hero-start {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 460px;
+  margin-top: 2rem;
+  padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+  background: var(--lz-panel);
+  border: 1px solid var(--lz-line);
+  border-radius: 10px;
+  transition: border-color .18s var(--lz-ease), box-shadow .18s var(--lz-ease);
+}
+
+/* The whole control reacts, not just the input. */
+.landing .hero-start:focus-within {
+  border-color: var(--lz-action);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, .18);
+}
+
+.landing .hero-start input {
+  flex: 1;
+  min-width: 0;          /* stops the flex item from forcing overflow */
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.95rem;
+}
+.landing .hero-start input::placeholder { color: var(--text-muted); }
+.landing .hero-start input:focus { outline: none; }
+
+.landing .hero-secondary-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.landing .hero-secondary-link:hover { color: var(--lz-action-hi); }
+
+.landing .sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 520px) {
+  .landing .hero-start { flex-direction: column; align-items: stretch; padding: .6rem; gap: .6rem; }
+  .landing .hero-start .btn { width: 100%; }
+}
+
+/* ─── Change 03: panel section + split head ─── */
+.landing .panel-section {
+  background: var(--lz-panel);
+  border: 1px solid var(--lz-line);
+  border-radius: 16px;
+  padding: 3rem 2.5rem;
+}
+
+.landing .split-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  gap: 2.5rem;
+  align-items: end;   /* baselines the paragraph with the headline's last line */
+  margin-bottom: 3rem;
+}
+
+.landing .split-head-note {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 42ch;
+}
+
+.landing .strip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: rgba(34, 211, 238, 0.07);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  color: var(--lz-live);
+  margin-bottom: 0.9rem;
+}
+
+@media (max-width: 860px) {
+  .landing .panel-section { padding: 2rem 1.25rem; }
+  .landing .split-head { grid-template-columns: 1fr; gap: 1rem; align-items: start; }
+}
+
+/* ─── Change 04: hierarchy tree + bento spans ─── */
+.landing .hierarchy-tree {
+  list-style: none;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.landing .hierarchy-tree li {
+  margin-left: calc(var(--depth, 0) * 1.5rem);
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+  padding: .55rem .9rem;
+  background: rgba(34, 211, 238, .04);
+  border-left: 2px solid var(--lz-live);  /* cyan: structure, not a control */
+  border-radius: 0 6px 6px 0;
+}
+
+.landing .hierarchy-kind {
+  font-family: var(--lz-mono);
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--lz-live);
+  min-width: 9ch;
+  flex-shrink: 0;
+}
+
+.landing .hierarchy-name { color: var(--text-primary); font-size: .9rem; }
+
+/* Five levels of 1.5rem indent will not fit a 360px screen. */
+@media (max-width: 640px) {
+  .landing .hierarchy-tree li { margin-left: calc(var(--depth, 0) * .45rem); }
+  .landing .hierarchy-kind { min-width: 7ch; font-size: .6rem; }
+}
+
+/* Grid: one wide cell, then three narrow. */
+.landing .bento-cell.span-6 { grid-column: span 6; }
+@media (max-width: 860px) {
+  .landing .bento-cell.span-6,
+  .landing .bento-cell.span-2 { grid-column: span 6; }
+}
+
+/* ─── Change 05: workflow band + ghost numerals ─── */
+/* Full-bleed band. The section already spans the viewport; only the
+   ground and the rules change. */
+.landing .workflow-band {
+  background: var(--lz-panel);
+  border-top: 1px solid var(--lz-line);
+  border-bottom: 1px solid var(--lz-line);
+}
+
+.landing .workflow-band .step {
+  background: rgba(255, 255, 255, .02);
+  border: 1px solid var(--lz-line);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+}
+
+.landing .workflow-band .step-num {
+  font-family: var(--lz-sans);
+  font-size: clamp(3rem, 7vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--lz-line);
+  margin-bottom: .5rem;
+}
+
+/* Firefox shipped text-stroke late; without this the numerals vanish. */
+@supports not (-webkit-text-stroke: 1px currentColor) {
+  .landing .workflow-band .step-num { color: var(--lz-line); }
+}
+
+/* ─── Change 06: proof strip ─── */
+.landing .proof-strip {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem;
+  margin-top: 2.5rem; padding-top: 1.5rem;
+  border-top: 1px solid var(--lz-line-soft);
+}
+.landing .proof-label {
+  font-family: var(--lz-mono); font-size: .65rem;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted);
+}
+.landing .proof-strip ul {
+  display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: 0; padding: 0;
+}
+.landing .proof-strip li {
+  font-family: var(--lz-mono); font-size: .72rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--lz-line); border-radius: 5px;
+  padding: .25rem .55rem;
+}
+
+/* ─── Change 08: closing CTA panel ─── */
+.landing .landing-cta .cta-split {
+  background: var(--lz-panel);
+  border: 1px solid var(--lz-line);
+  border-radius: 18px;
+  padding: 3rem 2.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto;
+  gap: 2rem;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* One faint directional glow, matching the hero's. Not wallpaper. */
+.landing .landing-cta .cta-split::after {
+  content: "";
+  position: absolute; inset: auto -6rem -8rem auto;
+  width: 380px; height: 320px;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, .10), transparent 65%);
+  pointer-events: none;
+}
+
+@media (max-width: 820px) {
+  .landing .landing-cta .cta-split {
+    grid-template-columns: 1fr;
+    padding: 2rem 1.4rem;
+    gap: 1.5rem;
+  }
+}
+
+/* ─── Change 09: anchors, focus, reduced motion ─── */
+.landing section[id] { scroll-margin-top: 6rem; }
+
+/* Violet is the interaction colour, so it is also the focus colour. */
+.landing .btn:focus-visible,
+.landing a:focus-visible,
+.landing input:focus-visible {
+  outline: 2px solid var(--lz-action);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

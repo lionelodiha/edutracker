@@ -31,6 +31,41 @@ services:
       timeout: 5s
       retries: 5
 
+  # ASP.NET Core backend. Replaces `dotnet run --project backend/EduTracker.Api`.
+  # Listens on http://localhost:3187 (same URL the frontend is configured for).
+  #
+  # First-time setup (from repo root):
+  #   1. Copy-Item .env.example .env   # then fill in the two Base64 keys
+  #   2. docker compose up -d postgres redis
+  #   3. $env:ConnectionStrings__Database = "Host=localhost;Port=5433;Username=edutracker;Password=edutracker_dev;Database=edutracker"
+  #      dotnet ef database update --project backend/EduTracker.Persistence --startup-project backend/EduTracker.Api
+  #      (one-time migration; the app does not auto-migrate on startup)
+  #   4. docker compose up -d --build
+  #
+  # Everyday use: `docker compose up -d` / `docker compose logs -f api`.
+  api:
+    build:
+      context: .
+      dockerfile: backend/EduTracker.Api/Dockerfile
+    image: edutracker-api:local
+    container_name: edutracker-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3187:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      # Service names resolve inside the compose network; secrets come from .env
+      ConnectionStrings__Database: "Host=postgres;Port=5432;Username=edutracker;Password=edutracker_dev;Database=edutracker"
+      ConnectionStrings__Redis: "redis:6379"
+    env_file:
+      - .env
+
 volumes:
   postgres_data:
   redis_data:

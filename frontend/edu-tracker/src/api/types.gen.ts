@@ -4,6 +4,16 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:3187' | (string & {});
 };
 
+export type AddStaffMemberRequest = {
+    firstName: string;
+    middleName: null | string;
+    lastName: string;
+    userName: string;
+    email: string;
+    password: string;
+    role: OrganizationMemberRole;
+};
+
 export type ApiResponseOfCourseResponse = {
     success: boolean;
     messageId: string;
@@ -28,6 +38,14 @@ export type ApiResponseOfGuid = {
     data: string;
 };
 
+export type ApiResponseOfIReadOnlyListOfClassResponse = {
+    success: boolean;
+    messageId: string;
+    message: string;
+    details: null | Array<ResponseDetail>;
+    data: null | Array<ClassResponse>;
+};
+
 export type ApiResponseOfIReadOnlyListOfCourseOfferingResponse = {
     success: boolean;
     messageId: string;
@@ -42,6 +60,14 @@ export type ApiResponseOfIReadOnlyListOfCourseResponse = {
     message: string;
     details: null | Array<ResponseDetail>;
     data: null | Array<CourseResponse>;
+};
+
+export type ApiResponseOfIReadOnlyListOfDepartmentResponse = {
+    success: boolean;
+    messageId: string;
+    message: string;
+    details: null | Array<ResponseDetail>;
+    data: null | Array<DepartmentResponse>;
 };
 
 export type ApiResponseOfIReadOnlyListOfOrganizationInviteResponse = {
@@ -148,6 +174,16 @@ export type ApiResponseOfUserResponse = {
     data: null | UserResponse;
 };
 
+export type ClassResponse = {
+    id: string;
+    courseOfferingId: string;
+    code: string;
+    instructorId: null | string;
+    instructorName: null | string;
+    maxCapacity: number | string;
+    createdAt: string;
+};
+
 export type CourseOfferingResponse = {
     id: string;
     courseId: string;
@@ -171,6 +207,14 @@ export type CourseResponse = {
     createdAt: string;
 };
 
+export type CreateClassRequest = {
+    organizationId?: string;
+    courseOfferingId?: string;
+    code?: string;
+    instructorId?: null | string;
+    maxCapacity?: number | string;
+};
+
 export type CreateCourseOfferingRequest = {
     organizationId: string;
     courseId: string;
@@ -181,6 +225,13 @@ export type CreateCourseRequest = {
     organizationId: string;
     name: string;
     code: string;
+};
+
+export type CreateDepartmentRequest = {
+    organizationId: string;
+    facultyId?: null | string;
+    name: string;
+    description: null | string;
 };
 
 export type CreateOrganizationRequest = {
@@ -204,9 +255,17 @@ export type CursorPageOfUserResponse = {
     hasMore: boolean;
 };
 
+export type DepartmentResponse = {
+    id: string;
+    name: string;
+    description: null | string;
+    organizationId: string;
+    createdAt: string;
+};
+
 export type InviteOrganizationMemberRequest = {
-    userId?: string | null;
-    userName?: string | null;
+    userId: null | string;
+    userName: null | string;
 };
 
 export type LoginUserRequest = {
@@ -246,7 +305,7 @@ export type OrganizationMemberResponse = {
     joinedAt: string;
 };
 
-export type OrganizationMemberRole = 'Member' | 'Moderator' | 'Owner';
+export type OrganizationMemberRole = 'Member' | 'Moderator' | 'Owner' | 'Admin' | 'Teacher' | 'Student';
 
 export type OrganizationMemberStatus = 'Active' | 'Inactive' | 'Banned';
 
@@ -482,6 +541,113 @@ export type LogoutUserEndpointHandlerResponses = {
 };
 
 export type LogoutUserEndpointHandlerResponse = LogoutUserEndpointHandlerResponses[keyof LogoutUserEndpointHandlerResponses];
+
+export type PostApiClassesData = {
+    body: CreateClassRequest;
+    path?: never;
+    query?: never;
+    url: '/api/classes';
+};
+
+export type PostApiClassesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiResponseOfObject;
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+    /**
+     * Conflict
+     */
+    409: ApiResponseOfObject;
+};
+
+export type PostApiClassesError = PostApiClassesErrors[keyof PostApiClassesErrors];
+
+export type PostApiClassesResponses = {
+    /**
+     * Created
+     */
+    201: ApiResponseOfGuid;
+};
+
+export type PostApiClassesResponse = PostApiClassesResponses[keyof PostApiClassesResponses];
+
+export type GetApiClassesOfferingByCourseOfferingIdData = {
+    body?: never;
+    path: {
+        courseOfferingId: string;
+    };
+    query: {
+        OrganizationId: string;
+    };
+    url: '/api/classes/offering/{courseOfferingId}';
+};
+
+export type GetApiClassesOfferingByCourseOfferingIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+};
+
+export type GetApiClassesOfferingByCourseOfferingIdError = GetApiClassesOfferingByCourseOfferingIdErrors[keyof GetApiClassesOfferingByCourseOfferingIdErrors];
+
+export type GetApiClassesOfferingByCourseOfferingIdResponses = {
+    /**
+     * OK
+     */
+    200: ApiResponseOfIReadOnlyListOfClassResponse;
+};
+
+export type GetApiClassesOfferingByCourseOfferingIdResponse = GetApiClassesOfferingByCourseOfferingIdResponses[keyof GetApiClassesOfferingByCourseOfferingIdResponses];
+
+export type DeleteApiClassesByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query: {
+        OrganizationId: string;
+    };
+    url: '/api/classes/{id}';
+};
+
+export type DeleteApiClassesByIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+    /**
+     * Not Found
+     */
+    404: ApiResponseOfObject;
+};
+
+export type DeleteApiClassesByIdError = DeleteApiClassesByIdErrors[keyof DeleteApiClassesByIdErrors];
+
+export type DeleteApiClassesByIdResponses = {
+    /**
+     * OK
+     */
+    200: ApiResponseOfObject;
+};
+
+export type DeleteApiClassesByIdResponse = DeleteApiClassesByIdResponses[keyof DeleteApiClassesByIdResponses];
 
 export type GetCoursesEndpointHandlerData = {
     body?: never;
@@ -782,6 +948,111 @@ export type DeleteCourseOfferingEndpointHandlerResponses = {
 };
 
 export type DeleteCourseOfferingEndpointHandlerResponse = DeleteCourseOfferingEndpointHandlerResponses[keyof DeleteCourseOfferingEndpointHandlerResponses];
+
+export type GetDepartmentsEndpointHandlerData = {
+    body?: never;
+    path?: never;
+    query: {
+        organizationId: string;
+    };
+    url: '/api/departments';
+};
+
+export type GetDepartmentsEndpointHandlerErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+};
+
+export type GetDepartmentsEndpointHandlerError = GetDepartmentsEndpointHandlerErrors[keyof GetDepartmentsEndpointHandlerErrors];
+
+export type GetDepartmentsEndpointHandlerResponses = {
+    /**
+     * OK
+     */
+    200: ApiResponseOfIReadOnlyListOfDepartmentResponse;
+};
+
+export type GetDepartmentsEndpointHandlerResponse = GetDepartmentsEndpointHandlerResponses[keyof GetDepartmentsEndpointHandlerResponses];
+
+export type CreateDepartmentEndpointHandlerData = {
+    body: CreateDepartmentRequest;
+    path?: never;
+    query?: never;
+    url: '/api/departments';
+};
+
+export type CreateDepartmentEndpointHandlerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiResponseOfObject;
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+    /**
+     * Conflict
+     */
+    409: ApiResponseOfObject;
+};
+
+export type CreateDepartmentEndpointHandlerError = CreateDepartmentEndpointHandlerErrors[keyof CreateDepartmentEndpointHandlerErrors];
+
+export type CreateDepartmentEndpointHandlerResponses = {
+    /**
+     * Created
+     */
+    201: ApiResponseOfGuid;
+};
+
+export type CreateDepartmentEndpointHandlerResponse = CreateDepartmentEndpointHandlerResponses[keyof CreateDepartmentEndpointHandlerResponses];
+
+export type DeleteDepartmentEndpointHandlerData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/api/departments/{id}';
+};
+
+export type DeleteDepartmentEndpointHandlerErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+    /**
+     * Not Found
+     */
+    404: ApiResponseOfObject;
+};
+
+export type DeleteDepartmentEndpointHandlerError = DeleteDepartmentEndpointHandlerErrors[keyof DeleteDepartmentEndpointHandlerErrors];
+
+export type DeleteDepartmentEndpointHandlerResponses = {
+    /**
+     * OK
+     */
+    200: ApiResponseOfObject;
+};
+
+export type DeleteDepartmentEndpointHandlerResponse = DeleteDepartmentEndpointHandlerResponses[keyof DeleteDepartmentEndpointHandlerResponses];
 
 export type GetOrganizationsEndpointHandlerData = {
     body?: never;
@@ -1312,6 +1583,53 @@ export type GetOrganizationMembersEndpointHandlerResponses = {
 };
 
 export type GetOrganizationMembersEndpointHandlerResponse = GetOrganizationMembersEndpointHandlerResponses[keyof GetOrganizationMembersEndpointHandlerResponses];
+
+export type AddStaffMemberEndpointHandlerData = {
+    body: AddStaffMemberRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/organizations/{id}/staff';
+};
+
+export type AddStaffMemberEndpointHandlerErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiResponseOfObject;
+    /**
+     * Unauthorized
+     */
+    401: ApiResponseOfObject;
+    /**
+     * Forbidden
+     */
+    403: ApiResponseOfObject;
+    /**
+     * Not Found
+     */
+    404: ApiResponseOfObject;
+    /**
+     * Conflict
+     */
+    409: ApiResponseOfObject;
+    /**
+     * Internal Server Error
+     */
+    500: ApiResponseOfObject;
+};
+
+export type AddStaffMemberEndpointHandlerError = AddStaffMemberEndpointHandlerErrors[keyof AddStaffMemberEndpointHandlerErrors];
+
+export type AddStaffMemberEndpointHandlerResponses = {
+    /**
+     * Created
+     */
+    201: ApiResponseOfObject;
+};
+
+export type AddStaffMemberEndpointHandlerResponse = AddStaffMemberEndpointHandlerResponses[keyof AddStaffMemberEndpointHandlerResponses];
 
 export type RemoveOrganizationMemberEndpointHandlerData = {
     body?: never;

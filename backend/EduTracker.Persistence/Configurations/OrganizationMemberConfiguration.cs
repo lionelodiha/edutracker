@@ -41,6 +41,16 @@ internal sealed class OrganizationMemberConfiguration : IEntityTypeConfiguration
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
+        builder.HasOne(m => m.Faculty)
+            .WithMany()
+            .HasForeignKey(m => m.FacultyId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(m => m.Department)
+            .WithMany()
+            .HasForeignKey(m => m.DepartmentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.Property(m => m.Role)
             .HasConversion<string>()
             .HasMaxLength(OrganizationLimits.MemberRoleMaxLength)

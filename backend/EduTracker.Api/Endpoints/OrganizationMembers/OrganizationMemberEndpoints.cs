@@ -1,5 +1,6 @@
 using EduTracker.Api.Constants.Cookies;
 using EduTracker.Api.Constants.Routes;
+using EduTracker.Api.Endpoints.OrganizationMembers.Handlers.AddStaffMember;
 using EduTracker.Api.Endpoints.OrganizationMembers.Handlers.GetOrganizationMembers;
 using EduTracker.Api.Endpoints.OrganizationMembers.Handlers.RemoveOrganizationMember;
 using EduTracker.Api.Endpoints.OrganizationMembers.Handlers.TransferOrganizationOwnership;
@@ -103,6 +104,51 @@ internal sealed class OrganizationMemberEndpoints : IEndpointModule
             .Produces<ApiResponse<IReadOnlyList<OrganizationMemberResponse>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+            .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization();
+
+        // TEMPORARY — direct staff/teacher/student provisioning. Remove when email-token
+        // portal-invite flow ships (see School_API_Requirements.md §2).
+        group.MapPost(ApiRoutes.Organization.AddStaffMember, AddStaffMemberEndpointHandler.Handle)
+            .WithName(nameof(AddStaffMemberEndpointHandler))
+            .WithSummary("[TEMP] Add staff/teacher/student directly")
+            .WithDescription(
+                $"""
+                **TEMPORARY** — directly provisions a new User + OrganizationMember in a single
+                atomic call. Used by the admin UI until the email-token portal-invite flow ships.
+
+                **Authentication Required**: A valid session (`{CookieKeys.Session}` cookie) is needed,
+                and the caller must be an active Owner or Moderator of the target organization.
+
+                **Route Parameters**:
+                - `id` (uuid): Organization identifier.
+
+                **Request Body**:
+                - `FirstName` (string, required)
+                - `MiddleName` (string, optional)
+                - `LastName` (string, required)
+                - `UserName` (string, required)
+                - `Email` (string, required)
+                - `Password` (string, required, must meet password policy)
+                - `Role` (enum, required): `Admin`, `Teacher`, `Student`, `Moderator`, or `Member`.
+                   Owner cannot be provisioned directly.
+
+                Possible responses:
+                - `201 Created`: Staff member created successfully.
+                - `400 BadRequest`: Validation failed.
+                - `401 Unauthorized`: No valid session or session expired.
+                - `403 Forbidden`: Caller is not an Owner/Moderator, or tried to provision an Owner.
+                - `404 NotFound`: Organization not found.
+                - `409 Conflict`: Email or username already exists.
+                - `500 InternalServerError`: Unexpected server error.
+                """
+            )
+            .Produces<ApiResponse<object>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized)
+            .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
             .Produces<ApiResponse<object>>(StatusCodes.Status500InternalServerError)
             .RequireAuthorization();
 

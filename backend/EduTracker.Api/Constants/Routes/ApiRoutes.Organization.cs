@@ -15,6 +15,9 @@ internal static partial class ApiRoutes
         public const string Members = "/{id:guid}/members";
         public const string RemoveMember = "/{id:guid}/members/{memberId:guid}";
         public const string UpdateMemberRole = "/{id:guid}/members/{memberId:guid}/role";
+        // TEMPORARY — direct-provisioning route for AddStaffMember feature. Remove when the
+        // email-token portal-invite flow ships (see School_API_Requirements.md §2).
+        public const string AddStaffMember = "/{id:guid}/staff";
         public const string OrgInvites = "/{id:guid}/invites";
         public const string AcceptInvite = "/invites/{inviteId:guid}/accept";
         public const string RejectInvite = "/invites/{inviteId:guid}/reject";

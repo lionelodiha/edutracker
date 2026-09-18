@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptOrganizationInviteEndpointHandlerData, AcceptOrganizationInviteEndpointHandlerErrors, AcceptOrganizationInviteEndpointHandlerResponses, CancelOrganizationInviteEndpointHandlerData, CancelOrganizationInviteEndpointHandlerErrors, CancelOrganizationInviteEndpointHandlerResponses, CreateCourseEndpointHandlerData, CreateCourseEndpointHandlerErrors, CreateCourseEndpointHandlerResponses, CreateCourseOfferingEndpointHandlerData, CreateCourseOfferingEndpointHandlerErrors, CreateCourseOfferingEndpointHandlerResponses, CreateOrganizationEndpointHandlerData, CreateOrganizationEndpointHandlerErrors, CreateOrganizationEndpointHandlerResponses, CreateSemesterEndpointHandlerData, CreateSemesterEndpointHandlerErrors, CreateSemesterEndpointHandlerResponses, CreateTermEndpointHandlerData, CreateTermEndpointHandlerErrors, CreateTermEndpointHandlerResponses, DeleteCourseEndpointHandlerData, DeleteCourseEndpointHandlerErrors, DeleteCourseEndpointHandlerResponses, DeleteCourseOfferingEndpointHandlerData, DeleteCourseOfferingEndpointHandlerErrors, DeleteCourseOfferingEndpointHandlerResponses, DeleteOrganizationEndpointHandlerData, DeleteOrganizationEndpointHandlerErrors, DeleteOrganizationEndpointHandlerResponses, DeleteSemesterEndpointHandlerData, DeleteSemesterEndpointHandlerErrors, DeleteSemesterEndpointHandlerResponses, DeleteTermEndpointHandlerData, DeleteTermEndpointHandlerErrors, DeleteTermEndpointHandlerResponses, DemoteUserEndpointHandlerData, DemoteUserEndpointHandlerErrors, DemoteUserEndpointHandlerResponses, GetCourseByIdEndpointHandlerData, GetCourseByIdEndpointHandlerErrors, GetCourseByIdEndpointHandlerResponses, GetCourseOfferingsBySemesterEndpointHandlerData, GetCourseOfferingsBySemesterEndpointHandlerErrors, GetCourseOfferingsBySemesterEndpointHandlerResponses, GetCoursesEndpointHandlerData, GetCoursesEndpointHandlerErrors, GetCoursesEndpointHandlerResponses, GetCurrentUserEndpointHandlerData, GetCurrentUserEndpointHandlerErrors, GetCurrentUserEndpointHandlerResponses, GetCurrentUserSessionsEndpointHandlerData, GetCurrentUserSessionsEndpointHandlerErrors, GetCurrentUserSessionsEndpointHandlerResponses, GetOrganizationByIdEndpointHandlerData, GetOrganizationByIdEndpointHandlerErrors, GetOrganizationByIdEndpointHandlerResponses, GetOrganizationInvitesEndpointHandlerData, GetOrganizationInvitesEndpointHandlerErrors, GetOrganizationInvitesEndpointHandlerResponses, GetOrganizationMembersEndpointHandlerData, GetOrganizationMembersEndpointHandlerErrors, GetOrganizationMembersEndpointHandlerResponses, GetOrganizationsEndpointHandlerData, GetOrganizationsEndpointHandlerErrors, GetOrganizationsEndpointHandlerResponses, GetSemesterByIdEndpointHandlerData, GetSemesterByIdEndpointHandlerErrors, GetSemesterByIdEndpointHandlerResponses, GetSemestersEndpointHandlerData, GetSemestersEndpointHandlerErrors, GetSemestersEndpointHandlerResponses, GetTermByIdEndpointHandlerData, GetTermByIdEndpointHandlerErrors, GetTermByIdEndpointHandlerResponses, GetTermsBySemesterEndpointHandlerData, GetTermsBySemesterEndpointHandlerErrors, GetTermsBySemesterEndpointHandlerResponses, GetUserByIdEndpointHandlerData, GetUserByIdEndpointHandlerErrors, GetUserByIdEndpointHandlerResponses, GetUserInvitesEndpointHandlerData, GetUserInvitesEndpointHandlerErrors, GetUserInvitesEndpointHandlerResponses, GetUsersEndpointHandlerData, GetUsersEndpointHandlerErrors, GetUsersEndpointHandlerResponses, InviteOrganizationMemberEndpointHandlerData, InviteOrganizationMemberEndpointHandlerErrors, InviteOrganizationMemberEndpointHandlerResponses, LockUserEndpointHandlerData, LockUserEndpointHandlerErrors, LockUserEndpointHandlerResponses, LoginUserEndpointHandlerData, LoginUserEndpointHandlerErrors, LoginUserEndpointHandlerResponses, LogoutUserEndpointHandlerData, LogoutUserEndpointHandlerErrors, LogoutUserEndpointHandlerResponses, PromoteUserEndpointHandlerData, PromoteUserEndpointHandlerErrors, PromoteUserEndpointHandlerResponses, RefreshSessionEndpointHandlerData, RefreshSessionEndpointHandlerErrors, RefreshSessionEndpointHandlerResponses, RegisterUserEndpointHandlerData, RegisterUserEndpointHandlerErrors, RegisterUserEndpointHandlerResponses, RejectOrganizationInviteEndpointHandlerData, RejectOrganizationInviteEndpointHandlerErrors, RejectOrganizationInviteEndpointHandlerResponses, RemoveOrganizationMemberEndpointHandlerData, RemoveOrganizationMemberEndpointHandlerErrors, RemoveOrganizationMemberEndpointHandlerResponses, RevokeAllCurrentUserSessionsEndpointHandlerData, RevokeAllCurrentUserSessionsEndpointHandlerErrors, RevokeAllCurrentUserSessionsEndpointHandlerResponses, RevokeCurrentUserSessionEndpointHandlerData, RevokeCurrentUserSessionEndpointHandlerErrors, RevokeCurrentUserSessionEndpointHandlerResponses, TransferOrganizationOwnershipEndpointHandlerData, TransferOrganizationOwnershipEndpointHandlerErrors, TransferOrganizationOwnershipEndpointHandlerResponses, UnlockUserEndpointHandlerData, UnlockUserEndpointHandlerErrors, UnlockUserEndpointHandlerResponses, UpdateCourseEndpointHandlerData, UpdateCourseEndpointHandlerErrors, UpdateCourseEndpointHandlerResponses, UpdateCurrentUserEndpointHandlerData, UpdateCurrentUserEndpointHandlerErrors, UpdateCurrentUserEndpointHandlerResponses, UpdateCurrentUserPasswordEndpointHandlerData, UpdateCurrentUserPasswordEndpointHandlerErrors, UpdateCurrentUserPasswordEndpointHandlerResponses, UpdateOrganizationEndpointHandlerData, UpdateOrganizationEndpointHandlerErrors, UpdateOrganizationEndpointHandlerResponses, UpdateOrganizationMemberRoleEndpointHandlerData, UpdateOrganizationMemberRoleEndpointHandlerErrors, UpdateOrganizationMemberRoleEndpointHandlerResponses } from './types.gen';
+import type { AcceptOrganizationInviteEndpointHandlerData, AcceptOrganizationInviteEndpointHandlerErrors, AcceptOrganizationInviteEndpointHandlerResponses, AddStaffMemberEndpointHandlerData, AddStaffMemberEndpointHandlerErrors, AddStaffMemberEndpointHandlerResponses, CancelOrganizationInviteEndpointHandlerData, CancelOrganizationInviteEndpointHandlerErrors, CancelOrganizationInviteEndpointHandlerResponses, CreateCourseEndpointHandlerData, CreateCourseEndpointHandlerErrors, CreateCourseEndpointHandlerResponses, CreateCourseOfferingEndpointHandlerData, CreateCourseOfferingEndpointHandlerErrors, CreateCourseOfferingEndpointHandlerResponses, CreateDepartmentEndpointHandlerData, CreateDepartmentEndpointHandlerErrors, CreateDepartmentEndpointHandlerResponses, CreateOrganizationEndpointHandlerData, CreateOrganizationEndpointHandlerErrors, CreateOrganizationEndpointHandlerResponses, CreateSemesterEndpointHandlerData, CreateSemesterEndpointHandlerErrors, CreateSemesterEndpointHandlerResponses, CreateTermEndpointHandlerData, CreateTermEndpointHandlerErrors, CreateTermEndpointHandlerResponses, DeleteApiClassesByIdData, DeleteApiClassesByIdErrors, DeleteApiClassesByIdResponses, DeleteCourseEndpointHandlerData, DeleteCourseEndpointHandlerErrors, DeleteCourseEndpointHandlerResponses, DeleteCourseOfferingEndpointHandlerData, DeleteCourseOfferingEndpointHandlerErrors, DeleteCourseOfferingEndpointHandlerResponses, DeleteDepartmentEndpointHandlerData, DeleteDepartmentEndpointHandlerErrors, DeleteDepartmentEndpointHandlerResponses, DeleteOrganizationEndpointHandlerData, DeleteOrganizationEndpointHandlerErrors, DeleteOrganizationEndpointHandlerResponses, DeleteSemesterEndpointHandlerData, DeleteSemesterEndpointHandlerErrors, DeleteSemesterEndpointHandlerResponses, DeleteTermEndpointHandlerData, DeleteTermEndpointHandlerErrors, DeleteTermEndpointHandlerResponses, DemoteUserEndpointHandlerData, DemoteUserEndpointHandlerErrors, DemoteUserEndpointHandlerResponses, GetApiClassesOfferingByCourseOfferingIdData, GetApiClassesOfferingByCourseOfferingIdErrors, GetApiClassesOfferingByCourseOfferingIdResponses, GetCourseByIdEndpointHandlerData, GetCourseByIdEndpointHandlerErrors, GetCourseByIdEndpointHandlerResponses, GetCourseOfferingsBySemesterEndpointHandlerData, GetCourseOfferingsBySemesterEndpointHandlerErrors, GetCourseOfferingsBySemesterEndpointHandlerResponses, GetCoursesEndpointHandlerData, GetCoursesEndpointHandlerErrors, GetCoursesEndpointHandlerResponses, GetCurrentUserEndpointHandlerData, GetCurrentUserEndpointHandlerErrors, GetCurrentUserEndpointHandlerResponses, GetCurrentUserSessionsEndpointHandlerData, GetCurrentUserSessionsEndpointHandlerErrors, GetCurrentUserSessionsEndpointHandlerResponses, GetDepartmentsEndpointHandlerData, GetDepartmentsEndpointHandlerErrors, GetDepartmentsEndpointHandlerResponses, GetOrganizationByIdEndpointHandlerData, GetOrganizationByIdEndpointHandlerErrors, GetOrganizationByIdEndpointHandlerResponses, GetOrganizationInvitesEndpointHandlerData, GetOrganizationInvitesEndpointHandlerErrors, GetOrganizationInvitesEndpointHandlerResponses, GetOrganizationMembersEndpointHandlerData, GetOrganizationMembersEndpointHandlerErrors, GetOrganizationMembersEndpointHandlerResponses, GetOrganizationsEndpointHandlerData, GetOrganizationsEndpointHandlerErrors, GetOrganizationsEndpointHandlerResponses, GetSemesterByIdEndpointHandlerData, GetSemesterByIdEndpointHandlerErrors, GetSemesterByIdEndpointHandlerResponses, GetSemestersEndpointHandlerData, GetSemestersEndpointHandlerErrors, GetSemestersEndpointHandlerResponses, GetTermByIdEndpointHandlerData, GetTermByIdEndpointHandlerErrors, GetTermByIdEndpointHandlerResponses, GetTermsBySemesterEndpointHandlerData, GetTermsBySemesterEndpointHandlerErrors, GetTermsBySemesterEndpointHandlerResponses, GetUserByIdEndpointHandlerData, GetUserByIdEndpointHandlerErrors, GetUserByIdEndpointHandlerResponses, GetUserInvitesEndpointHandlerData, GetUserInvitesEndpointHandlerErrors, GetUserInvitesEndpointHandlerResponses, GetUsersEndpointHandlerData, GetUsersEndpointHandlerErrors, GetUsersEndpointHandlerResponses, InviteOrganizationMemberEndpointHandlerData, InviteOrganizationMemberEndpointHandlerErrors, InviteOrganizationMemberEndpointHandlerResponses, LockUserEndpointHandlerData, LockUserEndpointHandlerErrors, LockUserEndpointHandlerResponses, LoginUserEndpointHandlerData, LoginUserEndpointHandlerErrors, LoginUserEndpointHandlerResponses, LogoutUserEndpointHandlerData, LogoutUserEndpointHandlerErrors, LogoutUserEndpointHandlerResponses, PostApiClassesData, PostApiClassesErrors, PostApiClassesResponses, PromoteUserEndpointHandlerData, PromoteUserEndpointHandlerErrors, PromoteUserEndpointHandlerResponses, RefreshSessionEndpointHandlerData, RefreshSessionEndpointHandlerErrors, RefreshSessionEndpointHandlerResponses, RegisterUserEndpointHandlerData, RegisterUserEndpointHandlerErrors, RegisterUserEndpointHandlerResponses, RejectOrganizationInviteEndpointHandlerData, RejectOrganizationInviteEndpointHandlerErrors, RejectOrganizationInviteEndpointHandlerResponses, RemoveOrganizationMemberEndpointHandlerData, RemoveOrganizationMemberEndpointHandlerErrors, RemoveOrganizationMemberEndpointHandlerResponses, RevokeAllCurrentUserSessionsEndpointHandlerData, RevokeAllCurrentUserSessionsEndpointHandlerErrors, RevokeAllCurrentUserSessionsEndpointHandlerResponses, RevokeCurrentUserSessionEndpointHandlerData, RevokeCurrentUserSessionEndpointHandlerErrors, RevokeCurrentUserSessionEndpointHandlerResponses, TransferOrganizationOwnershipEndpointHandlerData, TransferOrganizationOwnershipEndpointHandlerErrors, TransferOrganizationOwnershipEndpointHandlerResponses, UnlockUserEndpointHandlerData, UnlockUserEndpointHandlerErrors, UnlockUserEndpointHandlerResponses, UpdateCourseEndpointHandlerData, UpdateCourseEndpointHandlerErrors, UpdateCourseEndpointHandlerResponses, UpdateCurrentUserEndpointHandlerData, UpdateCurrentUserEndpointHandlerErrors, UpdateCurrentUserEndpointHandlerResponses, UpdateCurrentUserPasswordEndpointHandlerData, UpdateCurrentUserPasswordEndpointHandlerErrors, UpdateCurrentUserPasswordEndpointHandlerResponses, UpdateOrganizationEndpointHandlerData, UpdateOrganizationEndpointHandlerErrors, UpdateOrganizationEndpointHandlerResponses, UpdateOrganizationMemberRoleEndpointHandlerData, UpdateOrganizationMemberRoleEndpointHandlerErrors, UpdateOrganizationMemberRoleEndpointHandlerResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -105,6 +105,19 @@ export const refreshSessionEndpointHandler = <ThrowOnError extends boolean = fal
  * - `500 InternalServerError`: Unexpected server error.
  */
 export const logoutUserEndpointHandler = <ThrowOnError extends boolean = false>(options?: Options<LogoutUserEndpointHandlerData, ThrowOnError>) => (options?.client ?? client).post<LogoutUserEndpointHandlerResponses, LogoutUserEndpointHandlerErrors, ThrowOnError>({ url: '/api/auth/logout', ...options });
+
+export const postApiClasses = <ThrowOnError extends boolean = false>(options: Options<PostApiClassesData, ThrowOnError>) => (options.client ?? client).post<PostApiClassesResponses, PostApiClassesErrors, ThrowOnError>({
+    url: '/api/classes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getApiClassesOfferingByCourseOfferingId = <ThrowOnError extends boolean = false>(options: Options<GetApiClassesOfferingByCourseOfferingIdData, ThrowOnError>) => (options.client ?? client).get<GetApiClassesOfferingByCourseOfferingIdResponses, GetApiClassesOfferingByCourseOfferingIdErrors, ThrowOnError>({ url: '/api/classes/offering/{courseOfferingId}', ...options });
+
+export const deleteApiClassesById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiClassesByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApiClassesByIdResponses, DeleteApiClassesByIdErrors, ThrowOnError>({ url: '/api/classes/{id}', ...options });
 
 /**
  * List courses
@@ -319,6 +332,81 @@ export const getCourseOfferingsBySemesterEndpointHandler = <ThrowOnError extends
  * - `404 NotFound`: Course offering was not found in the organization.
  */
 export const deleteCourseOfferingEndpointHandler = <ThrowOnError extends boolean = false>(options: Options<DeleteCourseOfferingEndpointHandlerData, ThrowOnError>) => (options.client ?? client).delete<DeleteCourseOfferingEndpointHandlerResponses, DeleteCourseOfferingEndpointHandlerErrors, ThrowOnError>({ url: '/api/course-offerings/{id}', ...options });
+
+/**
+ * List departments
+ *
+ * Retrieves all departments for an organization.
+ *
+ * **Authentication Required**: A valid session (`edu_session_id` cookie) is needed.
+ *
+ * **Query Parameters**:
+ * - `organizationId` (uuid, required): Organization identifier.
+ *
+ * **Access**:
+ * - Any active organization member can view departments.
+ *
+ * Possible responses:
+ * - `200 OK`: Departments retrieved successfully.
+ * - `401 Unauthorized`: No valid session or session expired.
+ * - `403 Forbidden`: User is not an active member of the organization.
+ */
+export const getDepartmentsEndpointHandler = <ThrowOnError extends boolean = false>(options: Options<GetDepartmentsEndpointHandlerData, ThrowOnError>) => (options.client ?? client).get<GetDepartmentsEndpointHandlerResponses, GetDepartmentsEndpointHandlerErrors, ThrowOnError>({ url: '/api/departments', ...options });
+
+/**
+ * Create department
+ *
+ * Creates a new department for an organization.
+ *
+ * **Authentication Required**: A valid session (`edu_session_id` cookie) is needed.
+ *
+ * **Request Body**:
+ * - `organizationId` (uuid, required): Organization identifier.
+ * - `name` (string, required): Department name.
+ * - `description` (string, optional): Department description.
+ *
+ * **Access**:
+ * - Only organization owners and moderators can create departments.
+ *
+ * Possible responses:
+ * - `201 Created`: Department created successfully.
+ * - `400 BadRequest`: Request body is invalid.
+ * - `401 Unauthorized`: No valid session or session expired.
+ * - `403 Forbidden`: User is not allowed to manage academics for the organization.
+ * - `409 Conflict`: A department with the same name already exists in this organization.
+ */
+export const createDepartmentEndpointHandler = <ThrowOnError extends boolean = false>(options: Options<CreateDepartmentEndpointHandlerData, ThrowOnError>) => (options.client ?? client).post<CreateDepartmentEndpointHandlerResponses, CreateDepartmentEndpointHandlerErrors, ThrowOnError>({
+    url: '/api/departments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete department
+ *
+ * Deletes a department from an organization.
+ *
+ * **Authentication Required**: A valid session (`edu_session_id` cookie) is needed.
+ *
+ * **Route Parameters**:
+ * - `id` (uuid): Department identifier.
+ *
+ * **Query Parameters**:
+ * - `organizationId` (uuid, required): Organization identifier.
+ *
+ * **Access**:
+ * - Only organization owners and moderators can delete departments.
+ *
+ * Possible responses:
+ * - `200 OK`: Department deleted successfully.
+ * - `401 Unauthorized`: No valid session or session expired.
+ * - `403 Forbidden`: User is not allowed to manage academics for the organization.
+ * - `404 NotFound`: Department was not found in the organization.
+ */
+export const deleteDepartmentEndpointHandler = <ThrowOnError extends boolean = false>(options: Options<DeleteDepartmentEndpointHandlerData, ThrowOnError>) => (options.client ?? client).delete<DeleteDepartmentEndpointHandlerResponses, DeleteDepartmentEndpointHandlerErrors, ThrowOnError>({ url: '/api/departments/{id}', ...options });
 
 /**
  * List organizations
@@ -629,6 +717,46 @@ export const updateOrganizationMemberRoleEndpointHandler = <ThrowOnError extends
  * - `500 InternalServerError`: Unexpected server error.
  */
 export const getOrganizationMembersEndpointHandler = <ThrowOnError extends boolean = false>(options: Options<GetOrganizationMembersEndpointHandlerData, ThrowOnError>) => (options.client ?? client).get<GetOrganizationMembersEndpointHandlerResponses, GetOrganizationMembersEndpointHandlerErrors, ThrowOnError>({ url: '/api/organizations/{id}/members', ...options });
+
+/**
+ * [TEMP] Add staff/teacher/student directly
+ *
+ * **TEMPORARY** — directly provisions a new User + OrganizationMember in a single
+ * atomic call. Used by the admin UI until the email-token portal-invite flow ships.
+ *
+ * **Authentication Required**: A valid session (`edu_session_id` cookie) is needed,
+ * and the caller must be an active Owner or Moderator of the target organization.
+ *
+ * **Route Parameters**:
+ * - `id` (uuid): Organization identifier.
+ *
+ * **Request Body**:
+ * - `FirstName` (string, required)
+ * - `MiddleName` (string, optional)
+ * - `LastName` (string, required)
+ * - `UserName` (string, required)
+ * - `Email` (string, required)
+ * - `Password` (string, required, must meet password policy)
+ * - `Role` (enum, required): `Admin`, `Teacher`, `Student`, `Moderator`, or `Member`.
+ * Owner cannot be provisioned directly.
+ *
+ * Possible responses:
+ * - `201 Created`: Staff member created successfully.
+ * - `400 BadRequest`: Validation failed.
+ * - `401 Unauthorized`: No valid session or session expired.
+ * - `403 Forbidden`: Caller is not an Owner/Moderator, or tried to provision an Owner.
+ * - `404 NotFound`: Organization not found.
+ * - `409 Conflict`: Email or username already exists.
+ * - `500 InternalServerError`: Unexpected server error.
+ */
+export const addStaffMemberEndpointHandler = <ThrowOnError extends boolean = false>(options: Options<AddStaffMemberEndpointHandlerData, ThrowOnError>) => (options.client ?? client).post<AddStaffMemberEndpointHandlerResponses, AddStaffMemberEndpointHandlerErrors, ThrowOnError>({
+    url: '/api/organizations/{id}/staff',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Remove or leave organization member

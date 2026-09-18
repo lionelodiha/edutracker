@@ -11,9 +11,38 @@ import {
     getCoursesEndpointHandler,
 } from "../../api";
 import { client } from "../../api/client.gen";
+import Modal from "../../components/Modal";
 import type { SemesterResponse, TermResponse, CourseOfferingResponse, CourseResponse } from "../../api";
 
 const API_BASE = "http://localhost:3187";
+
+function PlusIcon() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+    );
+}
+
+function CalendarIcon() {
+    return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+    );
+}
+
+function BookIcon() {
+    return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+        </svg>
+    );
+}
 
 export default function SemesterDetailsPage() {
     const { id: organizationId, semesterId } = useParams<{ id: string; semesterId: string }>();
@@ -159,229 +188,246 @@ export default function SemesterDetailsPage() {
 
     if (loading) {
         return (
-            <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
-                <div className="spinner spinner-lg" />
+            <div className="dz-page">
+                <div className="dz-page-head">
+                    <div>
+                        <div className="skeleton" style={{ height: 28, width: 240, borderRadius: 8, marginBottom: 8 }} />
+                        <div className="skeleton" style={{ height: 14, width: 180, borderRadius: 6 }} />
+                    </div>
+                </div>
+                <div className="dz-card">
+                    <div className="skeleton" style={{ height: 14, width: "40%", borderRadius: 6, marginBottom: 10 }} />
+                    <div className="skeleton" style={{ height: 10, width: "70%", borderRadius: 6 }} />
+                </div>
             </div>
         );
     }
 
     if (!semester) {
         return (
-            <div className="fade-in card empty-state">
-                <div className="empty-state-icon">⚠</div>
-                <div className="empty-state-title">Semester not found</div>
-                <button className="btn btn-secondary" onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters`)}>
-                    Back to Semesters
-                </button>
+            <div className="dz-page">
+                <div className="dz-card dz-empty">
+                    <span className="dz-empty-icon"><CalendarIcon /></span>
+                    <div className="dz-empty-title">Semester not found</div>
+                    <div className="dz-empty-text">This academic year may have been removed.</div>
+                    <button className="dz-btn-outline" style={{ marginTop: "1rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters`)}>
+                        Back to Semesters
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters`)}>
-                    &larr; Back
-                </button>
+        <div className="dz-page">
+            <div className="dz-page-head">
                 <div>
-                    <h1 style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "0.25rem" }}>
+                    <div className="dz-crumb">
+                        <button className="dz-pill-btn" onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters`)}>← Semesters</button>
+                    </div>
+                    <h1 className="dz-page-title">
                         Semester {semester.startYear} / {Number(semester.startYear) + 1}
                     </h1>
-                    <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                        Manage Terms and Course Offerings
+                    <p className="dz-page-sub">
+                        {terms.length} term{terms.length === 1 ? "" : "s"} · {offerings.length} course offering{offerings.length === 1 ? "" : "s"}.
                     </p>
                 </div>
+                {activeTab === 'terms' ? (
+                    <button className="dz-btn-green" onClick={() => { setTermError(null); setShowTermCreate(true); }}>
+                        <PlusIcon /> Add Term
+                    </button>
+                ) : (
+                    <button className="dz-btn-green" onClick={() => { setOfferingError(null); setShowOfferingCreate(true); }}>
+                        <PlusIcon /> Add Offering
+                    </button>
+                )}
             </div>
 
-            {/* Tabs */}
-            <div style={{ display: "flex", gap: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem" }}>
+            <div className="dz-segmented" role="tablist" aria-label="Semester sections">
                 <button
-                    className={`btn ${activeTab === 'terms' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+                    role="tab"
+                    aria-selected={activeTab === 'terms'}
+                    className={`dz-seg-btn ${activeTab === 'terms' ? 'active' : ''}`}
                     onClick={() => setActiveTab('terms')}
                 >
                     Terms ({terms.length})
                 </button>
                 <button
-                    className={`btn ${activeTab === 'offerings' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+                    role="tab"
+                    aria-selected={activeTab === 'offerings'}
+                    className={`dz-seg-btn ${activeTab === 'offerings' ? 'active' : ''}`}
                     onClick={() => setActiveTab('offerings')}
                 >
                     Course Offerings ({offerings.length})
                 </button>
             </div>
 
-            {/* Terms Section */}
             {activeTab === 'terms' && (
-                <>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <h2 style={{ fontSize: "1.35rem", fontWeight: 700 }}>Academic Terms</h2>
-                        <button className="btn btn-primary btn-sm" onClick={() => setShowTermCreate(true)}>
-                            + Add Term
-                        </button>
+                <div className="dz-card" style={{ padding: 0, overflow: "hidden" }}>
+                    <div style={{ padding: "1.35rem 1.4rem 1rem" }}>
+                        <div className="dz-card-title">Academic Terms</div>
+                        <div className="dz-reminder-meta" style={{ marginTop: "0.25rem" }}>Terms split the year into teaching periods.</div>
                     </div>
-
-                    <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-                        {terms.length === 0 ? (
-                            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>
-                                No terms found. Create one.
-                            </div>
-                        ) : (
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    {terms.length === 0 ? (
+                        <div className="dz-empty">
+                            <span className="dz-empty-icon"><CalendarIcon /></span>
+                            <div className="dz-empty-title">No terms yet</div>
+                            <div className="dz-empty-text">Add Term 1 to start scheduling course offerings.</div>
+                        </div>
+                    ) : (
+                        <div className="dz-table-wrap">
+                            <table className="dz-table">
                                 <thead>
-                                    <tr style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                                        <th style={{ padding: "1rem", textAlign: "left", fontWeight: 600, fontSize: "0.9rem" }}>Ordinal</th>
-                                        <th style={{ padding: "1rem", textAlign: "left", fontWeight: 600, fontSize: "0.9rem" }}>Created At</th>
-                                        <th style={{ padding: "1rem", textAlign: "right", fontWeight: 600, fontSize: "0.9rem" }}>Actions</th>
+                                    <tr>
+                                        <th>Term</th>
+                                        <th>Created</th>
+                                        <th className="dz-table-actions">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {terms.map((t) => (
-                                        <tr key={t.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                                            <td style={{ padding: "1rem", fontWeight: 600 }}>Term {t.ordinal}</td>
-                                            <td style={{ padding: "1rem", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                                        <tr key={t.id}>
+                                            <td style={{ fontWeight: 700 }}>Term {t.ordinal}</td>
+                                            <td style={{ color: "var(--text-secondary)" }}>
                                                 {new Date(t.createdAt).toLocaleDateString()}
                                             </td>
-                                            <td style={{ padding: "1rem", textAlign: "right" }}>
-                                                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTerm(t.id)}>Delete</button>
+                                            <td className="dz-table-actions">
+                                                <button className="dz-btn-danger-ghost" onClick={() => handleDeleteTerm(t.id)}>Delete</button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                        )}
-                    </div>
-                </>
+                        </div>
+                    )}
+                </div>
             )}
 
-            {/* Offerings Section */}
             {activeTab === 'offerings' && (
-                <>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <h2 style={{ fontSize: "1.35rem", fontWeight: 700 }}>Course Offerings</h2>
-                        <button className="btn btn-primary btn-sm" onClick={() => setShowOfferingCreate(true)}>
-                            + Add Offering
-                        </button>
+                <div className="dz-card" style={{ padding: 0, overflow: "hidden" }}>
+                    <div style={{ padding: "1.35rem 1.4rem 1rem" }}>
+                        <div className="dz-card-title">Course Offerings</div>
+                        <div className="dz-reminder-meta" style={{ marginTop: "0.25rem" }}>Map catalog courses to terms in this semester.</div>
                     </div>
-
-                    <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-                        {offerings.length === 0 ? (
-                            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>
-                                No offerings mapped. Add terms and courses first.
-                            </div>
-                        ) : (
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    {offerings.length === 0 ? (
+                        <div className="dz-empty">
+                            <span className="dz-empty-icon"><BookIcon /></span>
+                            <div className="dz-empty-title">No offerings yet</div>
+                            <div className="dz-empty-text">Add terms and courses first, then map them here.</div>
+                        </div>
+                    ) : (
+                        <div className="dz-table-wrap">
+                            <table className="dz-table">
                                 <thead>
-                                    <tr style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                                        <th style={{ padding: "1rem", textAlign: "left", fontWeight: 600, fontSize: "0.9rem" }}>Course Name</th>
-                                        <th style={{ padding: "1rem", textAlign: "left", fontWeight: 600, fontSize: "0.9rem" }}>Code</th>
-                                        <th style={{ padding: "1rem", textAlign: "left", fontWeight: 600, fontSize: "0.9rem" }}>Term</th>
-                                        <th style={{ padding: "1rem", textAlign: "right", fontWeight: 600, fontSize: "0.9rem" }}>Actions</th>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Code</th>
+                                        <th>Term</th>
+                                        <th className="dz-table-actions">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {offerings.map((o) => (
-                                        <tr key={o.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                                            <td style={{ padding: "1rem", fontWeight: 600 }}>{o.courseName}</td>
-                                            <td style={{ padding: "1rem" }}>
-                                                <span className="badge badge-secondary">{o.courseCode}</span>
+                                        <tr key={o.id}>
+                                            <td style={{ fontWeight: 600 }}>{o.courseName}</td>
+                                            <td>
+                                                <span className="dz-status dz-status-gray mono">{o.courseCode}</span>
                                             </td>
-                                            <td style={{ padding: "1rem" }}>Term {o.termOrdinal}</td>
-                                            <td style={{ padding: "1rem", textAlign: "right" }}>
-                                                <button className="btn btn-secondary btn-sm" style={{ marginRight: "0.5rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/classes/${o.id}`)}>View Classes</button>
-                                                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteOffering(o.id)}>Remove</button>
+                                            <td style={{ color: "var(--text-secondary)" }}>Term {o.termOrdinal}</td>
+                                            <td className="dz-table-actions">
+                                                <button className="dz-pill-btn" style={{ marginRight: "0.5rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/classes/${o.id}`)}>View Classes</button>
+                                                <button className="dz-btn-danger-ghost" onClick={() => handleDeleteOffering(o.id)}>Remove</button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                        )}
-                    </div>
-                </>
+                        </div>
+                    )}
+                </div>
             )}
 
-            {/* Term Create Modal */}
             {showTermCreate && (
-                <div className="modal-overlay" onClick={() => setShowTermCreate(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: "1rem" }}>Create Term</h2>
-                        <form onSubmit={handleCreateTerm} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                            {termError && (
-                                <div className="alert alert-error">
-                                    <span>⚠</span>
-                                    <span>{termError}</span>
-                                </div>
-                            )}
-                            <div>
-                                <label className="input-label">Term Ordinal (e.g. 1 for Term 1)</label>
-                                <input
-                                    className="input"
-                                    type="number"
-                                    min="1"
-                                    value={newTermOrdinal}
-                                    onChange={(e) => setNewTermOrdinal(parseInt(e.target.value))}
-                                    required
-                                    autoFocus
-                                />
+                <Modal titleId="create-term-title" onClose={() => setShowTermCreate(false)}>
+                    <h2 id="create-term-title" className="dz-modal-title">Create Term</h2>
+                    <p className="dz-modal-sub">Add a teaching period to {semester.startYear} / {Number(semester.startYear) + 1}.</p>
+                    <form onSubmit={handleCreateTerm} className="dz-form">
+                        {termError && (
+                            <div className="alert alert-error">
+                                <span>{termError}</span>
                             </div>
-                            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "0.5rem" }}>
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowTermCreate(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" disabled={submittingTerm}>
-                                    {submittingTerm ? "Creating..." : "Create"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                        )}
+                        <div>
+                            <label className="input-label" htmlFor="term-ordinal">Term Ordinal (e.g. 1 for Term 1)</label>
+                            <input
+                                id="term-ordinal"
+                                className="input"
+                                type="number"
+                                min="1"
+                                value={newTermOrdinal}
+                                onChange={(e) => setNewTermOrdinal(parseInt(e.target.value))}
+                                required
+                                autoFocus
+                            />
+                        </div>
+                        <div className="dz-form-actions">
+                            <button type="button" className="dz-btn-outline" onClick={() => setShowTermCreate(false)}>Cancel</button>
+                            <button type="submit" className="dz-btn-green" disabled={submittingTerm}>
+                                {submittingTerm ? "Creating…" : "Create"}
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
             )}
 
-            {/* Offering Create Modal */}
             {showOfferingCreate && (
-                <div className="modal-overlay" onClick={() => setShowOfferingCreate(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: "1rem" }}>Add Course Offering</h2>
-                        <form onSubmit={handleCreateOffering} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                            {offeringError && (
-                                <div className="alert alert-error">
-                                    <span>⚠</span>
-                                    <span>{offeringError}</span>
-                                </div>
-                            )}
-                            <div>
-                                <label className="input-label">Select Term</label>
-                                <select 
-                                    className="input" 
-                                    value={selectedTermId} 
-                                    onChange={(e) => setSelectedTermId(e.target.value)}
-                                    required
-                                >
-                                    <option value="" disabled>-- Select a Term --</option>
-                                    {terms.map(t => (
-                                        <option key={t.id} value={t.id}>Term {t.ordinal}</option>
-                                    ))}
-                                </select>
+                <Modal titleId="create-offering-title" onClose={() => setShowOfferingCreate(false)}>
+                    <h2 id="create-offering-title" className="dz-modal-title">Add Course Offering</h2>
+                    <p className="dz-modal-sub">Offer a catalog course inside one term of this semester.</p>
+                    <form onSubmit={handleCreateOffering} className="dz-form">
+                        {offeringError && (
+                            <div className="alert alert-error">
+                                <span>{offeringError}</span>
                             </div>
-                            <div>
-                                <label className="input-label">Select Course</label>
-                                <select 
-                                    className="input" 
-                                    value={selectedCourseId} 
-                                    onChange={(e) => setSelectedCourseId(e.target.value)}
-                                    required
-                                >
-                                    <option value="" disabled>-- Select a Course --</option>
-                                    {courses.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "0.5rem" }}>
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowOfferingCreate(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" disabled={submittingOffering || !selectedTermId || !selectedCourseId}>
-                                    {submittingOffering ? "Adding..." : "Add"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                        )}
+                        <div>
+                            <label className="input-label" htmlFor="offering-term">Term</label>
+                            <select
+                                id="offering-term"
+                                className="input"
+                                value={selectedTermId}
+                                onChange={(e) => setSelectedTermId(e.target.value)}
+                                required
+                            >
+                                <option value="" disabled>-- Select a Term --</option>
+                                {terms.map(t => (
+                                    <option key={t.id} value={t.id}>Term {t.ordinal}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="input-label" htmlFor="offering-course">Course</label>
+                            <select
+                                id="offering-course"
+                                className="input"
+                                value={selectedCourseId}
+                                onChange={(e) => setSelectedCourseId(e.target.value)}
+                                required
+                            >
+                                <option value="" disabled>-- Select a Course --</option>
+                                {courses.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="dz-form-actions">
+                            <button type="button" className="dz-btn-outline" onClick={() => setShowOfferingCreate(false)}>Cancel</button>
+                            <button type="submit" className="dz-btn-green" disabled={submittingOffering || !selectedTermId || !selectedCourseId}>
+                                {submittingOffering ? "Adding…" : "Add"}
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
             )}
         </div>
     );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import Logo from "../components/LogoLockup";
 
 export default function LoginPage() {
     const { login, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -50,21 +51,8 @@ export default function LoginPage() {
             <div style={{ width: "100%", maxWidth: 420, position: "relative", zIndex: 1 }} className="fade-in">
                 {/* Logo */}
                 <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                    <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", textDecoration: "none", marginBottom: "0.75rem" }}>
-                        <div
-                            style={{
-                                width: 44, height: 44, borderRadius: 12,
-                                background: "var(--grad-brand)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontWeight: 800, fontSize: "1.1rem", color: "#fff",
-                                boxShadow: "0 4px 20px rgba(99, 102, 241, 0.3)",
-                            }}
-                        >
-                            E
-                        </div>
-                        <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.03em" }}>
-                            EduTracker
-                        </span>
+                    <Link to="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none", marginBottom: "0.75rem" }}>
+                        <Logo markSize={44} fontSize="1.5rem" />
                     </Link>
                     <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem", marginTop: "0.5rem" }}>
                         Welcome back! Sign in to your account.
