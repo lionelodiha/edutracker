@@ -1,0 +1,25 @@
+root = true
+
+# One formatting standard (DELIVERY-PLAYBOOK Stage 00):
+# `dotnet format --verify-no-changes` runs in CI. Formatting-only diffs
+# buried in logic changes are how real bugs slip through review unnoticed.
+
+[*]
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+[*.{cs,csx}]
+indent_size = 4
+csharp_new_line_before_open_brace = all
+csharp_indent_case_contents = true
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.{js,jsx,ts,tsx}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

@@ -1,0 +1,162 @@
+name: ci
+
+# WHEN this runs.
+#   pull_request     every PR, so problems are found before merge
+#   push to main     after merge, so main is always known-good
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel an in-progress run when the same branch is pushed again. Without
+# this you pay to verify a commit nobody will ever merge.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: read-only by default. Jobs opt in to more if they need it.
+permissions:
+  contents: read
+
+jobs:
+  # ── Does the C# build? ────────────────────────────────────────────────
+  backend:
+    runs-on: ubuntu-latest        # a clean Linux machine, empty every time
+    steps:
+      # Copy the repo onto the runner. Without this the machine has nothing.
+      - uses: actions/checkout@v4
+
+      # Install the SDK version global.json pins, so CI matches every laptop.
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Cache downloaded packages, keyed on the files that decide what gets
+      # restored. Change a version and the key changes, so the cache misses.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-
+
+      - run: dotnet restore edutracker.slnx
+
+      # -warnaserror on CI only. Locally a warning is a hint; on main it is a
+      # decision nobody made.
+      - run: dotnet build edutracker.slnx --no-restore -c Release -warnaserror
+
+      # Formatting is enforced so a reformat can never hide a logic change
+      # inside a 200-line diff.
+      - run: dotnet format edutracker.slnx --verify-no-changes
+
+      # ── the step that makes the green tick mean something ──
+      # Runs both suites: domain tests (no database) and integration tests
+      # (real Postgres + Redis started by Testcontainers). Linux runners have
+      # a working Docker socket, which is why this is reliable here.
+      - run: dotnet test edutracker.slnx --no-build -c Release
+               --logger trx
+               --collect:"XPlat Code Coverage"
+
+      # Uploaded on failure too — the failing run is exactly when you want
+      # to read the results.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: "**/TestResults/**"
+
+  # ── Does the React app build? ─────────────────────────────────────────
+  # Runs at the same time as `backend`: separate jobs get separate machines
+  # and share nothing, so GitHub runs them in parallel.
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/edu-tracker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"        # quoted: unquoted YAML would make it a number
+          cache: npm
+          cache-dependency-path: frontend/edu-tracker/package-lock.json
+
+      # `ci`, not `install`. It installs exactly what the lockfile says and
+      # fails if package.json and the lockfile have drifted apart.
+      - run: npm ci
+
+      - run: npx tsc -b --noEmit    # type errors
+      - run: npm run lint           # style and common bug patterns
+      - run: npm run build          # does it actually produce a bundle
+
+  # ── Are any dependencies known to be vulnerable? ──────────────────────
+  # You did not write the ~800 packages this app depends on, but you ship
+  # them, so you own their vulnerabilities.
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: edutracker
+          path: "."
+          format: HTML
+          # Fail only on High and Critical (CVSS >= 7). Failing on Low would
+          # leave the job permanently red, and a permanently red job is one
+          # nobody reads.
+          args: --failOnCVSS 7 --enableExperimental
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-check-report
+          path: reports/
+
+  # ── Does it package into runnable containers? ─────────────────────────
+  image:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]      # only worth building if both passed
+    permissions:
+      contents: read
+      packages: write               # required to push to GHCR
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      # Only needed when we actually push. Without it every PR stays green
+      # and the first merge to main fails with a 401 — the worst place to
+      # discover it.
+      - uses: docker/login-action@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build on every PR to prove the Dockerfile still works; push only
+      # from main. Tagged by commit SHA, never :latest — ":latest" means
+      # "whatever was built most recently", which is not something you can
+      # roll back to.
+      - name: API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/EduTracker.Api/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend/edu-tracker
+          file: frontend/edu-tracker/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ghcr.io/${{ github.repository }}/web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
