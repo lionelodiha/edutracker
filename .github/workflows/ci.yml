@@ -89,3 +89,29 @@ jobs:
       - run: npx tsc -b --noEmit    # type errors
       - run: npm run lint           # style and common bug patterns
       - run: npm run build          # does it actually produce a bundle
+
+  # ── Are any dependencies known to be vulnerable? ──────────────────────
+  # You did not write the ~800 packages this app depends on, but you ship
+  # them, so you own their vulnerabilities.
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: edutracker
+          path: "."
+          format: HTML
+          # Fail only on High and Critical (CVSS >= 7). Failing on Low would
+          # leave the job permanently red, and a permanently red job is one
+          # nobody reads.
+          args: --failOnCVSS 7 --enableExperimental
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-check-report
+          path: reports/
