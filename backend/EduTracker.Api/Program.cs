@@ -80,3 +80,8 @@ app.UseAuthorization();
 app.MapEndpointModules();
 
 app.Run();
+
+// Top-level statements compile into an INTERNAL Program class, which a test
+// project cannot reach. WebApplicationFactory<Program> needs it public.
+// One line, and it is what makes integration tests possible at all.
+public partial class Program { }

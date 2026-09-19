@@ -49,6 +49,22 @@ jobs:
       # inside a 200-line diff.
       - run: dotnet format edutracker.slnx --verify-no-changes
 
+      # ── the step that makes the green tick mean something ──
+      # Runs both suites: domain tests (no database) and integration tests
+      # (real Postgres + Redis started by Testcontainers). Linux runners have
+      # a working Docker socket, which is why this is reliable here.
+      - run: dotnet test edutracker.slnx --no-build -c Release
+               --logger trx
+               --collect:"XPlat Code Coverage"
+
+      # Uploaded on failure too — the failing run is exactly when you want
+      # to read the results.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: "**/TestResults/**"
+
   # ── Does the React app build? ─────────────────────────────────────────
   # Runs at the same time as `backend`: separate jobs get separate machines
   # and share nothing, so GitHub runs them in parallel.
