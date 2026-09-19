@@ -14,6 +14,7 @@ using EduTracker.Infrastructure;
 using EduTracker.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 
@@ -50,6 +51,26 @@ builder.Services.Configure<JsonOptions>(opts =>
 
 builder.Services.AddOpenApi(options => { options.AddCustomOpenApiTransformer(); });
 
+// Stage 06 pull-forward (needed by Part 2): health endpoints for container
+// healthchecks and rolling deploys. Liveness checks nothing external;
+// readiness gates on Postgres (+ Redis when configured).
+IHealthChecksBuilder healthChecks = builder.Services.AddHealthChecks();
+
+string? databaseConnectionString = builder.Configuration.GetConnectionString("Database");
+if (!string.IsNullOrWhiteSpace(databaseConnectionString))
+{
+    healthChecks.AddNpgSql(databaseConnectionString, name: "postgres", tags: ["ready"]);
+}
+
+string? redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+if (!string.IsNullOrWhiteSpace(redisConnectionString))
+{
+    // Redis is cache-only (RedisCacheService no-ops when unreachable), so a
+    // Redis outage must not take the instance out of rotation. Tag it
+    // separately from "ready" so /health/ready stays green without it.
+    healthChecks.AddRedis(redisConnectionString, name: "redis", tags: ["cache"]);
+}
+
 builder.Services.AddHostedService<StartupTasksHostedService>();
 
 WebApplication app = builder.Build();
@@ -78,6 +99,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapEndpointModules();
+
+// Liveness: is this process wedged? Checks NOTHING external, so a Postgres
+// hiccup never causes the orchestrator to kill every replica at once.
+// Readiness: can this instance serve a real request right now?
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false,
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+});
 
 app.Run();
 

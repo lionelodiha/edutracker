@@ -9,8 +9,7 @@ import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
 import { apiErrorMessage, thrownMessage } from "../../utils/apiError";
 import type { CourseResponse } from "../../api";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../../config";
 
 function PlusIcon() {
     return (
@@ -44,7 +43,7 @@ export default function CoursesPage() {
 
     const fetchCourses = async () => {
         if (!organizationId) return;
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         try {
             const res = await getCoursesEndpointHandler({ query: { organizationId } });
             if (res.data?.data) {

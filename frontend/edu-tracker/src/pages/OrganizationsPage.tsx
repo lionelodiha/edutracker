@@ -7,8 +7,7 @@ import {
 import { client } from "../api/client.gen";
 import Modal from "../components/Modal";
 import type { OrganizationListItemResponse } from "../api";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../config";
 
 function PlusIcon() {
     return (
@@ -45,7 +44,7 @@ export default function OrganizationsPage() {
     const [error, setError] = useState<string | null>(null);
 
     const fetchOrgs = async () => {
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         try {
             const r = await getOrganizationsEndpointHandler();
             if (r.data?.data) setOrgs(r.data.data);
@@ -65,7 +64,7 @@ export default function OrganizationsPage() {
         setError(null);
         setCreating(true);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             const result = await createOrganizationEndpointHandler({
                 body: { name: newName },
             });

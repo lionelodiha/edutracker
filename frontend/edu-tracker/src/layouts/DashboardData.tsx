@@ -14,8 +14,7 @@ import type {
     SessionData,
     UserOrganizationInviteResponse,
 } from "../api";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../config";
 
 export type DashboardData = {
     orgs: OrganizationListItemResponse[];
@@ -50,7 +49,7 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        client.setConfig({ baseUrl: API_BASE, credentials: "include" });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: "include" });
 
         getOrganizationsEndpointHandler()
             .then((r) => { if (r.data?.data) setOrgs(r.data.data); })

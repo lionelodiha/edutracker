@@ -10,8 +10,7 @@ import {
 import { client } from "../api/client.gen";
 import { apiErrorMessage, thrownMessage } from "../utils/apiError";
 import type { SessionData } from "../api";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../config";
 
 function MonitorIcon() {
     return (
@@ -53,7 +52,7 @@ export default function ProfilePage() {
     const fetchSessions = async () => {
         setSessionsLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             const r = await getCurrentUserSessionsEndpointHandler();
             if (r.data?.data) {
                 setSessions(r.data.data);
@@ -74,7 +73,7 @@ export default function ProfilePage() {
     const handleRevokeSession = async (sessionId: string) => {
         if (!confirm("Are you sure you want to sign out of this session?")) return;
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             await revokeCurrentUserSessionEndpointHandler({ path: { id: sessionId } });
             fetchSessions();
         } catch {
@@ -86,7 +85,7 @@ export default function ProfilePage() {
     const handleRevokeAllSessions = async () => {
         if (!confirm("Are you sure you want to sign out of all other devices?")) return;
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             await revokeAllCurrentUserSessionsEndpointHandler({ query: { keepCurrentUserSession: true } });
             fetchSessions();
         } catch {
@@ -100,7 +99,7 @@ export default function ProfilePage() {
         setProfileMsg(null);
         setProfileLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             const result = await updateCurrentUserEndpointHandler({
                 body: {
                     userName: profile.userName || null,
@@ -130,7 +129,7 @@ export default function ProfilePage() {
         }
         setPwLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             const result = await updateCurrentUserPasswordEndpointHandler({
                 body: {
                     currentPassword: passwords.currentPassword,

@@ -18,6 +18,10 @@
 
 <body>
   <div id="root"></div>
+  <!-- Runtime config (Stage 03). Written by the container entrypoint on every
+       start; absent in `npm run dev`, where config.ts falls back to
+       VITE_API_BASE_URL then localhost. -->
+  <script src="/config.js"></script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

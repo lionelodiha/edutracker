@@ -17,8 +17,7 @@ import type {
     DepartmentResponse,
 } from "../../api";
 import { useAuth } from "../../context/AuthContext";
-
-const API_BASE = "http://localhost:3187";
+import { getApiBaseUrl } from "../../config";
 
 // TEMPORARY — roles available in the "Add Member" modal. The long-term email-invite flow
 // will only issue Teacher/Student roles; Admin/Moderator will be granted through the
@@ -120,7 +119,7 @@ export default function OrganizationDetailsPage() {
 
     const fetchDetails = useCallback(async () => {
         if (!id) return;
-        client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+        client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
         try {
             const orgRes = await getOrganizationByIdEndpointHandler({ path: { id } });
             if (orgRes.data?.data) {
@@ -141,7 +140,7 @@ export default function OrganizationDetailsPage() {
         if (!id) return;
         setDepartmentsLoading(true);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             const res = await getDepartmentsEndpointHandler({ query: { organizationId: id } });
             if (res.data?.data) {
                 setDepartments(res.data.data);
@@ -172,7 +171,7 @@ export default function OrganizationDetailsPage() {
         setDeptError(null);
         setDeptSubmitting(true);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             const res = await createDepartmentEndpointHandler({
                 body: {
                     organizationId: id,
@@ -202,7 +201,7 @@ export default function OrganizationDetailsPage() {
         if (!confirm(`Delete department "${name}"? This cannot be undone.`)) return;
         setDeletingDeptId(departmentId);
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
             await deleteDepartmentEndpointHandler({
                 path: { id: departmentId },
                 query: { organizationId: id },
@@ -237,7 +236,7 @@ export default function OrganizationDetailsPage() {
         setAddingStaff(true);
 
         try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
+            client.setConfig({ baseUrl: getApiBaseUrl(), credentials: 'include' });
 
             const res = await addStaffMemberEndpointHandler({
                 path: { id },
