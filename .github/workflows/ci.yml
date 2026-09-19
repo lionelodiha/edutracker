@@ -48,3 +48,28 @@ jobs:
       # Formatting is enforced so a reformat can never hide a logic change
       # inside a 200-line diff.
       - run: dotnet format edutracker.slnx --verify-no-changes
+
+  # ── Does the React app build? ─────────────────────────────────────────
+  # Runs at the same time as `backend`: separate jobs get separate machines
+  # and share nothing, so GitHub runs them in parallel.
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/edu-tracker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"        # quoted: unquoted YAML would make it a number
+          cache: npm
+          cache-dependency-path: frontend/edu-tracker/package-lock.json
+
+      # `ci`, not `install`. It installs exactly what the lockfile says and
+      # fails if package.json and the lockfile have drifted apart.
+      - run: npm ci
+
+      - run: npx tsc -b --noEmit    # type errors
+      - run: npm run lint           # style and common bug patterns
+      - run: npm run build          # does it actually produce a bundle
