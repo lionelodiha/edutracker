@@ -1,32 +1,62 @@
-# Opens a pull request when a dependency you rely on has a newer version,
-# and flags the ones with known security advisories. Free, and it needs no
-# configuration beyond telling it where each manifest lives.
+# Dependabot watches your dependencies and opens pull requests when newer
+# versions exist.
+#
+# Two things to understand about the settings below:
+#
+# 1. Major version bumps are IGNORED here. A major version is the maintainer
+#    saying "this release breaks things on purpose" — TypeScript 5 to 7, or
+#    Vite 7 to 8, are not routine bumps and should not arrive unannounced on a
+#    Monday. Do those deliberately, one at a time, when you have time to read
+#    the migration notes.
+#
+# 2. SECURITY updates ignore everything below. If a package you use has a
+#    published vulnerability, Dependabot opens that PR regardless of schedule,
+#    limit, or the major-version rule. Quietening routine noise does not make
+#    you less safe.
 version: 2
 updates:
   - package-ecosystem: nuget
     directory: /
     schedule:
-      interval: weekly
-    # One grouped PR for routine bumps instead of fifteen separate ones,
-    # which is the difference between reviewing them and ignoring them.
+      interval: monthly
+    open-pull-requests-limit: 3
     groups:
-      dotnet-minor-and-patch:
-        update-types: [minor, patch]
+      # One PR for all routine .NET bumps, not one per package.
+      dotnet:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: npm
     directory: /frontend/edu-tracker
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 3
     groups:
-      npm-minor-and-patch:
-        update-types: [minor, patch]
+      npm:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /backend/EduTracker.Api
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
