@@ -33,7 +33,7 @@ jobs:
 
       # Cache downloaded packages, keyed on the files that decide what gets
       # restored. Change a version and the key changes, so the cache misses.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
           key: nuget-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
