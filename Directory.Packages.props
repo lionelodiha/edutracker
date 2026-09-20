@@ -13,7 +13,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
     <!-- Direct pin: overrides the vulnerable Microsoft.OpenApi 2.0.0 pulled in
          transitively (GHSA-v5pm-xwqc-g5wc, fixed in 2.7.5). -->
-    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="3.10.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
