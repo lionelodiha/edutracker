@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Without this, a PackageVersion entry only governs packages a project
+         references DIRECTLY, and transitive ones resolve on their own. That is
+         how EF Core ended up at two versions at once. -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +19,13 @@
          transitively (GHSA-v5pm-xwqc-g5wc, fixed in 2.7.5). -->
     <PackageVersion Include="Microsoft.OpenApi" Version="2.12.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
+    <!-- EF Core itself is pinned explicitly even though nothing references it
+         directly. Npgsql asks for the range [10.0.4, 11.0.0) and resolves to the
+         floor, while EF Design pins Relational exactly; left transitive the two
+         land on different versions and the build fails with MSB3277. Pinning it
+         here forces one version and keeps the three moving together. -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.17.6" />
