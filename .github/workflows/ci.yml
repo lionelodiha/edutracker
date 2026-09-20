@@ -125,7 +125,7 @@ jobs:
       packages: write               # required to push to GHCR
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       # Only needed when we actually push. Without it every PR stays green
       # and the first merge to main fails with a 401 — the worst place to
