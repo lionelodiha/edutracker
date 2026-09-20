@@ -142,7 +142,7 @@ jobs:
       # "whatever was built most recently", which is not something you can
       # roll back to.
       - name: API image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: backend/EduTracker.Api/Dockerfile
@@ -152,7 +152,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Web image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: frontend/edu-tracker
           file: frontend/edu-tracker/Dockerfile
