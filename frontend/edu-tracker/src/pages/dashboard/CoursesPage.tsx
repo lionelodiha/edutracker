@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     getCoursesEndpointHandler,
@@ -41,7 +41,7 @@ export default function CoursesPage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCourses = async () => {
+    const fetchCourses = useCallback(async () => {
         if (!organizationId) return;
         client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         try {
@@ -49,13 +49,16 @@ export default function CoursesPage() {
             if (res.data?.data) {
                 setCourses(res.data.data);
             }
-        } catch {}
+        } catch {
+            // Course list is best-effort on mount; the table already renders
+            // loading/empty states.
+        }
         setLoading(false);
-    };
+    }, [organizationId]);
 
     useEffect(() => {
         fetchCourses();
-    }, [organizationId]);
+    }, [fetchCourses]);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,11 +74,11 @@ export default function CoursesPage() {
                 setNewCode("");
                 await fetchCourses();
             } else {
-                const d = res.data as any;
+                const d = res.data as { message?: string } | undefined;
                 setError(d?.message || "Failed to create course.");
             }
-        } catch (err: any) {
-            setError(err?.message || "Error creating course.");
+        } catch (err: unknown) {
+            setError((err as Error)?.message || "Error creating course.");
         }
         setSubmitting(false);
     };

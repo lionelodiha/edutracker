@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     getSemesterByIdEndpointHandler,
@@ -69,7 +69,7 @@ export default function SemesterDetailsPage() {
 
     const [activeTab, setActiveTab] = useState<"terms" | "offerings">("terms");
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!organizationId || !semesterId) return;
         client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         try {
@@ -87,7 +87,15 @@ export default function SemesterDetailsPage() {
                 path: { semesterId },
                 query: { organizationId }
             });
-            if (termRes.data?.data) setTerms(termRes.data.data);
+            if (termRes.data?.data) {
+                setTerms(termRes.data.data);
+                // Default the offering-term dropdown on first load without an
+                // effect: keep the user's pick on refetch, fill it when empty.
+                const firstTermId = termRes.data.data[0]?.id;
+                if (firstTermId) {
+                    setSelectedTermId((prev) => prev || firstTermId);
+                }
+            }
 
             // Fetch Offerings
             const offRes = await getCourseOfferingsBySemesterEndpointHandler({
@@ -110,18 +118,11 @@ export default function SemesterDetailsPage() {
             console.error("Error fetching semester details:", err);
         }
         setLoading(false);
-    };
+    }, [organizationId, semesterId]);
 
     useEffect(() => {
         fetchData();
-    }, [organizationId, semesterId]);
-
-    // Set default term when terms load
-    useEffect(() => {
-        if (terms.length > 0 && !selectedTermId) {
-            setSelectedTermId(terms[0].id);
-        }
-    }, [terms]);
+    }, [fetchData]);
 
     const handleCreateTerm = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -136,11 +137,11 @@ export default function SemesterDetailsPage() {
                 setNewTermOrdinal(newTermOrdinal + 1);
                 await fetchData();
             } else {
-                const d = res.data as any;
+                const d = res.data as { message?: string } | undefined;
                 setTermError(d?.message || "Failed to create term.");
             }
-        } catch (err: any) {
-            setTermError(err?.message || "Error creating term.");
+        } catch (err: unknown) {
+            setTermError((err as Error)?.message || "Error creating term.");
         }
         setSubmittingTerm(false);
     };
@@ -167,11 +168,11 @@ export default function SemesterDetailsPage() {
                 setShowOfferingCreate(false);
                 await fetchData();
             } else {
-                const d = res.data as any;
+                const d = res.data as { message?: string } | undefined;
                 setOfferingError(d?.message || "Failed to add course offering.");
             }
-        } catch (err: any) {
-            setOfferingError(err?.message || "Error adding offering.");
+        } catch (err: unknown) {
+            setOfferingError((err as Error)?.message || "Error adding offering.");
         }
         setSubmittingOffering(false);
     };

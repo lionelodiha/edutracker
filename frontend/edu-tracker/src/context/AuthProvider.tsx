@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   getCurrentUserEndpointHandler,
   loginUserEndpointHandler,
@@ -7,27 +7,25 @@ import {
 } from "../api";
 import { client } from "../api/client.gen";
 import type { UserResponse } from "../api";
+import { AuthContext } from "./AuthContext";
 
 const API_BASE = "http://localhost:3187";
 
-type AuthState = {
-  user: UserResponse | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  login: (identifier: string, password: string, rememberMe?: boolean) => Promise<{ ok: boolean; error?: string }>;
-  register: (data: {
-    userName: string;
-    email: string;
-    password: string;
-    firstName: string;
-    middleName?: string | null;
-    lastName: string;
-  }) => Promise<{ ok: boolean; error?: string }>;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+type ApiErrorBody = {
+  message?: string;
+  title?: string;
+  details?: { message?: string }[];
 };
 
-const AuthContext = createContext<AuthState | null>(null);
+type ApiResult = {
+  error?: unknown;
+  data?: unknown;
+};
+
+function getErrorMessage(e: unknown, fallback: string): string {
+  if (e instanceof Error && e.message) return e.message;
+  return fallback;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);
@@ -47,22 +45,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.log('[fetchUser] exception:', e);
       setUser(null);
+    } finally {
+      // Loading ends with the first fetch, so the effect below performs no
+      // direct setState and stays clear of react-hooks/set-state-in-effect.
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
-    fetchUser().finally(() => setIsLoading(false));
+    fetchUser();
   }, [fetchUser]);
 
-  const extractError = (result: any): string => {
+  const extractError = (result: ApiResult): string => {
     // hey-api puts error bodies in result.error for non-2xx
-    const errBody = result.error || result.data;
+    const errBody = (result.error ?? result.data) as ApiErrorBody | undefined;
     if (!errBody) return "An unexpected error occurred.";
     const msg = errBody.message || "";
     const details = errBody.details;
     if (Array.isArray(details) && details.length > 0) {
-      const msgs = details.map((d: any) => d.message).filter(Boolean);
+      const msgs = details.map((d) => d.message).filter(Boolean);
       if (msgs.length > 0) return msgs.join(" ");
     }
     return msg || "An unexpected error occurred.";
@@ -81,8 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { ok: true };
         }
         return { ok: false, error: extractError(result) };
-      } catch (e: any) {
-        return { ok: false, error: e?.message || "Login failed." };
+      } catch (e: unknown) {
+        return { ok: false, error: getErrorMessage(e, "Login failed.") };
       }
     },
     [fetchUser]
@@ -113,8 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { ok: true };
         }
         return { ok: false, error: extractError(result) };
-      } catch (e: any) {
-        return { ok: false, error: e?.message || "Registration failed." };
+      } catch (e: unknown) {
+        return { ok: false, error: getErrorMessage(e, "Registration failed.") };
       }
     },
     []
@@ -125,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
       await logoutUserEndpointHandler();
     } catch {
-      // ignore
+      // ignore — signing out locally is safe even if the server call fails
     }
     setUser(null);
   }, []);
@@ -145,10 +146,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
 }

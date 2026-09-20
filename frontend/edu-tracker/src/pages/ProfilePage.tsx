@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
     updateCurrentUserEndpointHandler,
@@ -49,7 +49,7 @@ export default function ProfilePage() {
     const [sessions, setSessions] = useState<SessionData[]>([]);
     const [sessionsLoading, setSessionsLoading] = useState(false);
 
-    const fetchSessions = async () => {
+    const fetchSessions = useCallback(async () => {
         setSessionsLoading(true);
         try {
             client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
@@ -57,15 +57,18 @@ export default function ProfilePage() {
             if (r.data?.data) {
                 setSessions(r.data.data);
             }
-        } catch {}
+        } catch {
+            // Sessions list is best-effort; the table already handles the
+            // empty state, so a failed refresh stays silent.
+        }
         setSessionsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         if (tab === "sessions") {
             fetchSessions();
         }
-    }, [tab]);
+    }, [tab, fetchSessions]);
 
     const handleRevokeSession = async (sessionId: string) => {
         if (!confirm("Are you sure you want to sign out of this session?")) return;
@@ -73,7 +76,10 @@ export default function ProfilePage() {
             client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             await revokeCurrentUserSessionEndpointHandler({ path: { id: sessionId } });
             fetchSessions();
-        } catch {}
+        } catch {
+            // Revocation failure leaves the list as-is; the next refresh
+            // will show the true server state.
+        }
     };
 
     const handleRevokeAllSessions = async () => {
@@ -82,7 +88,9 @@ export default function ProfilePage() {
             client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
             await revokeAllCurrentUserSessionsEndpointHandler({ query: { keepCurrentUserSession: true } });
             fetchSessions();
-        } catch {}
+        } catch {
+            // Same as above: keep the current list on failure.
+        }
     };
 
     const handleProfileSave = async (e: React.FormEvent) => {
@@ -103,11 +111,11 @@ export default function ProfilePage() {
                 setProfileMsg({ type: "success", text: "Profile updated successfully." });
                 await refreshUser();
             } else {
-                const d = result.data as any;
+                const d = result.data as { message?: string } | undefined;
                 setProfileMsg({ type: "error", text: d?.message || "Failed to update profile." });
             }
-        } catch (err: any) {
-            setProfileMsg({ type: "error", text: err?.message || "Failed to update profile." });
+        } catch (err: unknown) {
+            setProfileMsg({ type: "error", text: (err as Error)?.message || "Failed to update profile." });
         }
         setProfileLoading(false);
     };
@@ -133,11 +141,11 @@ export default function ProfilePage() {
                 setPwMsg({ type: "success", text: "Password updated successfully." });
                 setPasswords({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
             } else {
-                const d = result.data as any;
+                const d = result.data as { message?: string } | undefined;
                 setPwMsg({ type: "error", text: d?.message || "Failed to update password." });
             }
-        } catch (err: any) {
-            setPwMsg({ type: "error", text: err?.message || "Failed to update password." });
+        } catch (err: unknown) {
+            setPwMsg({ type: "error", text: (err as Error)?.message || "Failed to update password." });
         }
         setPwLoading(false);
     };

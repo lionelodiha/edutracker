@@ -26,7 +26,7 @@ internal static partial class ResponseCatalog
             Details: []
         );
 
-        public static readonly OperationFailureResponse RelatedRecordNotFound = new(            Id: "SYSTEM_RELATED_RECORD_NOT_FOUND",
+        public static readonly OperationFailureResponse RelatedRecordNotFound = new(Id: "SYSTEM_RELATED_RECORD_NOT_FOUND",
             StatusCode: HttpStatusCodes.NotFound,
             Title: "A related record was not found.",
             Details: []

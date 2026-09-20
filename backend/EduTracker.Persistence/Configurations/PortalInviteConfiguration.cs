@@ -15,7 +15,7 @@ internal sealed class PortalInviteConfiguration : IEntityTypeConfiguration<Porta
         builder.Property(p => p.OrganizationId).IsRequired();
         builder.Property(p => p.Email).IsRequired().HasMaxLength(254);
         builder.Property(p => p.EmailHash).IsRequired().HasMaxLength(32);
-        
+
         builder.Property(p => p.Role)
             .HasConversion<string>()
             .HasMaxLength(OrganizationLimits.MemberRoleMaxLength)

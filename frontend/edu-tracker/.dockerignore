@@ -1,0 +1,9 @@
+# Keep the frontend build context small.
+node_modules/
+dist/
+test-results/
+playwright-report/
+test-results/
+coverage/
+.git/
+.vite/

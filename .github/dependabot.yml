@@ -1,0 +1,32 @@
+# Opens a pull request when a dependency you rely on has a newer version,
+# and flags the ones with known security advisories. Free, and it needs no
+# configuration beyond telling it where each manifest lives.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    # One grouped PR for routine bumps instead of fifteen separate ones,
+    # which is the difference between reviewing them and ignoring them.
+    groups:
+      dotnet-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /frontend/edu-tracker
+    schedule:
+      interval: weekly
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /backend/EduTracker.Api
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

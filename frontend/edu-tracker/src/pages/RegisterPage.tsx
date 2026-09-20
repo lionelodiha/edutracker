@@ -35,6 +35,8 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
+    const strength = useMemo(() => getPasswordStrength(form.password), [form.password]);
+
     useEffect(() => {
         if (!authLoading && isAuthenticated && !showSuccess) {
             navigate("/dashboard", { replace: true });
@@ -42,8 +44,6 @@ export default function RegisterPage() {
     }, [authLoading, isAuthenticated, showSuccess, navigate]);
 
     if (authLoading) return null;
-
-    const strength = useMemo(() => getPasswordStrength(form.password), [form.password]);
 
     const update = (field: string, value: string) =>
         setForm((prev) => ({ ...prev, [field]: value }));

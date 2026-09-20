@@ -16,7 +16,11 @@ export default function Modal({ titleId, onClose, children, maxWidth }: ModalPro
     // effect re-ran per keystroke and focus() yanked the caret out of
     // whatever input the user was typing in.
     const onCloseRef = useRef(onClose);
-    onCloseRef.current = onClose;
+    // Sync the ref outside render so the mount-only effect below always
+    // calls the latest onClose without re-subscribing per keystroke.
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    });
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
