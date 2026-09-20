@@ -21,7 +21,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCustomCors(builder.Configuration);
 
-builder.Services.AddPersistenceServices(builder.Configuration.GetConnectionString("Database"));
+builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices([typeof(IMediator).Assembly]);
 
