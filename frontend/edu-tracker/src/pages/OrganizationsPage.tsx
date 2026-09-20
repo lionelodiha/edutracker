@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     getOrganizationsEndpointHandler,
@@ -44,18 +44,21 @@ export default function OrganizationsPage() {
     const [creating, setCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchOrgs = async () => {
+    const fetchOrgs = useCallback(async () => {
         client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         try {
             const r = await getOrganizationsEndpointHandler();
             if (r.data?.data) setOrgs(r.data.data);
-        } catch { }
+        } catch {
+            // Listing is best-effort on mount; the page already renders
+            // loading/empty states, so there is nothing to report here.
+        }
         setLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         fetchOrgs();
-    }, []);
+    }, [fetchOrgs]);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,7 +74,7 @@ export default function OrganizationsPage() {
                 setNewName("");
                 await fetchOrgs();
             } else {
-                const errBody = result.error || result.data as any;
+                const errBody = (result.error ?? result.data) as { message?: string; title?: string; details?: { message?: string }[] } | undefined;
                 let errorMsg = "Failed to create organization.";
                 if (errBody) {
                     if (errBody.message) errorMsg = errBody.message;
@@ -79,14 +82,14 @@ export default function OrganizationsPage() {
                     else if (typeof errBody === 'string') errorMsg = errBody;
 
                     if (errBody.details && Array.isArray(errBody.details)) {
-                        errorMsg += " " + errBody.details.map((d: any) => d.message || d).join(" ");
+                        errorMsg += " " + errBody.details.map((d) => d.message || d).join(" ");
                     }
                 }
                 setError(errorMsg);
                 console.error("Create organization failed:", result);
             }
-        } catch (err: any) {
-            setError(err?.message || "Failed to create organization.");
+        } catch (err: unknown) {
+            setError((err as Error)?.message || "Failed to create organization.");
             console.error("Create organization exception:", err);
         }
         setCreating(false);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     getSemestersEndpointHandler,
@@ -42,7 +42,7 @@ export default function SemestersPage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchSemesters = async () => {
+    const fetchSemesters = useCallback(async () => {
         if (!organizationId) return;
         client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
         try {
@@ -50,13 +50,16 @@ export default function SemestersPage() {
             if (res.data?.data) {
                 setSemesters(res.data.data);
             }
-        } catch {}
+        } catch {
+            // Semester list is best-effort on mount; the table already renders
+            // loading/empty states.
+        }
         setLoading(false);
-    };
+    }, [organizationId]);
 
     useEffect(() => {
         fetchSemesters();
-    }, [organizationId]);
+    }, [fetchSemesters]);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,11 +73,11 @@ export default function SemestersPage() {
                 setShowCreate(false);
                 await fetchSemesters();
             } else {
-                const d = res.data as any;
+                const d = res.data as { message?: string } | undefined;
                 setError(d?.message || "Failed to create semester.");
             }
-        } catch (err: any) {
-            setError(err?.message || "Error creating semester.");
+        } catch (err: unknown) {
+            setError((err as Error)?.message || "Error creating semester.");
         }
         setSubmitting(false);
     };

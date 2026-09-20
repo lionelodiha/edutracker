@@ -153,18 +153,15 @@ export default function OrganizationDetailsPage() {
     }, [id]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchDetails();
     }, [fetchDetails]);
 
     // Load departments the first time the user opens the tab.
     useEffect(() => {
         if (activeTab === "departments" && departments.length === 0 && !departmentsLoading) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             fetchDepartments();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab]);
+    }, [activeTab, departments.length, departmentsLoading, fetchDepartments]);
 
     const handleCreateDepartment = async (e: React.FormEvent) => {
         e.preventDefault();
