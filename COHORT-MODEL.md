@@ -337,3 +337,167 @@ Two things worth checking against a real school before the schema is fixed:
    200 Level but carrying 100 Level courses. The `Enrollment` record handles the
    courses; the question is whether their *cohort* changes. Decide it explicitly
    rather than discovering it during a term.
+
+---
+
+# API Contract — Cohorts
+
+**Agreed before anyone writes code.** Frontend builds against a mock of these
+shapes; backend implements the same shapes. When both are done the mock is
+deleted and nothing on the frontend changes.
+
+If either side needs to change a shape, change it *here first* and tell the
+other. A contract that drifts silently is worse than no contract, because the
+swap at the end is what breaks.
+
+## Conventions
+
+Existing repo conventions apply: every response is wrapped in the standard
+envelope, ids are uuids, and every request is scoped by `organizationId`.
+
+```jsonc
+// success
+{ "id": "...", "title": "...", "data": <payload> }
+// failure
+{ "id": "COHORT_NOT_FOUND", "title": "...", "details": [] }
+```
+
+## Types
+
+```ts
+type Stage = {
+  id: string;
+  organizationId: string;
+  ordinal: number;        // sort order: JSS1=1 ... SS3=6, or 100L=1 ... 500L=5
+  name: string;           // "SS 2"  |  "100 Level"
+  shortName: string;      // "SS2"   |  "100L"
+};
+
+type Cohort = {
+  id: string;
+  organizationId: string;
+  academicUnitId: string | null;   // null when the school does not stream
+  academicUnitName: string | null; // "Science" | "Computer Engineering"
+  stageId: string;
+  stageName: string;               // "SS 2"
+  arm: string | null;              // "A" | null when there is only one
+  displayName: string;             // "SS 2 Science A" — server-composed
+  sessionId: string;
+  formTeacherId: string | null;
+  formTeacherName: string | null;
+  studentCount: number;
+};
+
+type CohortStudent = {
+  studentProfileId: string;
+  userId: string;
+  admissionNumber: string;   // "JMS/2023/0219"
+  fullName: string;
+  status: "Active" | "Deferred" | "Suspended" | "Withdrawn" | "Graduated";
+};
+```
+
+> `displayName` is composed on the server, not the client. Otherwise every
+> screen reinvents the "unit + stage + arm" formatting rule and they drift.
+
+## Endpoints
+
+| Method | Path | Returns |
+| --- | --- | --- |
+| GET | `/api/stages?organizationId=` | `Stage[]`, ordered by `ordinal` |
+| GET | `/api/cohorts?organizationId=&stageId=&academicUnitId=` | `Cohort[]`, filters optional |
+| GET | `/api/cohorts/{id}` | `Cohort` |
+| POST | `/api/cohorts` | `201` + new id |
+| GET | `/api/cohorts/{id}/students` | `CohortStudent[]` |
+| POST | `/api/cohorts/{id}/students` | `201`, body `{ studentProfileIds: string[] }` |
+| DELETE | `/api/cohorts/{id}/students/{studentProfileId}` | `200` |
+
+**POST /api/cohorts** body:
+
+```jsonc
+{
+  "organizationId": "uuid",
+  "academicUnitId": "uuid | null",
+  "stageId": "uuid",
+  "arm": "A | null",
+  "sessionId": "uuid",
+  "formTeacherId": "uuid | null"
+}
+```
+
+## Status codes
+
+| Code | When |
+| --- | --- |
+| 400 | Validation failed |
+| 401 | No session |
+| 403 | Not a member of that organization, or lacks the role |
+| 404 | Cohort not found **in this organization** |
+| 409 | A cohort with the same (unit, stage, arm, session) already exists |
+
+> 404 rather than 403 for a cohort belonging to another organization would leak
+> whether an id exists. Resolve the organization from the cohort and compare,
+> never trust `organizationId` from the request body.
+
+---
+
+# Work split
+
+Two halves, divided along the contract. Neither blocks the other.
+
+## ~~Half 1 — Mock backend and contract~~ ✅ COMPLETED
+
+~~Everything needed for the frontend to be built without a real backend.~~
+
+- ~~Define the API contract above~~
+- ~~Install and configure MSW~~
+- ~~Request handlers for all seven endpoints~~
+- ~~Seed data covering both institution shapes: a secondary school with
+  streamed SS cohorts, and a university with levels~~
+- ~~Wire MSW into dev mode and into Vitest, behind a flag so it is off by
+  default and deletable in one commit~~
+
+**Verified:** `tsc -b --noEmit` and `eslint` both pass with zero errors.
+
+> **If dependencies appear to be missing, check `NODE_ENV` first.** With
+> `NODE_ENV=production` set, npm omits every devDependency — `@types/react`,
+> `msw`, `vitest`, and the types behind `"types": ["vite/client"]` in
+> tsconfig.app.json. Nothing errors; npm reports success having installed half
+> of what you asked for, and the symptoms look like a broken tsconfig or a
+> corrupted node_modules.
+>
+> Fix: clear `NODE_ENV`, or `NODE_ENV=development npm install --include=dev`.
+
+## Half 2 — Cohort UI — **for the other AI**
+
+Screens consuming the contract. Built against the mock, works unchanged
+against the real backend.
+
+- [ ] Cohort list page — grouped by stage, showing `displayName`, form
+      teacher and `studentCount`
+- [ ] Cohort detail page — the drill-down: students with admission numbers
+      and status, form teacher, and the academic unit path
+- [ ] Create-cohort modal — stage picker, optional unit, optional arm.
+      Reuse the existing `Modal` component; do not build a second one
+- [ ] Add and remove students from a cohort
+- [ ] Vitest tests against the MSW handlers
+- [ ] Route registration and a nav entry
+
+**Where the mock lives:** `src/mocks/` — `handlers.ts` has the seven
+endpoints, `data.ts` has the seed data. Change the seed data freely; leave
+the response *shapes* alone, because those are the contract.
+
+**Enabling it:** set `VITE_USE_MOCKS=true` in `.env.local`, then `npm run dev`.
+It is off without that flag, so it can never reach production by accident.
+
+## Deleting the mock
+
+When the backend ships:
+
+1. `npm run openapi-ts` against the real API
+2. Confirm the generated types match the contract above
+3. Delete `src/mocks/` and the MSW block in `main.tsx`
+4. Remove `msw` from `package.json`
+
+No component changes. If any are needed, the contract drifted and that is the
+thing to fix.
