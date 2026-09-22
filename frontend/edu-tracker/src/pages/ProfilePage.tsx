@@ -10,7 +10,7 @@ import {
 import { client } from "../api/client.gen";
 import type { SessionData } from "../api";
 
-const API_BASE = "http://localhost:3187";
+import { API_BASE } from "../apiBase";
 
 function MonitorIcon() {
     return (

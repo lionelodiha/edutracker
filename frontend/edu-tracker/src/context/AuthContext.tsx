@@ -8,7 +8,7 @@ import {
 import { client } from "../api/client.gen";
 import type { UserResponse } from "../api";
 
-const API_BASE = "http://localhost:3187";
+import { API_BASE } from "../apiBase";
 
 type AuthState = {
   user: UserResponse | null;

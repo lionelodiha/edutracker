@@ -47,3 +47,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+# test and coverage output
+TestResults/
+coverage/

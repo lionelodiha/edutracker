@@ -18,7 +18,7 @@ import type {
 } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE = "http://localhost:3187";
+import { API_BASE } from "../../apiBase";
 
 // TEMPORARY — roles available in the "Add Member" modal. The long-term email-invite flow
 // will only issue Teacher/Student roles; Admin/Moderator will be granted through the

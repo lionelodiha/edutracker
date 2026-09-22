@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import Logo from "../components/LogoLockup";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import AuthShell from "../components/AuthShell";
 
 function getPasswordStrength(pw: string): { level: number; label: string } {
     if (!pw) return { level: 0, label: "" };
@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
     if (authLoading) return null;
 
-    const strength = useMemo(() => getPasswordStrength(form.password), [form.password]);
+    const strength = getPasswordStrength(form.password);
 
     const update = (field: string, value: string) =>
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -79,30 +79,9 @@ export default function RegisterPage() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", position: "relative" }}>
-            {/* Animated background */}
-            <div className="bg-orbs">
-                <div className="bg-orb bg-orb-1" />
-                <div className="bg-orb bg-orb-2" />
-                <div className="bg-orb bg-orb-3" />
-            </div>
-            <div className="bg-grid" />
-
-            <div style={{ width: "100%", maxWidth: 460, position: "relative", zIndex: 1 }} className="fade-in">
-                {/* Logo */}
-                <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
-                    <Link to="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none", marginBottom: "0.75rem" }}>
-                        <Logo markSize={44} fontSize="1.5rem" />
-                    </Link>
-                    <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem", marginTop: "0.5rem" }}>
-                        Create your account to get started.
-                    </p>
-                </div>
-
-                {/* Card */}
-                <div className="auth-card" style={{ padding: "2rem" }}>
+        <AuthShell mode="register">
                     {showSuccess ? (
-                        <div className="success-anim-container">
+                        <div className="success-anim-container" role="status" aria-live="polite">
                             <div className="success-anim-circle">
                                 <svg className="success-anim-svg" viewBox="0 0 52 52">
                                     <circle cx="26" cy="26" r="24" />
@@ -115,20 +94,20 @@ export default function RegisterPage() {
                     ) : (
                     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                         {error && (
-                            <div className="alert alert-error fade-in">
+                            <div className="alert alert-error" role="alert">
                                 <span>⚠️</span>
                                 <span>{error}</span>
                             </div>
                         )}
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.85rem" }}>
+                        <div className="auth-name-row">
                             <div>
                                 <label className="input-label" htmlFor="reg-fn">First Name</label>
-                                <input id="reg-fn" className="input" placeholder="John" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} required />
+                                <input id="reg-fn" autoComplete="given-name" className="input" placeholder="John" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} required />
                             </div>
                             <div>
                                 <label className="input-label" htmlFor="reg-ln">Last Name</label>
-                                <input id="reg-ln" className="input" placeholder="Doe" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} required />
+                                <input id="reg-ln" autoComplete="family-name" className="input" placeholder="Doe" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} required />
                             </div>
                         </div>
 
@@ -147,7 +126,7 @@ export default function RegisterPage() {
                                 <label className="input-label" htmlFor="reg-pw" style={{ marginBottom: 0 }}>Password</label>
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}
                                     style={{
                                         background: "none", border: "none", cursor: "pointer",
                                         color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "inherit",
@@ -196,7 +175,7 @@ export default function RegisterPage() {
                             )}
                         </div>
 
-                        <button type="submit" className="btn btn-primary btn-full btn-lg glow-ring" disabled={loading} style={{ marginTop: "0.25rem" }}>
+                        <button type="submit" className="btn btn-primary btn-full btn-lg auth-submit" disabled={loading} style={{ marginTop: "0.25rem" }}>
                             {loading ? (
                                 <><div className="spinner" style={{ borderTopColor: "#fff", width: 18, height: 18 }} /> Creating account...</>
                             ) : (
@@ -205,17 +184,6 @@ export default function RegisterPage() {
                         </button>
                     </form>
                     )}
-                </div>
-
-                <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.88rem" }}>
-                        Already have an account?{" "}
-                    </span>
-                    <Link to="/login" style={{ fontWeight: 600, fontSize: "0.88rem" }}>
-                        Sign in →
-                    </Link>
-                </div>
-            </div>
-        </div>
+        </AuthShell>
     );
 }

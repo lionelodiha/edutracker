@@ -15,7 +15,7 @@ import type {
     UserOrganizationInviteResponse,
 } from "../api";
 
-const API_BASE = "http://localhost:3187";
+import { API_BASE } from "../apiBase";
 
 export type DashboardData = {
     orgs: OrganizationListItemResponse[];
