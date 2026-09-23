@@ -169,7 +169,7 @@ export default function CoursesPage() {
             {showCreate && (
                 <Modal titleId="create-course-title" onClose={() => setShowCreate(false)}>
                     <h2 id="create-course-title" className="dz-modal-title">Create Course</h2>
-                    <p className="dz-modal-sub">Add a reusable course to the catalog. Offer it per term from a semester.</p>
+                    <p className="dz-modal-sub">Add a reusable course to the catalog. Offer it per term from a session.</p>
                     <form onSubmit={handleCreate} className="dz-form">
                         {error && (
                             <div className="alert alert-error">

@@ -19,6 +19,7 @@ import { API_BASE } from "../apiBase";
 
 export type DashboardData = {
     orgs: OrganizationListItemResponse[];
+    refreshOrganizations: () => Promise<void>;
     sessions: SessionData[];
     invites: UserOrganizationInviteResponse[];
     orgsLoading: boolean;
@@ -86,8 +87,12 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
         setRespondingInvite(null);
     };
 
+    const refreshOrganizations = async () => {
+        const result = await getOrganizationsEndpointHandler();
+        if (result.data?.data) setOrgs(result.data.data);
+    };
     const value: DashboardData = {
-        orgs, sessions, invites,
+        orgs, sessions, invites, refreshOrganizations,
         orgsLoading, sessionsLoading, invitesLoading,
         searchQuery, setSearchQuery,
         respondingInvite, respondInvite,

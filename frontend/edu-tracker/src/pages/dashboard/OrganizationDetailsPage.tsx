@@ -1,12 +1,11 @@
+import SchoolStructureEditor from "../../features/cohorts/SchoolStructureEditor";
+import { readSchoolSetup } from "../../features/cohorts/schoolSetup";
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
     getOrganizationByIdEndpointHandler,
     getOrganizationMembersEndpointHandler,
     addStaffMemberEndpointHandler,
-    getDepartmentsEndpointHandler,
-    createDepartmentEndpointHandler,
-    deleteDepartmentEndpointHandler,
 } from "../../api";
 import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
@@ -14,7 +13,6 @@ import type {
     OrganizationResponse,
     OrganizationMemberResponse,
     OrganizationMemberRole,
-    DepartmentResponse,
 } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 
@@ -76,28 +74,63 @@ function UsersIcon() {
 
 const TABS = [
     { id: "overview", label: "Overview" },
-    { id: "departments", label: "Departments & Courses" },
+    { id: "faculties", label: "Faculties" },
+    { id: "departments", label: "Academic structure" },
     { id: "staff", label: "Staff & Teachers" },
     { id: "settings", label: "School Settings" },
 ] as const;
 
+/** FACULTY-BUILD §8 — faculties as cards that navigate into the workspace. */
+function FacultiesTab({ organizationId, onOpen }: { organizationId: string; onOpen: (facultyId: string) => void }) {
+    const setup = readSchoolSetup(organizationId);
+    const faculties = (setup?.structure.units ?? []).filter((u) => u.parent === null);
+    const deptCount = (facultyId: string) =>
+        (setup?.structure.units ?? []).filter((u) => u.parent === facultyId).length;
+    if (!setup) {
+        return (
+            <div className="dz-card dz-empty">
+                <div className="dz-empty-title">Set up your school first</div>
+                <div className="dz-empty-text">Define the academic structure, then each faculty opens as its own workspace.</div>
+            </div>
+        );
+    }
+    if (faculties.length === 0) {
+        return (
+            <div className="dz-card dz-empty">
+                <div className="dz-empty-title">No faculties yet</div>
+                <div className="dz-empty-text">Add a faculty under Academic structure. It opens as a workspace of its own.</div>
+            </div>
+        );
+    }
+    return (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+            {faculties.map((f) => (
+                <button
+                    key={f.key}
+                    className="dz-card"
+                    style={{ textAlign: "left", cursor: "pointer" }}
+                    onClick={() => onOpen(f.key)}
+                >
+                    <div className="dz-card-title">{f.name}</div>
+                    <div className="dz-reminder-meta" style={{ margin: "0.35rem 0 0.75rem" }}>
+                        {deptCount(f.key)} department{deptCount(f.key) === 1 ? "" : "s"}
+                    </div>
+                    <span className="dz-btn-outline">Open workspace →</span>
+                </button>
+            ))}
+        </div>
+    );
+}
+
 export default function OrganizationDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { user } = useAuth();
 
     const [org, setOrg] = useState<OrganizationResponse | null>(null);
     const [members, setMembers] = useState<OrganizationMemberResponse[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // --- Departments state ---
-    const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
-    const [departmentsLoading, setDepartmentsLoading] = useState(false);
-    const [showCreateDept, setShowCreateDept] = useState(false);
-    const [deptForm, setDeptForm] = useState({ name: "", description: "" });
-    const [deptSubmitting, setDeptSubmitting] = useState(false);
-    const [deptError, setDeptError] = useState<string | null>(null);
-    const [deletingDeptId, setDeletingDeptId] = useState<string | null>(null);
 
     // --- Add Staff Member modal state ---
     const [showAddStaff, setShowAddStaff] = useState(false);
@@ -116,7 +149,7 @@ export default function OrganizationDetailsPage() {
     const [addStaffSuccess, setAddStaffSuccess] = useState<string | null>(null);
 
     // Dashboard Tabs
-    const [activeTab, setActiveTab] = useState<"overview" | "departments" | "staff" | "settings">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "faculties" | "departments" | "staff" | "settings">(searchParams.get("tab") === "structure" ? "departments" : "overview");
 
     const fetchDetails = useCallback(async () => {
         if (!id) return;
@@ -125,6 +158,7 @@ export default function OrganizationDetailsPage() {
             const orgRes = await getOrganizationByIdEndpointHandler({ path: { id } });
             if (orgRes.data?.data) {
                 setOrg(orgRes.data.data);
+                try { localStorage.setItem(`edutracker.organizationName.${id}`, orgRes.data.data.name); } catch { /* Name remains visible in this page. */ }
             }
 
             const membersRes = await getOrganizationMembersEndpointHandler({ path: { id } });
@@ -137,82 +171,10 @@ export default function OrganizationDetailsPage() {
         setLoading(false);
     }, [id]);
 
-    const fetchDepartments = useCallback(async () => {
-        if (!id) return;
-        setDepartmentsLoading(true);
-        try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
-            const res = await getDepartmentsEndpointHandler({ query: { organizationId: id } });
-            if (res.data?.data) {
-                setDepartments(res.data.data);
-            }
-        } catch (err) {
-            console.error("Failed to fetch departments:", err);
-        }
-        setDepartmentsLoading(false);
-    }, [id]);
-
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchDetails();
     }, [fetchDetails]);
-
-    // Load departments the first time the user opens the tab.
-    useEffect(() => {
-        if (activeTab === "departments" && departments.length === 0 && !departmentsLoading) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            fetchDepartments();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab]);
-
-    const handleCreateDepartment = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!id) return;
-        setDeptError(null);
-        setDeptSubmitting(true);
-        try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
-            const res = await createDepartmentEndpointHandler({
-                body: {
-                    organizationId: id,
-                    facultyId: null,
-                    name: deptForm.name,
-                    description: deptForm.description || null,
-                },
-            });
-            if (res.response?.ok) {
-                setShowCreateDept(false);
-                setDeptForm({ name: "", description: "" });
-                await fetchDepartments();
-            } else {
-                const errBody = (res.error ?? res.data) as { message?: string; details?: { message?: string }[] } | undefined;
-                const detailMsgs = errBody?.details?.map((d) => d.message).filter(Boolean).join(" ");
-                setDeptError(detailMsgs || errBody?.message || "Failed to create department.");
-            }
-        } catch (err: unknown) {
-            const error = err as Error;
-            setDeptError(error?.message || "Failed to create department.");
-        }
-        setDeptSubmitting(false);
-    };
-
-    const handleDeleteDepartment = async (departmentId: string, name: string) => {
-        if (!id) return;
-        if (!confirm(`Delete department "${name}"? This cannot be undone.`)) return;
-        setDeletingDeptId(departmentId);
-        try {
-            client.setConfig({ baseUrl: API_BASE, credentials: 'include' });
-            await deleteDepartmentEndpointHandler({
-                path: { id: departmentId },
-                query: { organizationId: id },
-            });
-            await fetchDepartments();
-        } catch (err) {
-            console.error("Failed to delete department:", err);
-        }
-        setDeletingDeptId(null);
-    };
 
     const openAddStaffModal = (roles: AddStaffRole[], defaultRole: AddStaffRole) => {
         setAllowedRoles(roles);
@@ -324,23 +286,12 @@ export default function OrganizationDetailsPage() {
                         <button className="dz-pill-btn" onClick={() => navigate("/dashboard/organizations")}>← Organizations</button>
                     </div>
                     <h1 className="dz-page-title">{org.name}</h1>
+<button className="dz-btn-outline" onClick={() => navigate(`/dashboard/organizations/${org.id}/sessions`)}>View sessions →</button>
                     <p className="dz-page-sub">
-                        School workspace · {members.length} member{members.length === 1 ? "" : "s"}
+                        {readSchoolSetup(org.id)?.model ?? "School setup needed"} workspace · {members.length} member{members.length === 1 ? "" : "s"}
                         {ownerMember ? ` · Owner ${ownerMember.firstName} ${ownerMember.lastName}` : ""}
                     </p>
                 </div>
-                {activeTab === "departments" && isOwner && (
-                    <button
-                        className="dz-btn-green"
-                        onClick={() => {
-                            setDeptForm({ name: "", description: "" });
-                            setDeptError(null);
-                            setShowCreateDept(true);
-                        }}
-                    >
-                        <PlusIcon /> New Department
-                    </button>
-                )}
                 {activeTab === "staff" && isOwner && (
                     <button
                         className="dz-btn-green"
@@ -368,6 +319,10 @@ export default function OrganizationDetailsPage() {
             {/* TAB: OVERVIEW */}
             {activeTab === "overview" && (
                 <>
+                    <div className="school-journey">
+                        <button onClick={() => setActiveTab("departments")}><span>01 / FOUNDATION</span><strong>Define your structure</strong><small>Institution type, academic units and stages →</small></button>
+                        <button onClick={() => navigate(`/dashboard/organizations/${org.id}/sessions`)}><span>02 / ACADEMIC YEAR</span><strong>Open a session</strong><small>Classes, levels and student records →</small></button>
+                    </div>
                     <div className="dz-card">
                         <div className="dz-hero">
                             <div className="dz-hero-tile" style={{ background: "#8b5cf6" }}>
@@ -403,92 +358,13 @@ export default function OrganizationDetailsPage() {
                 </>
             )}
 
-            {/* TAB: DEPARTMENTS & COURSES */}
-            {activeTab === "departments" && (
-                <>
-                    <div className="dz-card-head" style={{ marginBottom: 0 }}>
-                        <div>
-                            <h2 className="dz-card-title">Academic Departments</h2>
-                            <p className="dz-reminder-meta" style={{ marginTop: "0.2rem" }}>
-                                Organize your school into departments like Science, Mathematics, or Arts.
-                            </p>
-                        </div>
-                        {isOwner && departments.length > 0 && (
-                            <button
-                                className="dz-pill-btn"
-                                onClick={() => {
-                                    setDeptForm({ name: "", description: "" });
-                                    setDeptError(null);
-                                    setShowCreateDept(true);
-                                }}
-                            >
-                                <PlusIcon /> New
-                            </button>
-                        )}
-                    </div>
+            {activeTab === "departments" && <SchoolStructureEditor key={org.id} organizationId={org.id} editable={isOwner} />}
 
-                    {departmentsLoading ? (
-                        <div className="dz-org-grid">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="dz-card">
-                                    <div className="skeleton" style={{ height: 14, width: "60%", borderRadius: 6, marginBottom: 10 }} />
-                                    <div className="skeleton" style={{ height: 10, width: "80%", borderRadius: 6 }} />
-                                </div>
-                            ))}
-                        </div>
-                    ) : departments.length === 0 ? (
-                        <div className="dz-card dz-empty">
-                            <span className="dz-empty-icon"><BuildingIcon /></span>
-                            <div className="dz-empty-title">No departments yet</div>
-                            <div className="dz-empty-text">Create your first department to start organizing courses and staff.</div>
-                            {isOwner && (
-                                <button
-                                    className="dz-btn-green"
-                                    style={{ marginTop: "1rem" }}
-                                    onClick={() => {
-                                        setDeptForm({ name: "", description: "" });
-                                        setDeptError(null);
-                                        setShowCreateDept(true);
-                                    }}
-                                >
-                                    <PlusIcon /> Create Department
-                                </button>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="dz-org-grid">
-                            {departments.map((dept) => (
-                                <div key={dept.id} className="dz-card" style={{ gap: "0.6rem" }}>
-                                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem" }}>
-                                        <h3 style={{ fontWeight: 700, fontSize: "0.95rem", letterSpacing: "-0.01em", flex: 1 }}>
-                                            {dept.name}
-                                        </h3>
-                                        {isOwner && (
-                                            <button
-                                                className="dz-btn-danger-ghost"
-                                                disabled={deletingDeptId === dept.id}
-                                                onClick={() => handleDeleteDepartment(dept.id, dept.name)}
-                                                title="Delete department"
-                                            >
-                                                {deletingDeptId === dept.id ? "…" : "Delete"}
-                                            </button>
-                                        )}
-                                    </div>
-                                    {dept.description && (
-                                        <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.55 }}>
-                                            {dept.description}
-                                        </p>
-                                    )}
-                                    <div className="dz-note" style={{ marginTop: "auto" }}>
-                                        Created {new Date(dept.createdAt).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </>
+            {/* TAB: FACULTIES — cards that navigate INTO the workspace, never inline contents. */}
+            {activeTab === "faculties" && (
+                <FacultiesTab organizationId={org.id} onOpen={(facultyId) => navigate(`/dashboard/organizations/${org.id}/faculties/${facultyId}`)} />
             )}
-
+            
             {/* TAB: STAFF & TEACHERS */}
             {activeTab === "staff" && (
                 <div className="dz-card" style={{ padding: 0, overflow: "hidden" }}>
@@ -585,8 +461,8 @@ export default function OrganizationDetailsPage() {
                             Configure terms and courses for {org.name}. Changes apply school-wide.
                         </p>
                         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                            <button className="dz-btn-outline" onClick={() => navigate(`/dashboard/organizations/${id}/semesters`)}>
-                                Semesters / Terms
+                            <button className="dz-btn-outline" onClick={() => navigate(`/dashboard/organizations/${id}/sessions`)}>
+                                Sessions / Terms
                             </button>
                             <button className="dz-btn-outline" onClick={() => navigate(`/dashboard/organizations/${id}/courses`)}>
                                 Manage Courses
@@ -622,57 +498,6 @@ export default function OrganizationDetailsPage() {
                         </div>
                     </div>
                 </>
-            )}
-
-            {/* Create Department Modal */}
-            {showCreateDept && (
-                <Modal titleId="create-dept-title" onClose={() => setShowCreateDept(false)}>
-                        <h2 id="create-dept-title" className="dz-modal-title">
-                            Create Department
-                        </h2>
-                        <p className="dz-modal-sub">
-                            Add a new academic department to {org.name}.
-                        </p>
-                        <form onSubmit={handleCreateDepartment} className="dz-form">
-                            {deptError && (
-                                <div className="alert alert-error">
-                                    <span>{deptError}</span>
-                                </div>
-                            )}
-                            <div>
-                                <label className="input-label" htmlFor="dept-name">Department Name</label>
-                                <input
-                                    id="dept-name"
-                                    className="input"
-                                    value={deptForm.name}
-                                    onChange={(e) => setDeptForm(f => ({ ...f, name: e.target.value }))}
-                                    placeholder="e.g. Science & Mathematics"
-                                    required
-                                    autoFocus
-                                />
-                            </div>
-                            <div>
-                                <label className="input-label" htmlFor="dept-desc">Description (optional)</label>
-                                <textarea
-                                    id="dept-desc"
-                                    className="input"
-                                    value={deptForm.description}
-                                    onChange={(e) => setDeptForm(f => ({ ...f, description: e.target.value }))}
-                                    placeholder="Brief description of the department"
-                                    rows={3}
-                                    style={{ resize: "vertical" }}
-                                />
-                            </div>
-                            <div className="dz-form-actions">
-                                <button type="button" className="dz-btn-outline" onClick={() => setShowCreateDept(false)}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="dz-btn-green" disabled={deptSubmitting}>
-                                    {deptSubmitting ? "Creating…" : "Create Department"}
-                                </button>
-                            </div>
-                        </form>
-                </Modal>
             )}
 
             {/* Add Staff Member Modal */}

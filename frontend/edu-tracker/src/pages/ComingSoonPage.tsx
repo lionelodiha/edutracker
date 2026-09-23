@@ -15,6 +15,7 @@ export default function ComingSoonPage({
 }: Props) {
     return (
         <div
+            className="coming-soon-page"
             style={{
                 minHeight: "100vh",
                 display: "flex",

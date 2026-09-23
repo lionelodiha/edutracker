@@ -4,7 +4,6 @@
  */
 import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
-
 export const worker = setupWorker(...handlers);
 
 /**
@@ -26,7 +25,7 @@ export async function startMocks(): Promise<void> {
   });
 
   console.info(
-    "%c[mocks] cohort endpoints are mocked. Everything else hits the real API.",
+    "%c[mocks] cohort and faculty endpoints are mocked. Everything else hits the real API.",
     "color:#22d3ee",
   );
 }

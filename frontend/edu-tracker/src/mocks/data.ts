@@ -1,198 +1,102 @@
-/**
- * Seed data for the cohort mock backend.
- *
- * Two organizations on purpose, because the model has to serve both shapes:
- *
- *   Jewel Model Schools   secondary — JSS has no streaming, SS streams into
- *                         Science / Arts / Commercial
- *   Ridgeway University   university — Faculty > Department > levels
- *
- * Change these values freely. Do NOT change the SHAPES — those are the
- * contract in COHORT-MODEL.md, and the real backend returns the same ones.
- */
+import type { Cohort, CohortStudent, Stage, AcademicUnitOption } from "../features/cohorts/types";
+import type { SchoolModel } from "../features/cohorts/settings";
+export type { Cohort, CohortStudent, Stage } from "../features/cohorts/types";
 
-export const ORG_SCHOOL = "11111111-1111-1111-1111-111111111111";
-export const ORG_UNIVERSITY = "22222222-2222-2222-2222-222222222222";
+import type { SchoolStructure } from "../features/cohorts/schoolSetup";
+import { fixtureId } from "../features/cohorts/fixtureId";
 
-export const SESSION_2026 = "aaaaaaaa-0000-0000-0000-000000000001";
-
-export type Stage = {
-  id: string;
-  organizationId: string;
-  ordinal: number;
-  name: string;
-  shortName: string;
-};
-
-export type AcademicUnit = {
-  id: string;
-  organizationId: string;
-  parentId: string | null;
-  kind: "Faculty" | "Department" | "Programme" | "Stream";
-  name: string;
-  code: string;
-};
-
-export type Cohort = {
-  id: string;
-  organizationId: string;
-  academicUnitId: string | null;
-  academicUnitName: string | null;
-  stageId: string;
-  stageName: string;
-  arm: string | null;
-  displayName: string;
-  sessionId: string;
-  formTeacherId: string | null;
-  formTeacherName: string | null;
-  studentCount: number;
-};
-
-export type CohortStudent = {
-  studentProfileId: string;
-  userId: string;
-  admissionNumber: string;
-  fullName: string;
-  status: "Active" | "Deferred" | "Suspended" | "Withdrawn" | "Graduated";
-};
-
-// ── Stages ──────────────────────────────────────────────────────────────
-// Ordinal drives sort order, so the UI never hardcodes "JSS before SS".
-
-export const stages: Stage[] = [
-  { id: "st-jss1", organizationId: ORG_SCHOOL, ordinal: 1, name: "JSS 1", shortName: "JSS1" },
-  { id: "st-jss2", organizationId: ORG_SCHOOL, ordinal: 2, name: "JSS 2", shortName: "JSS2" },
-  { id: "st-jss3", organizationId: ORG_SCHOOL, ordinal: 3, name: "JSS 3", shortName: "JSS3" },
-  { id: "st-ss1", organizationId: ORG_SCHOOL, ordinal: 4, name: "SS 1", shortName: "SS1" },
-  { id: "st-ss2", organizationId: ORG_SCHOOL, ordinal: 5, name: "SS 2", shortName: "SS2" },
-  { id: "st-ss3", organizationId: ORG_SCHOOL, ordinal: 6, name: "SS 3", shortName: "SS3" },
-
-  { id: "st-100", organizationId: ORG_UNIVERSITY, ordinal: 1, name: "100 Level", shortName: "100L" },
-  { id: "st-200", organizationId: ORG_UNIVERSITY, ordinal: 2, name: "200 Level", shortName: "200L" },
-  { id: "st-300", organizationId: ORG_UNIVERSITY, ordinal: 3, name: "300 Level", shortName: "300L" },
-  { id: "st-400", organizationId: ORG_UNIVERSITY, ordinal: 4, name: "400 Level", shortName: "400L" },
-  { id: "st-500", organizationId: ORG_UNIVERSITY, ordinal: 5, name: "500 Level", shortName: "500L" },
-];
-
-// ── Academic units ──────────────────────────────────────────────────────
-// Secondary: one level deep (streams). University: three (faculty > dept >
-// programme). Primary would have none at all.
-
-export const academicUnits: AcademicUnit[] = [
-  { id: "au-sci", organizationId: ORG_SCHOOL, parentId: null, kind: "Stream", name: "Science", code: "SCI" },
-  { id: "au-art", organizationId: ORG_SCHOOL, parentId: null, kind: "Stream", name: "Arts", code: "ART" },
-  { id: "au-com", organizationId: ORG_SCHOOL, parentId: null, kind: "Stream", name: "Commercial", code: "COM" },
-
-  { id: "au-eng", organizationId: ORG_UNIVERSITY, parentId: null, kind: "Faculty", name: "Faculty of Engineering", code: "ENG" },
-  { id: "au-cpe", organizationId: ORG_UNIVERSITY, parentId: "au-eng", kind: "Department", name: "Computer Engineering", code: "CPE" },
-  { id: "au-eee", organizationId: ORG_UNIVERSITY, parentId: "au-eng", kind: "Department", name: "Electrical Engineering", code: "EEE" },
-  { id: "au-cve", organizationId: ORG_UNIVERSITY, parentId: "au-eng", kind: "Department", name: "Civil Engineering", code: "CVE" },
-];
-
-// ── Cohorts ─────────────────────────────────────────────────────────────
-// displayName is composed by the SERVER, not the client, so every screen
-// renders the same string. JSS cohorts carry no academic unit, because
-// streaming has not started yet. That asymmetry is the point.
-
-export const cohorts: Cohort[] = [
-  {
-    id: "co-jss2a", organizationId: ORG_SCHOOL,
-    academicUnitId: null, academicUnitName: null,
-    stageId: "st-jss2", stageName: "JSS 2", arm: "A",
-    displayName: "JSS 2A", sessionId: SESSION_2026,
-    formTeacherId: "u-adeyemi", formTeacherName: "Mrs. F. Adeyemi",
-    studentCount: 34,
-  },
-  {
-    id: "co-jss2b", organizationId: ORG_SCHOOL,
-    academicUnitId: null, academicUnitName: null,
-    stageId: "st-jss2", stageName: "JSS 2", arm: "B",
-    displayName: "JSS 2B", sessionId: SESSION_2026,
-    formTeacherId: "u-bello", formTeacherName: "Mr. K. Bello",
-    studentCount: 31,
-  },
-  {
-    id: "co-ss2sciA", organizationId: ORG_SCHOOL,
-    academicUnitId: "au-sci", academicUnitName: "Science",
-    stageId: "st-ss2", stageName: "SS 2", arm: "A",
-    displayName: "SS 2 Science A", sessionId: SESSION_2026,
-    formTeacherId: "u-okonkwo", formTeacherName: "Mrs. C. Okonkwo",
-    studentCount: 31,
-  },
-  {
-    id: "co-ss2artA", organizationId: ORG_SCHOOL,
-    academicUnitId: "au-art", academicUnitName: "Arts",
-    stageId: "st-ss2", stageName: "SS 2", arm: "A",
-    displayName: "SS 2 Arts A", sessionId: SESSION_2026,
-    formTeacherId: null, formTeacherName: null,
-    studentCount: 27,
-  },
-  {
-    // University cohorts usually have no arm — one group per level.
-    id: "co-cpe100", organizationId: ORG_UNIVERSITY,
-    academicUnitId: "au-cpe", academicUnitName: "Computer Engineering",
-    stageId: "st-100", stageName: "100 Level", arm: null,
-    displayName: "100L Computer Engineering", sessionId: SESSION_2026,
-    formTeacherId: "u-okafor", formTeacherName: "Dr. E. Okafor",
-    studentCount: 52,
-  },
-  {
-    id: "co-cpe200", organizationId: ORG_UNIVERSITY,
-    academicUnitId: "au-cpe", academicUnitName: "Computer Engineering",
-    stageId: "st-200", stageName: "200 Level", arm: null,
-    displayName: "200L Computer Engineering", sessionId: SESSION_2026,
-    formTeacherId: null, formTeacherName: null,
-    studentCount: 47,
-  },
-];
-
-// ── Students ────────────────────────────────────────────────────────────
-// Admission numbers follow the structured pattern schools actually use:
-// entry year / institution / serial. Not every student is Active — the UI
-// has to handle Deferred and Withdrawn without falling over.
-
-const SURNAMES = [
-  "Okeke", "Adeyemi", "Bello", "Chukwu", "Danjuma", "Eze", "Falana", "Garba",
-  "Hassan", "Ibrahim", "Johnson", "Kalu", "Lawal", "Mohammed", "Nwosu",
-  "Obi", "Peters", "Quadri", "Raji", "Sanni", "Tijani", "Uche", "Vincent",
-  "Williams", "Yakubu", "Zubair", "Abiodun", "Balogun", "Chidi", "Dada",
-  "Emeka", "Femi",
-];
-
-const FIRST_NAMES = [
-  "Chidera", "Aisha", "Tunde", "Ngozi", "Emeka", "Fatima", "Segun", "Amara",
-  "Ibrahim", "Blessing", "Kunle", "Zainab", "Obinna", "Halima", "Yusuf",
-  "Chioma", "Musa", "Adaeze", "Bashir", "Temitope",
-];
-
-function makeStudents(cohortId: string, prefix: string, count: number): CohortStudent[] {
-  return Array.from({ length: count }, (_, i) => {
-    const serial = String(i + 1).padStart(4, "0");
-    // Deterministic, so a refresh shows the same people. Random names would
-    // make "did my change work?" impossible to answer by eye.
-    const first = FIRST_NAMES[(i * 7) % FIRST_NAMES.length];
-    const last = SURNAMES[(i * 11) % SURNAMES.length];
-
-    // A realistic sprinkle of non-Active students.
-    let status: CohortStudent["status"] = "Active";
-    if (i === 3) status = "Deferred";
-    else if (i === 9) status = "Suspended";
-
-    return {
-      studentProfileId: `${cohortId}-sp-${serial}`,
-      userId: `${cohortId}-u-${serial}`,
-      admissionNumber: `${prefix}/${serial}`,
-      fullName: `${first} ${last}`,
-      status,
-    };
-  });
+/** Depth of a unit key in a bare unit list (top level = 0). Local copy so mocks stay dependency-light. */
+function unitDepthOf(units: SchoolStructure["units"], key: string | null): number {
+  let depth = 0;
+  let current = units.find(unit => unit.key === key);
+  const seen = new Set<string>();
+  while (current?.parent && !seen.has(current.key)) {
+    seen.add(current.key);
+    depth += 1;
+    current = units.find(unit => unit.key === current!.parent);
+  }
+  return depth;
 }
+export { fixtureId } from "../features/cohorts/fixtureId";
+export type { SchoolStructure } from "../features/cohorts/schoolSetup";
 
-export const studentsByCohort: Record<string, CohortStudent[]> = {
-  "co-jss2a": makeStudents("co-jss2a", "JMS/2025/JSS", 34),
-  "co-jss2b": makeStudents("co-jss2b", "JMS/2025/JSS", 31),
-  "co-ss2sciA": makeStudents("co-ss2sciA", "JMS/2023", 31),
-  "co-ss2artA": makeStudents("co-ss2artA", "JMS/2023", 27),
-  "co-cpe100": makeStudents("co-cpe100", "20/ENG/CPE", 52),
-  "co-cpe200": makeStudents("co-cpe200", "19/ENG/CPE", 47),
+// Sample school setup values, not naming rules. Labels are stored independently
+// of stages, streams and arms. Empty labels omit that placement.
+export const structures: Record<SchoolModel, SchoolStructure> = {
+  Primary: {
+    stages: [1, 2, 3, 4, 5, 6].map(n => ({ key: `p${n}`, name: `Primary ${n}`, shortName: `P${n}` })),
+    units: [],
+    placements: [{ key: "main", unit: null, arm: null, labels: ["Acorns", "Willows", "Cedars", "Maples", "Oaks", "Sequoias"] }],
+  },
+  Secondary: {
+    stages: ["JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"].map((name, i) => ({ key: `s${i}`, name, shortName: name.replace(" ", "") })),
+    units: [{ key: "science", parent: null, name: "Science" }, { key: "arts", parent: null, name: "Arts" }, { key: "commercial", parent: null, name: "Commercial" }],
+    placements: [
+      { key: "junior-a", unit: null, arm: "A", labels: ["JSS 1A", "JSS 2A", "JSS 3A", "", "", ""] },
+      { key: "junior-b", unit: null, arm: "B", labels: ["JSS 1B", "JSS 2B", "JSS 3B", "", "", ""] },
+      { key: "science", unit: "science", arm: "H", labels: ["", "", "", "SS 1H", "SS 2H", "SS 3H"] },
+      { key: "arts", unit: "arts", arm: "A", labels: ["", "", "", "SS 1A", "SS 2A", "SS 3A"] },
+      { key: "commercial", unit: "commercial", arm: null, labels: ["", "", "", "Enterprise I", "Enterprise II", "Enterprise III"] },
+    ],
+  },
+  University: {
+    stages: [100, 200, 300, 400, 500].map(n => ({ key: String(n), name: `${n} Level`, shortName: `${n}L` })),
+    units: [{ key: "engineering", parent: null, name: "Faculty of Engineering", kind: "Faculty" as const },
+      { key: "cpe", parent: "engineering", name: "Computer Engineering", kind: "Department" as const, code: "CPE" },
+      { key: "eee", parent: "engineering", name: "Electrical Engineering", kind: "Department" as const, code: "EEE" },
+      { key: "cve", parent: "engineering", name: "Civil Engineering", kind: "Department" as const, code: "CVE" }],
+    placements: [
+      { key: "cpe", unit: "cpe", arm: null, labels: ["CPE Foundation", "CPE Year Two", "CPE Year Three", "CPE Year Four", "CPE Finalists"] },
+      { key: "eee", unit: "eee", arm: null, labels: ["EEE Foundation", "EEE Year Two", "EEE Year Three", "EEE Year Four", "EEE Finalists"] },
+      { key: "cve", unit: "cve", arm: null, labels: ["Civil Foundation", "Civil Year Two", "Civil Year Three", "Civil Year Four", "Civil Finalists"] },
+    ],
+  },
 };
+
+export function seedSchool(organizationId: string, sessionId: string, structure: SchoolStructure = structures.Secondary, studentCount = 12) {
+  const stages: Stage[] = structure.stages.map((stage, index) => ({
+    id: fixtureId(organizationId, "stage", stage.key), organizationId, ordinal: index + 1, name: stage.name, shortName: stage.shortName,
+  }));
+  const academicUnits: AcademicUnitOption[] = structure.units.map(unit => ({
+    id: fixtureId(organizationId, "unit", unit.key), name: unit.name,
+    parentId: unit.parent ? fixtureId(organizationId, "unit", unit.parent) : null,
+    ...(unit.kind ? { kind: unit.kind } : {}),
+    ...(unit.code ? { code: unit.code } : {}),
+  }));
+  const cohorts: Cohort[] = [];
+  const studentsByCohort: Record<string, CohortStudent[]> = {};
+  // PEOPLE-AND-COURSES §1 rule 4: only Programme units generate cohorts; faculties
+  // and departments are containers. Transitional: a department with no programme
+  // children still generates (it acts as its own programme until programmes exist).
+  const generatesCohorts = (placementUnitKey: string | null): boolean => {
+    if (!placementUnitKey) return true;
+    const unit = structure.units.find(item => item.key === placementUnitKey);
+    if (!unit) return true;
+    const depth = unitDepthOf(structure.units, placementUnitKey);
+    const kind = unit.kind ?? (depth === 0 ? "Faculty" : depth === 1 ? "Department" : "Programme");
+    // Older Secondary fixtures use root units as streams. Explicit Faculty
+    // nodes remain containers, while those legacy leaf units still generate.
+    if (kind === "Faculty") return !unit.kind && !structure.units.some(child => child.parent === unit.key);
+    if (kind === "Programme") return true;
+    return !structure.units.some(child => child.parent === unit.key);
+  };
+  stages.forEach((stage, index) => structure.placements.forEach(placement => {
+    const displayName = placement.labels[index];
+    if (!displayName) return;
+    if (!generatesCohorts(placement.unit)) return;
+    const id = fixtureId(organizationId, sessionId, stage.id, placement.key);
+    const unit = academicUnits.find(item => item.id === fixtureId(organizationId, "unit", placement.unit ?? ""));
+    const students = Array.from({ length: studentCount }, (_, i): CohortStudent => ({
+      studentProfileId: fixtureId(organizationId, stage.id, placement.key, "student", String(i)),
+      userId: fixtureId(organizationId, stage.id, placement.key, "user", String(i)),
+      admissionNumber: `ADM/${String(cohorts.length * 12 + i + 1).padStart(4, "0")}`,
+      fullName: ["Chidera Okeke", "Aisha Adeyemi", "Tunde Bello", "Ngozi Chukwu", "Emeka Danjuma", "Fatima Eze", "Segun Falana", "Amara Garba", "Ibrahim Hassan", "Blessing Ibrahim", "Kunle Johnson", "Zainab Kalu"][i],
+      status: i === 3 ? "Deferred" : i === 9 ? "Suspended" : "Active",
+    }));
+    cohorts.push({ id, organizationId, sessionId, stageId: stage.id, stageName: stage.name,
+      academicUnitId: unit?.id ?? null, academicUnitName: unit?.name ?? null, arm: placement.arm, displayName,
+      formTeacherId: studentCount ? fixtureId(organizationId, "teacher", placement.key) : null, formTeacherName: studentCount ? "Mrs. F. Adeyemi" : null, studentCount: students.length });
+    studentsByCohort[id] = students;
+  }));
+  return { stages, academicUnits, cohorts, studentsByCohort };
+}

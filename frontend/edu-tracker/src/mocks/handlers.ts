@@ -1,38 +1,72 @@
-/**
- * MSW request handlers for the cohort endpoints.
- *
- * These implement the contract in COHORT-MODEL.md exactly — same paths, same
- * shapes, same status codes. The real backend returns the same thing, so the
- * frontend does not change when this is deleted.
- *
- * Deliberately included, because the UI has to cope with them:
- *   - 403 for an organization you are not scoped to
- *   - 404 for a cohort that does not exist
- *   - 409 for a duplicate (unit, stage, arm, session)
- *   - a small latency so loading states are actually visible
- */
-
 import { http, HttpResponse, delay } from "msw";
-import {
-  ORG_SCHOOL,
-  ORG_UNIVERSITY,
-  SESSION_2026,
-  academicUnits,
-  cohorts,
-  stages,
-  studentsByCohort,
-  type Cohort,
-  type CohortStudent,
-} from "./data";
+import { seedSchool, structures, fixtureId, type Cohort, type CohortStudent } from "./data";
+import { readSchoolSetup } from "../features/cohorts/schoolSetup";
+import { getGroupSettings } from "../features/cohorts/settings";
+import { approvedStudentsInCohort, resetFacultyMocks } from "./faculty";
+import { facultyHandlers } from "./facultyHandlers";
 
-const API = "http://localhost:3187";
+const API = "*";
+let cohortStore: Cohort[] = [];
+const studentStore: Record<string, CohortStudent[]> = {};
+const studentDirectory = new Map<string, { organizationId: string; student: CohortStudent }>();
+const seeded = new Map<string, string>();
 
-// Mutable copies, so POST and DELETE actually change what GET returns within
-// a session. A mock where writes do nothing teaches the UI bad habits.
-let cohortStore: Cohort[] = [...cohorts];
-const studentStore: Record<string, CohortStudent[]> = structuredClone(studentsByCohort);
+function currentStructure(organizationId: string) {
+  return readSchoolSetup(organizationId)?.structure ?? structures[getGroupSettings(organizationId).model];
+}
 
-const KNOWN_ORGS = new Set([ORG_SCHOOL, ORG_UNIVERSITY]);
+function persistSchool(organizationId: string) {
+  if (typeof localStorage === "undefined") return;
+  const groups = cohortStore.filter(c => c.organizationId === organizationId);
+  const previous = JSON.parse(localStorage.getItem(`edutracker.records.${organizationId}`) || "{}");
+  const rosters = { ...(previous.rosters ?? {}), ...Object.fromEntries(groups.map(c => [c.id, studentStore[c.id] ?? []])) };
+  const directory = [...studentDirectory.entries()].filter(([, record]) => record.organizationId === organizationId);
+  localStorage.setItem(`edutracker.records.${organizationId}`, JSON.stringify({ rosters, directory }));
+}
+
+function ensureSchool(organizationId: string, sessionId: string) {
+  const structure = currentStructure(organizationId);
+  const revision = JSON.stringify(structure);
+  const key = JSON.stringify([organizationId, sessionId]);
+  if (seeded.get(key) === revision) return;
+  if (!cohortStore.some(c => c.organizationId === organizationId) && typeof localStorage !== "undefined") {
+    const saved = JSON.parse(localStorage.getItem(`edutracker.records.${organizationId}`) || "null");
+    if (saved?.rosters && saved?.directory) {
+      Object.assign(studentStore, saved.rosters);
+      for (const [id, record] of saved.directory) studentDirectory.set(id, record);
+    }
+  }
+  const configured = readSchoolSetup(organizationId) !== null;
+  const seed = seedSchool(organizationId, sessionId, structure, configured ? 0 : 12);
+  for (const group of seed.cohorts) {
+    studentStore[group.id] ??= structuredClone(seed.studentsByCohort[group.id]);
+    group.studentCount = studentStore[group.id].length;
+    for (const student of studentStore[group.id]) studentDirectory.set(student.studentProfileId, { organizationId, student });
+  }
+  cohortStore = cohortStore.filter(c => c.organizationId !== organizationId || c.sessionId !== sessionId);
+  cohortStore.push(...seed.cohorts);
+  seeded.set(key, revision);
+}
+
+function syncApprovedStudents(cohort: Cohort) {
+  const roster = studentStore[cohort.id] ?? [];
+  const approved = approvedStudentsInCohort(cohort.organizationId, cohort.id);
+  for (const profile of approved) {
+    const row: CohortStudent = {
+      studentProfileId: profile.studentProfileId,
+      userId: profile.userId,
+      fullName: profile.fullName,
+      admissionNumber: profile.matriculationNumber,
+      status: profile.status,
+    };
+    const index = roster.findIndex(student => student.studentProfileId === profile.studentProfileId);
+    if (index === -1) roster.push(row);
+    else roster[index] = row;
+    studentDirectory.set(row.studentProfileId, { organizationId: cohort.organizationId, student: row });
+  }
+  studentStore[cohort.id] = roster;
+  cohort.studentCount = roster.length;
+}
 
 /** The repo's success envelope. */
 function ok<T>(id: string, title: string, data: T, status = 200) {
@@ -44,19 +78,45 @@ function fail(id: string, title: string, status: number) {
   return HttpResponse.json({ id, title, details: [] }, { status });
 }
 
-/**
- * Stand-in for the real tenant check. The server resolves the organization
- * FROM the resource and compares; it never trusts an id in the request.
- */
+// This development mock accepts the active application's organization ID.
+// Authentication remains the real API's responsibility; this is not an auth emulator.
 function orgGuard(organizationId: string | null) {
-  if (!organizationId) return fail("VALIDATION_FAILED", "organizationId is required.", 400);
-  if (!KNOWN_ORGS.has(organizationId)) {
-    return fail("AUTHORIZATION_FORBIDDEN", "You are not a member of this organization.", 403);
-  }
+  if (!organizationId?.trim()) return fail("VALIDATION_FAILED", "organizationId is required.", 400);
   return null;
 }
 
+async function readBody(request: Request): Promise<Record<string, unknown> | null> {
+  try {
+    const body: unknown = await request.json();
+    return body !== null && typeof body === "object" && !Array.isArray(body)
+      ? body as Record<string, unknown>
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export const cohortHandlers = [
+  // Frontend-only admission preview. No real backend endpoint is changed.
+  http.post(`${API}/api/cohorts/:id/admissions`, async ({ params, request }) => {
+    const cohort = cohortStore.find(c => c.id === params.id);
+    if (!cohort) return fail("COHORT_NOT_FOUND", "Student group not found.", 404);
+    const body = await readBody(request);
+    if (typeof body?.fullName !== "string" || !body.fullName.trim() || body.fullName.length > 120 ||
+        typeof body.admissionNumber !== "string" || !body.admissionNumber.trim() || body.admissionNumber.length > 80) {
+      return fail("VALIDATION_FAILED", "Enter the student's name and admission number.", 400);
+    }
+    const admissionNumber = body.admissionNumber.trim();
+    if ([...studentDirectory.values()].some(record => record.organizationId === cohort.organizationId && record.student.admissionNumber.toLowerCase() === admissionNumber.toLowerCase())) {
+      return fail("ADMISSION_NUMBER_EXISTS", "This admission number already belongs to a student. Use placement correction for an existing record.", 409);
+    }
+    const student: CohortStudent = { studentProfileId: crypto.randomUUID(), userId: crypto.randomUUID(), fullName: body.fullName.trim(), admissionNumber, status: "Active" };
+    studentDirectory.set(student.studentProfileId, { organizationId: cohort.organizationId, student });
+    studentStore[cohort.id] = [...(studentStore[cohort.id] ?? []), student];
+    cohort.studentCount = studentStore[cohort.id].length;
+    persistSchool(cohort.organizationId);
+    return ok("STUDENT_ADMITTED", "Student record saved.", student, 201);
+  }),
   // GET /api/stages?organizationId=
   http.get(`${API}/api/stages`, async ({ request }) => {
     await delay(120);
@@ -65,9 +125,7 @@ export const cohortHandlers = [
     const denied = orgGuard(organizationId);
     if (denied) return denied;
 
-    const data = stages
-      .filter((s) => s.organizationId === organizationId)
-      .sort((a, b) => a.ordinal - b.ordinal);
+    const data = seedSchool(organizationId!, "", currentStructure(organizationId!)).stages;
 
     return ok("STAGE_RETRIEVED", "Stages retrieved successfully.", data);
   }),
@@ -81,20 +139,26 @@ export const cohortHandlers = [
     const denied = orgGuard(organizationId);
     if (denied) return denied;
 
+    const sessionId = params.get("sessionId");
+    if (sessionId || !cohortStore.some(c => c.organizationId === organizationId)) {
+      ensureSchool(organizationId!, sessionId || fixtureId(organizationId!, "default-session"));
+    }
+    cohortStore.filter(c => c.organizationId === organizationId).forEach(syncApprovedStudents);
     const stageId = params.get("stageId");
     const academicUnitId = params.get("academicUnitId");
 
     const data = cohortStore
       .filter((c) => c.organizationId === organizationId)
+      .filter((c) => !sessionId || c.sessionId === sessionId)
       .filter((c) => !stageId || c.stageId === stageId)
       .filter((c) => !academicUnitId || c.academicUnitId === academicUnitId)
       .sort((a, b) => {
-        const sa = stages.find((s) => s.id === a.stageId)?.ordinal ?? 0;
-        const sb = stages.find((s) => s.id === b.stageId)?.ordinal ?? 0;
-        return sa - sb || a.displayName.localeCompare(b.displayName);
+        const stages = currentStructure(organizationId!).stages;
+        return stages.findIndex(s => s.name === a.stageName) - stages.findIndex(s => s.name === b.stageName)
+          || a.displayName.localeCompare(b.displayName);
       });
 
-    return ok("COHORT_RETRIEVED", "Cohorts retrieved successfully.", data);
+    return ok("COHORT_RETRIEVED", "Groups retrieved successfully.", data);
   }),
 
   // GET /api/cohorts/{id}
@@ -102,69 +166,12 @@ export const cohortHandlers = [
     await delay(120);
     const cohort = cohortStore.find((c) => c.id === params.id);
 
-    // 404, not 403 — but note the server reaches this only after confirming
-    // the caller belongs to the cohort's organization.
-    if (!cohort) return fail("COHORT_NOT_FOUND", "Cohort not found.", 404);
+    // Authentication is deliberately not simulated by these development fixtures.
+    if (!cohort) return fail("COHORT_NOT_FOUND", "Group not found.", 404);
 
-    return ok("COHORT_RETRIEVED", "Cohort retrieved successfully.", cohort);
-  }),
+    syncApprovedStudents(cohort);
 
-  // POST /api/cohorts
-  http.post(`${API}/api/cohorts`, async ({ request }) => {
-    await delay(220);
-    const body = (await request.json()) as {
-      organizationId: string;
-      academicUnitId: string | null;
-      stageId: string;
-      arm: string | null;
-      sessionId: string;
-      formTeacherId: string | null;
-    };
-
-    const denied = orgGuard(body.organizationId);
-    if (denied) return denied;
-
-    const stage = stages.find((s) => s.id === body.stageId);
-    if (!stage) return fail("STAGE_NOT_FOUND", "Stage not found.", 404);
-
-    // The uniqueness rule the database enforces for real.
-    const clash = cohortStore.find(
-      (c) =>
-        c.organizationId === body.organizationId &&
-        c.stageId === body.stageId &&
-        c.academicUnitId === body.academicUnitId &&
-        c.arm === body.arm &&
-        c.sessionId === body.sessionId,
-    );
-    if (clash) {
-      return fail("COHORT_ALREADY_EXISTS", "A cohort with these details already exists.", 409);
-    }
-
-    const unit = academicUnits.find((u) => u.id === body.academicUnitId) ?? null;
-
-    // displayName is composed HERE, on the server side of the contract, so
-    // every screen shows the same string.
-    const displayName = [stage.name, unit?.name, body.arm].filter(Boolean).join(" ");
-
-    const created: Cohort = {
-      id: `co-${Math.random().toString(36).slice(2, 10)}`,
-      organizationId: body.organizationId,
-      academicUnitId: body.academicUnitId,
-      academicUnitName: unit?.name ?? null,
-      stageId: body.stageId,
-      stageName: stage.name,
-      arm: body.arm,
-      displayName,
-      sessionId: body.sessionId || SESSION_2026,
-      formTeacherId: body.formTeacherId,
-      formTeacherName: null,
-      studentCount: 0,
-    };
-
-    cohortStore = [...cohortStore, created];
-    studentStore[created.id] = [];
-
-    return ok("COHORT_CREATED", "Cohort created successfully.", created.id, 201);
+    return ok("COHORT_RETRIEVED", "Group retrieved successfully.", cohort);
   }),
 
   // GET /api/cohorts/{id}/students
@@ -172,9 +179,12 @@ export const cohortHandlers = [
     await delay(200);
     const id = params.id as string;
 
-    if (!cohortStore.some((c) => c.id === id)) {
-      return fail("COHORT_NOT_FOUND", "Cohort not found.", 404);
+    const cohort = cohortStore.find((c) => c.id === id);
+    if (!cohort) {
+      return fail("COHORT_NOT_FOUND", "Group not found.", 404);
     }
+
+    syncApprovedStudents(cohort);
 
     return ok("COHORT_STUDENTS_RETRIEVED", "Students retrieved successfully.", studentStore[id] ?? []);
   }),
@@ -184,26 +194,43 @@ export const cohortHandlers = [
     await delay(200);
     const id = params.id as string;
     const cohort = cohortStore.find((c) => c.id === id);
-    if (!cohort) return fail("COHORT_NOT_FOUND", "Cohort not found.", 404);
+    if (!cohort) return fail("COHORT_NOT_FOUND", "Group not found.", 404);
 
-    const body = (await request.json()) as { studentProfileIds: string[] };
-    if (!body.studentProfileIds?.length) {
+    const body = await readBody(request);
+    if (!Array.isArray(body?.studentProfileIds) || !body.studentProfileIds.length ||
+        body.studentProfileIds.some((sp) => typeof sp !== "string" || !sp.trim())) {
       return fail("VALIDATION_FAILED", "At least one student is required.", 400);
     }
 
     const existing = studentStore[id] ?? [];
-    const added: CohortStudent[] = body.studentProfileIds
+    const profileIds = [...new Set((body.studentProfileIds as string[]).map((sp) => sp.trim()))];
+    if (profileIds.some((sp) => {
+      const record = studentDirectory.get(sp);
+      return record && record.organizationId !== cohort.organizationId;
+    })) {
+      return fail("VALIDATION_FAILED", "Every student must belong to this organization.", 400);
+    }
+
+    const added: CohortStudent[] = profileIds
       .filter((sp) => !existing.some((s) => s.studentProfileId === sp))
-      .map((sp, i) => ({
-        studentProfileId: sp,
-        userId: `${id}-u-new-${i}`,
-        admissionNumber: `NEW/${String(existing.length + i + 1).padStart(4, "0")}`,
-        fullName: "Newly Added Student",
-        status: "Active" as const,
-      }));
+      .map((sp) => {
+        const known = studentDirectory.get(sp);
+        if (known) return structuredClone(known.student);
+
+        const student: CohortStudent = {
+          studentProfileId: sp,
+          userId: crypto.randomUUID(),
+          admissionNumber: `NEW/${String(studentDirectory.size + 1).padStart(4, "0")}`,
+          fullName: "Newly Added Student",
+          status: "Active",
+        };
+        studentDirectory.set(sp, { organizationId: cohort.organizationId, student });
+        return structuredClone(student);
+      });
 
     studentStore[id] = [...existing, ...added];
     cohort.studentCount = studentStore[id].length;
+    persistSchool(cohort.organizationId);
 
     return ok("COHORT_STUDENTS_ADDED", "Students added successfully.", added.length, 201);
   }),
@@ -213,17 +240,18 @@ export const cohortHandlers = [
     await delay(150);
     const id = params.id as string;
     const cohort = cohortStore.find((c) => c.id === id);
-    if (!cohort) return fail("COHORT_NOT_FOUND", "Cohort not found.", 404);
+    if (!cohort) return fail("COHORT_NOT_FOUND", "Group not found.", 404);
 
     const before = studentStore[id] ?? [];
     const after = before.filter((s) => s.studentProfileId !== params.studentProfileId);
 
     if (after.length === before.length) {
-      return fail("STUDENT_NOT_IN_COHORT", "That student is not in this cohort.", 404);
+      return fail("STUDENT_NOT_IN_COHORT", "That student is not in this group.", 404);
     }
 
     studentStore[id] = after;
     cohort.studentCount = after.length;
+    persistSchool(cohort.organizationId);
 
     return ok("COHORT_STUDENT_REMOVED", "Student removed successfully.", null);
   }),
@@ -231,9 +259,13 @@ export const cohortHandlers = [
 
 /** Reset between tests, so one test's writes cannot leak into the next. */
 export function resetCohortMocks() {
-  cohortStore = [...cohorts];
+  cohortStore = [];
   for (const key of Object.keys(studentStore)) delete studentStore[key];
-  Object.assign(studentStore, structuredClone(studentsByCohort));
+  studentDirectory.clear();
+  seeded.clear();
+  // FACULTY-BUILD §11 — clear everything added by the faculty system too,
+  // or the tests will leak into each other.
+  resetFacultyMocks();
 }
 
-export const handlers = [...cohortHandlers];
+export const handlers = [...cohortHandlers, ...facultyHandlers];

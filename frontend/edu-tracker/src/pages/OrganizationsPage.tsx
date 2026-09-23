@@ -1,3 +1,6 @@
+import { initializeSchool, readSchoolSetup } from "../features/cohorts/schoolSetup";
+import type { SchoolModel } from "../features/cohorts/settings";
+import { useDashboardData } from "../layouts/DashboardData";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,6 +40,8 @@ function orgColor(name: string) {
 
 export default function OrganizationsPage() {
     const navigate = useNavigate();
+    const { refreshOrganizations } = useDashboardData();
+    const [schoolModel, setSchoolModel] = useState<SchoolModel>("Secondary");
     const [orgs, setOrgs] = useState<OrganizationListItemResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreate, setShowCreate] = useState(false);
@@ -67,9 +72,22 @@ export default function OrganizationsPage() {
                 body: { name: newName },
             });
             if (result.response?.ok || result.response?.status === 201) {
-                setShowCreate(false);
-                setNewName("");
-                await fetchOrgs();
+                const location = result.response.headers.get("Location");
+                const refreshed = await getOrganizationsEndpointHandler();
+                const items = refreshed.data?.data ?? [];
+                const createdId = location?.split("/").filter(Boolean).pop()
+                    ?? items.find(item => item.name === newName && !orgs.some(old => old.organizationId === item.organizationId))?.organizationId;
+                setOrgs(items);
+                await refreshOrganizations();
+                if (!createdId) {
+                    setShowCreate(false);
+                    setError("School created. Open its Academic structure tab to choose the institution type.");
+                } else {
+                    initializeSchool(createdId, schoolModel);
+                    setShowCreate(false);
+                    setNewName("");
+                    navigate(`/dashboard/organizations/${createdId}?tab=structure`);
+                }
             } else {
                 const errBody = result.error || result.data as any;
                 let errorMsg = "Failed to create organization.";
@@ -106,10 +124,11 @@ export default function OrganizationsPage() {
                 </button>
             </div>
 
+            {error && !showCreate && <p role="alert" className="alert alert-error">{error}</p>}
             {showCreate && (
                 <Modal titleId="create-org-title" onClose={() => setShowCreate(false)}>
                     <h2 id="create-org-title" className="dz-modal-title">Create Organization</h2>
-                    <p className="dz-modal-sub">Give your school a name. You can add departments, staff, and terms afterwards.</p>
+                    <p className="dz-modal-sub">Choose the kind of school you run. We will guide you through its academic structure.</p>
                     <form onSubmit={handleCreate} className="dz-form">
                         {error && (
                             <div className="alert alert-error">
@@ -128,6 +147,15 @@ export default function OrganizationsPage() {
                                 autoFocus
                             />
                         </div>
+                        <fieldset className="school-type-fieldset"><legend>Institution type</legend>
+                            <div className="school-type-grid">
+                                {(["Primary", "Secondary", "University"] as const).map(model => <label key={model} className={`school-type-option ${schoolModel === model ? "selected" : ""}`}>
+                                    <input type="radio" name="school-type" value={model} checked={schoolModel === model} onChange={() => setSchoolModel(model)} />
+                                    <strong>{model}</strong><span>{model === "University" ? "Faculties, departments and levels" : model === "Secondary" ? "Stages, optional streams and classes" : "Stages and classes"}</span>
+                                </label>)}
+                            </div>
+                        </fieldset>
+                        <p className="dz-note">Academic setup is saved in this browser during the frontend preview.</p>
                         <div className="dz-form-actions">
                             <button type="button" className="dz-btn-outline" onClick={() => setShowCreate(false)}>
                                 Cancel
@@ -185,7 +213,7 @@ export default function OrganizationsPage() {
                                 </span>
                             </div>
                             <h3 style={{ fontWeight: 700, fontSize: "0.92rem", marginBottom: "0.5rem" }}>{org.name}</h3>
-                            <span className="dz-status dz-status-gray">{org.role}</span>
+                            <span className="dz-status dz-status-gray">{readSchoolSetup(org.organizationId)?.model ?? "Setup needed"} · {org.role}</span>
                         </div>
                     ))}
                 </div>

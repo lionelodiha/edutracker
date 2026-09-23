@@ -55,7 +55,7 @@ export default function ClassDetailsPage() {
             <div className="dz-page-head">
                 <div>
                     <div className="dz-crumb">
-                        <Link to={`/dashboard/organizations/${id}/semesters`}>← Semesters</Link>
+                        <Link to={`/dashboard/organizations/${id}/sessions`}>← Sessions</Link>
                         <span className="dz-crumb-sep">/</span>
                         <span style={{ color: "var(--text-secondary)" }}>Class Details</span>
                     </div>

@@ -18,6 +18,9 @@ import SuperAdminDashboardPage from "./pages/dashboard/SuperAdminDashboardPage";
 import PortalLoginPage from "./pages/PortalLoginPage";
 import PortalSignupPage from "./pages/PortalSignupPage";
 import ProfilePage from "./pages/ProfilePage";
+import CohortWorkspacePage from "./features/cohorts/CohortWorkspacePage";
+import FacultyWorkspacePage from "./features/faculty/FacultyWorkspacePage";
+import PendingRecordPage from "./features/onboarding/PendingRecordPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -70,11 +73,18 @@ function App() {
             <Route index element={<DashboardPage />} />
             <Route path="organizations" element={<OrganizationsPage />} />
             <Route path="organizations/:id" element={<OrganizationDetailsPage />} />
-            <Route path="organizations/:id/semesters" element={<SemestersPage />} />
-            <Route path="organizations/:id/semesters/:semesterId" element={<SemesterDetailsPage />} />
+            <Route path="organizations/:id/sessions" element={<SemestersPage />} />
+            <Route path="organizations/:id/sessions/:semesterId" element={<SemesterDetailsPage />} />
             <Route path="organizations/:id/classes/:classId" element={<ClassDetailsPage />} />
             <Route path="organizations/:id/classes/:classId/attendance" element={<AttendancePage />} />
             <Route path="organizations/:id/courses" element={<CoursesPage />} />
+            <Route path="organizations/:id/sessions/:semesterId/groups/*" element={<CohortWorkspacePage />} />
+            {/* FACULTY-BUILD §8 — faculty workspace with bookmarkable tab routes. */}
+            <Route path="organizations/:id/faculties/:facultyId/*" element={<FacultyWorkspacePage />} />
+            {/* Existing bookmarks continue to work; all new links use sessions. */}
+            <Route path="organizations/:id/semesters" element={<SemestersPage />} />
+            <Route path="organizations/:id/semesters/:semesterId" element={<SemesterDetailsPage />} />
+            <Route path="organizations/:id/semesters/:semesterId/groups/*" element={<CohortWorkspacePage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
 
@@ -86,6 +96,10 @@ function App() {
           
           {/* Global / Super Admin (Mock) */}
           <Route path="/super-admin" element={<SuperAdminDashboardPage />} />
+
+
+          {/* Public join form — no auth, the person has no account yet. */}
+          <Route path="/join/:token" element={<PendingRecordPage />} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />

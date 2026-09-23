@@ -71,21 +71,21 @@ export default function SemestersPage() {
                 await fetchSemesters();
             } else {
                 const d = res.data as any;
-                setError(d?.message || "Failed to create semester.");
+                setError(d?.message || "Failed to create session.");
             }
         } catch (err: any) {
-            setError(err?.message || "Error creating semester.");
+            setError(err?.message || "Error creating session.");
         }
         setSubmitting(false);
     };
 
     const handleDelete = async (semesterId: string) => {
-        if (!confirm("Are you sure you want to delete this semester?")) return;
+        if (!confirm("Are you sure you want to delete this session?")) return;
         try {
             await deleteSemesterEndpointHandler({ path: { id: semesterId }, query: { organizationId: organizationId! } });
             await fetchSemesters();
         } catch (err) {
-            console.error("Failed to delete semester", err);
+            console.error("Failed to delete session", err);
         }
     };
 
@@ -96,13 +96,13 @@ export default function SemestersPage() {
                     <div className="dz-crumb">
                         <button className="dz-pill-btn" onClick={() => navigate(`/dashboard/organizations/${organizationId}`)}>← School</button>
                     </div>
-                    <h1 className="dz-page-title">Semesters</h1>
+                    <h1 className="dz-page-title">Sessions</h1>
                     <p className="dz-page-sub">
-                        {loading ? "Loading academic years…" : `${semesters.length} semester${semesters.length === 1 ? "" : "s"} · academic years and terms.`}
+                        {loading ? "Loading academic years…" : `${semesters.length} session${semesters.length === 1 ? "" : "s"} · academic years and terms.`}
                     </p>
                 </div>
                 <button className="dz-btn-green" onClick={() => { setError(null); setShowCreate(true); }}>
-                    <PlusIcon /> New Semester
+                    <PlusIcon /> New Session
                 </button>
             </div>
 
@@ -122,10 +122,10 @@ export default function SemestersPage() {
                 ) : semesters.length === 0 ? (
                     <div className="dz-empty">
                         <span className="dz-empty-icon"><CalendarIcon /></span>
-                        <div className="dz-empty-title">No semesters yet</div>
+                        <div className="dz-empty-title">No sessions yet</div>
                         <div className="dz-empty-text">Create an academic year to start adding terms and course offerings.</div>
                         <button className="dz-btn-green" style={{ marginTop: "1rem" }} onClick={() => { setError(null); setShowCreate(true); }}>
-                            <PlusIcon /> New Semester
+                            <PlusIcon /> New Session
                         </button>
                     </div>
                 ) : (
@@ -150,7 +150,7 @@ export default function SemestersPage() {
                                             {new Date(s.createdAt).toLocaleDateString()}
                                         </td>
                                         <td className="dz-table-actions">
-                                            <button className="dz-pill-btn" style={{ marginRight: "0.5rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters/${s.id}`)}>View Terms</button>
+                                            <button className="dz-pill-btn" style={{ marginRight: "0.5rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/sessions/${s.id}`)}>Open session</button>
                                             <button className="dz-btn-danger-ghost" onClick={() => handleDelete(s.id)}>Delete</button>
                                         </td>
                                     </tr>
@@ -163,8 +163,8 @@ export default function SemestersPage() {
 
             {showCreate && (
                 <Modal titleId="create-semester-title" onClose={() => setShowCreate(false)}>
-                    <h2 id="create-semester-title" className="dz-modal-title">Create Semester</h2>
-                    <p className="dz-modal-sub">Start a new academic year. Terms are added inside the semester.</p>
+                    <h2 id="create-semester-title" className="dz-modal-title">Create Session</h2>
+                    <p className="dz-modal-sub">Start a new academic year. Terms are added inside the session.</p>
                     <form onSubmit={handleCreate} className="dz-form">
                         {error && (
                             <div className="alert alert-error">

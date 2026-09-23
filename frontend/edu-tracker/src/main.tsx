@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
+import "./app-theme.css";
 import { client } from "./api/client.gen";
 import { API_BASE } from "./apiBase";
 
@@ -23,12 +24,17 @@ function render() {
 if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === "true") {
   import("./mocks/browser")
     .then(({ startMocks }) => startMocks())
+    .then(render)
     .catch((error) => {
-      // A broken mock must not stop the app booting; fall through to the
-      // real API and say why.
-      console.error("[mocks] failed to start, continuing without them", error);
-    })
-    .finally(render);
+      console.error("[mocks] could not start", error);
+      createRoot(document.getElementById("root")!).render(
+        <main style={{ padding: "3rem", maxWidth: 640, margin: "auto" }}>
+          <h1>Could not start the preview</h1>
+          <p role="alert">The mock service could not start. No requests have been sent to the backend.</p>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>Retry preview</button>
+        </main>,
+      );
+    });
 } else {
   render();
 }
