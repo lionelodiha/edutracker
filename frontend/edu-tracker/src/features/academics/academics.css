@@ -301,8 +301,12 @@
   .dz-scope .ac-skel-split { grid-template-columns: 1fr; }
   .dz-scope .ac-grid-scroll { display: none; }
   .dz-scope .ac-level-cards { display: grid; gap: .9rem; }
-  .dz-scope .ac-search { max-width: none; }
+  .dz-scope .ac-search { max-width: none; min-width: 0; flex-basis: 100%; }
   .dz-scope .ac-drawer-foot { flex-wrap: wrap; }
+  /* Three stats sit in one row rather than 2 + an orphan. */
+  .dz-scope .ac-stats:has(> .ac-stat:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .dz-scope .ac-stats:has(> .ac-stat:nth-child(3):last-child) > .ac-stat { border-top: 0; }
+  .dz-scope .ac-stats:has(> .ac-stat:nth-child(3):last-child) > .ac-stat + .ac-stat { border-left: 1px solid var(--border); }
 }
 @media (prefers-reduced-motion: reduce) {
   .dz-scope .ac-unit-card, .dz-scope .ac-choice, .dz-scope .ac-chip-offering { transition: none; }
