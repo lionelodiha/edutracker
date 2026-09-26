@@ -129,7 +129,9 @@ body { background: #0a0e14; }
 .coming-soon-page h1 { font-family: "Newsreader", Georgia, serif; font-style: italic; color: #e7ddff; }
 @keyframes workspace-enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
-  .dz-content > .dz-page, .school-structure, .cohort-stage { animation: workspace-enter .4s ease both; }
+  /* backwards, not both: a held transform turns the page into the containing
+     block for position:fixed children, cropping dialogs and drawers to the page. */
+  .dz-content > .dz-page, .school-structure, .cohort-stage { animation: workspace-enter .4s ease backwards; }
 }
 @media (max-width: 760px) {
   .school-structure-grid, .school-journey, .school-unit-grid { grid-template-columns: 1fr; }
