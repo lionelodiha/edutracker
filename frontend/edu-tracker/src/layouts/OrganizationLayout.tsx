@@ -58,18 +58,18 @@ export default function OrganizationLayout() {
     const structureActive = /\/(structure|sessions|semesters|courses|classes|faculties)(\/|$)/.test(pathname);
 
     const ORG_NAV = [
-        { to: base, label: "Overview", icon: <HomeIcon />, end: true as const, forceActive: false },
-        { to: `${base}/structure`, label: "Academic Structure", icon: <CalendarIcon />, end: undefined, forceActive: structureActive },
-        { to: `${base}/staff`, label: "Staff & Teachers", icon: <UsersIcon />, end: undefined, forceActive: false },
-        { to: `${base}/settings`, label: "School Settings", icon: <SettingsIcon />, end: undefined, forceActive: false },
+        { to: base, label: "Overview", short: "Overview", icon: <HomeIcon />, end: true as const, forceActive: false },
+        { to: `${base}/structure`, label: "Academic Structure", short: "Structure", icon: <CalendarIcon />, end: undefined, forceActive: structureActive },
+        { to: `${base}/staff`, label: "Staff & Teachers", short: "Staff", icon: <UsersIcon />, end: undefined, forceActive: false },
+        { to: `${base}/settings`, label: "School Settings", short: "Settings", icon: <SettingsIcon />, end: undefined, forceActive: false },
     ];
 
     return (
         <div className="dz-org-shell">
             <aside className="dz-sidebar dz-org-sidebar">
-                <Link to="/dashboard" className="dz-org-back">← Back to dashboard</Link>
+                <Link to="/dashboard" className="dz-org-back"><span aria-hidden="true">←</span><span className="dz-org-back-text"> Back to dashboard</span></Link>
                 <div className="dz-org-name">{org?.name ?? "Loading…"}</div>
-                <nav>
+                <nav aria-label="School">
                     <div className="dz-nav-label">Menu</div>
                     {ORG_NAV.map((item) => (
                         <NavLink
@@ -79,7 +79,7 @@ export default function OrganizationLayout() {
                             className={({ isActive }) =>
                                 `dz-nav-link ${isActive || item.forceActive ? "active" : ""}`}
                         >
-                            {item.icon}<span>{item.label}</span>
+                            {item.icon}<span className="dz-nav-full">{item.label}</span><span className="dz-nav-short" aria-hidden="true">{item.short}</span>
                         </NavLink>
                     ))}
                 </nav>

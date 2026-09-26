@@ -1505,3 +1505,88 @@ a.dz-row:hover {
     gap: 1.1rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   Phones (≤720px)
+   One-row top bar, a bottom tab bar for the school workspace,
+   and edge-to-edge content with a single 16px gutter.
+   ═══════════════════════════════════════════════════════ */
+
+.dz-topbar-spacer { flex: 1; }
+.dz-nav-short { display: none; }
+
+@media (max-width: 720px) {
+  /* Top bar: logo · demo · bell · avatar on one row; search drops below
+     only on the pages it filters. */
+  .dz-topbar { flex-wrap: wrap; gap: 0.5rem; padding: 0.6rem 1rem; }
+  .dz-topbar .dz-search { order: 10; flex: 1 0 100%; max-width: none; padding: 0.55rem 0.85rem; }
+  .dz-topbar .dz-search--desktop-only { display: none; }
+  .dz-demo-indicator { padding: 0.2rem 0.5rem; font-size: 0.68rem; }
+  .dz-icon-btn { width: 38px; height: 38px; }
+  .dz-user-chip { padding: 2px; }
+  .dz-user-caret { display: none; }
+
+  .dz-scope .dz-main--full .dz-content { padding: 1rem 1rem 2rem; }
+  .dz-scope .dz-main--full .dz-content:has(> .dz-org-shell) { padding: 0; }
+
+  /* School header: back arrow and school name on one line. */
+  .dz-sidebar.dz-org-sidebar {
+    flex-direction: row; align-items: center; gap: 0.25rem;
+    padding: 0.35rem 1rem 0.35rem 0.5rem; background: transparent;
+  }
+  .dz-org-back {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; padding: 0; flex-shrink: 0;
+    font-size: 1.05rem; color: var(--text-secondary);
+  }
+  .dz-org-back-text {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .dz-org-name { padding: 0; min-width: 0; }
+
+  /* Workspace sections become a bottom tab bar. */
+  .dz-org-sidebar nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem;
+    padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+    background: rgba(13, 19, 32, 0.94);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border);
+    overflow: visible;
+  }
+  .dz-org-sidebar .dz-nav-link {
+    flex-direction: column; justify-content: center; gap: 0.2rem;
+    min-height: 52px; padding: 0.35rem 0.25rem;
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.01em;
+    color: var(--text-muted); background: transparent; box-shadow: none;
+  }
+  .dz-org-sidebar .dz-nav-link svg { width: 20px; height: 20px; }
+  .dz-org-sidebar .dz-nav-link.active { background: transparent; color: #fff; font-weight: 700; box-shadow: none; }
+  .dz-org-sidebar .dz-nav-link.active svg { color: var(--accent-light); }
+  .dz-org-sidebar .dz-nav-full { display: none; }
+  .dz-org-sidebar .dz-nav-short { display: inline; }
+  .dz-org-sidebar .dz-nav-link:hover:not(.active) { background: transparent; color: var(--text-muted); }
+  .dz-org-sidebar .dz-nav-link:active { background: rgba(139, 92, 246, 0.12); }
+
+  /* Room for the tab bar under the last card, and lift toasts above it. */
+  .dz-org-content { padding: 1rem 1rem calc(5.5rem + env(safe-area-inset-bottom)); }
+  .dz-scope:has(.dz-org-shell) .ws-toast { bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
+
+  /* Page headings: smaller serif title, tighter rule under it. */
+  .dz-scope .dz-page-head { padding: 4px 0 18px; margin-bottom: 18px; gap: 12px; }
+  .dz-scope .dz-page-title, .dz-scope .cohort-heading h1 { font-size: 30px; }
+
+  /* Dashboard stats: 2×2 instead of four full-width cards. */
+  .dz-grid-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+  .dz-grid-stats .dz-card { padding: 0.9rem 1rem; }
+  .dz-grid-stats .dz-stat-label { font-size: 0.76rem; }
+  .dz-grid-stats .dz-stat-value { font-size: 1.9rem; }
+  .dz-grid-stats .dz-goto { width: 28px; height: 28px; }
+  .dz-card { padding: 1.1rem 1.1rem; }
+}
+
+/* Touch screens don't hover: keep lifts and fills for mouse users only. */
+@media (hover: none) {
+  .dz-icon-btn:hover { transform: none; border-color: var(--border); }
+}

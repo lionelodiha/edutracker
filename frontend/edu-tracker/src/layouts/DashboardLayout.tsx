@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Logo from "../components/LogoLockup";
 import AccountMenu from "../components/AccountMenu";
@@ -10,6 +10,9 @@ import "./Dashboard.css";
 function DashboardShell() {
     const { user, logout } = useAuth();
     const { invites, searchQuery, setSearchQuery } = useDashboardData();
+    const { pathname } = useLocation();
+    // Search filters the organization lists, so phones only show it on those pages.
+    const searchFiltersPage = /^\/dashboard(\/organizations)?\/?$/.test(pathname);
 
     const handleLogout = async () => {
         await logout();
@@ -31,7 +34,7 @@ function DashboardShell() {
                         <Logo markSize={32} markFill="#8b5cf6" fontSize="1.1rem" color="#f1f5f9" />
                     </Link>
 
-                    <label className="dz-search">
+                    <label className={`dz-search${searchFiltersPage ? "" : " dz-search--desktop-only"}`}>
                         <SearchIcon />
                         <input
                             value={searchQuery}
@@ -42,7 +45,7 @@ function DashboardShell() {
                         <kbd>&#8984; F</kbd>
                     </label>
 
-                    <div style={{ flex: 1 }} />
+                    <div className="dz-topbar-spacer" />
 
                     {isDemoMode() && (
                         <span className="dz-demo-indicator" title="Academic, cohort and faculty data is stored in this browser for the demo.">

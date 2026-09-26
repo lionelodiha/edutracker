@@ -50,7 +50,7 @@ export default function AccountMenu({ displayName, userName, initials, onLogout 
                         @{userName}
                     </span>
                 </span>
-                <span aria-hidden="true" style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>▾</span>
+                <span className="dz-user-caret" aria-hidden="true" style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>▾</span>
             </button>
             {open && (
                 <div className="dz-account-menu" role="menu">
