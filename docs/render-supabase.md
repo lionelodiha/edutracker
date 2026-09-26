@@ -49,11 +49,29 @@ Remove-Item Env:ConnectionStrings__Database
 Use Supabase's Session pooler connection details here too. Do not commit the
 connection string or put it in a frontend `VITE_` variable.
 
+If you prefer Supabase's SQL Editor, generate the same idempotent migration
+script locally and run its contents there:
+
+```powershell
+dotnet ef migrations script --idempotent --project backend/EduTracker.Persistence --startup-project backend/EduTracker.Api --output edutracker-migrations.sql
+```
+
+Delete the generated script after applying it; keep schema changes in EF
+migrations in the repository.
+
 ## 3. Create the Render service
 
 Push the deployment changes to the branch you want to host. In Render, create
 a **Blueprint** from `render.yaml` and select that branch. It creates one free
-Docker web service and deploys when new commits reach the linked branch.
+Docker web service. With a connected GitHub repository, new commits to the
+linked branch trigger deploys.
+
+If Render's connected GitHub account does not list this repository, its
+**Public Git Repository** URL also works for the first deployment. Select the
+branch containing `render.yaml`. Render does not automatically deploy changes
+from a public URL that has not been connected to its GitHub integration; use
+manual Blueprint syncs until that repository is connected.
+
 During creation, fill in the `sync: false` environment variables:
 
 | Variable | Value |
