@@ -108,6 +108,10 @@ export default function DashboardPage() {
         : Math.round((activeSessions.length / sessions.length) * 100);
 
     const statsLoading = orgsLoading || sessionsLoading || invitesLoading;
+    const firstOrgId = orgs[0]?.organizationId;
+    const sessionsTarget = firstOrgId
+        ? `/dashboard/organizations/${firstOrgId}/sessions`
+        : "/dashboard/organizations";
 
     return (
         <div className="dz-page">
@@ -162,9 +166,11 @@ export default function DashboardPage() {
                 <div className="dz-card dz-stat">
                     <div className="dz-stat-top">
                         <span className="dz-stat-label">Active Sessions</span>
-                        <Link to="/dashboard/profile" className="dz-goto" aria-label="Manage sessions">
-                            <ArrowUpRightIcon />
-                        </Link>
+                        {orgs.length > 0 && (
+                            <Link to={sessionsTarget} className="dz-goto" aria-label="Manage sessions">
+                                <ArrowUpRightIcon />
+                            </Link>
+                        )}
                     </div>
                     {sessionsLoading
                         ? <div className="skeleton" style={{ height: 46, width: 70, borderRadius: 10 }} />
@@ -314,7 +320,9 @@ export default function DashboardPage() {
                 <div className="dz-card">
                     <div className="dz-card-head">
                         <span className="dz-card-title">Sessions</span>
-                        <Link to="/dashboard/profile" className="dz-pill-btn">Manage</Link>
+                        {orgs.length > 0 && (
+                            <Link to={sessionsTarget} className="dz-pill-btn">Manage</Link>
+                        )}
                     </div>
                     {sessionsLoading ? (
                         <div className="dz-list">

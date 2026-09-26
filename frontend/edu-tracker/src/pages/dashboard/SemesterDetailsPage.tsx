@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { getGroupSettings } from "../../features/cohorts/settings";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     getSemesterByIdEndpointHandler,
@@ -14,7 +15,7 @@ import { client } from "../../api/client.gen";
 import Modal from "../../components/Modal";
 import type { SemesterResponse, TermResponse, CourseOfferingResponse, CourseResponse } from "../../api";
 
-const API_BASE = "http://localhost:3187";
+import { API_BASE } from "../../apiBase";
 
 function PlusIcon() {
     return (
@@ -209,10 +210,10 @@ export default function SemesterDetailsPage() {
             <div className="dz-page">
                 <div className="dz-card dz-empty">
                     <span className="dz-empty-icon"><CalendarIcon /></span>
-                    <div className="dz-empty-title">Semester not found</div>
+                    <div className="dz-empty-title">Session not found</div>
                     <div className="dz-empty-text">This academic year may have been removed.</div>
-                    <button className="dz-btn-outline" style={{ marginTop: "1rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters`)}>
-                        Back to Semesters
+                    <button className="dz-btn-outline" style={{ marginTop: "1rem" }} onClick={() => navigate(`/dashboard/organizations/${organizationId}/sessions`)}>
+                        Back to Sessions
                     </button>
                 </div>
             </div>
@@ -224,10 +225,14 @@ export default function SemesterDetailsPage() {
             <div className="dz-page-head">
                 <div>
                     <div className="dz-crumb">
-                        <button className="dz-pill-btn" onClick={() => navigate(`/dashboard/organizations/${organizationId}/semesters`)}>← Semesters</button>
+                        <button className="dz-pill-btn" onClick={() => navigate(`/dashboard/organizations/${organizationId}/sessions`)}>← Sessions</button>
+                    <button className="dz-btn-outline" onClick={() => navigate(`/dashboard/organizations/${organizationId}/sessions/${semesterId}/groups`, { state: { sessionName: `${semester.startYear} / ${Number(semester.startYear) + 1}` } })}>
+                        View {getGroupSettings(organizationId!).plural.toLowerCase()} →
+                    </button>
+
                     </div>
                     <h1 className="dz-page-title">
-                        Semester {semester.startYear} / {Number(semester.startYear) + 1}
+                        Session {semester.startYear} / {Number(semester.startYear) + 1}
                     </h1>
                     <p className="dz-page-sub">
                         {terms.length} term{terms.length === 1 ? "" : "s"} · {offerings.length} course offering{offerings.length === 1 ? "" : "s"}.
@@ -244,7 +249,7 @@ export default function SemesterDetailsPage() {
                 )}
             </div>
 
-            <div className="dz-segmented" role="tablist" aria-label="Semester sections">
+            <div className="dz-segmented" role="tablist" aria-label="Session sections">
                 <button
                     role="tab"
                     aria-selected={activeTab === 'terms'}
@@ -308,7 +313,7 @@ export default function SemesterDetailsPage() {
                 <div className="dz-card" style={{ padding: 0, overflow: "hidden" }}>
                     <div style={{ padding: "1.35rem 1.4rem 1rem" }}>
                         <div className="dz-card-title">Course Offerings</div>
-                        <div className="dz-reminder-meta" style={{ marginTop: "0.25rem" }}>Map catalog courses to terms in this semester.</div>
+                        <div className="dz-reminder-meta" style={{ marginTop: "0.25rem" }}>Map catalog courses to terms in this session.</div>
                     </div>
                     {offerings.length === 0 ? (
                         <div className="dz-empty">
@@ -384,7 +389,7 @@ export default function SemesterDetailsPage() {
             {showOfferingCreate && (
                 <Modal titleId="create-offering-title" onClose={() => setShowOfferingCreate(false)}>
                     <h2 id="create-offering-title" className="dz-modal-title">Add Course Offering</h2>
-                    <p className="dz-modal-sub">Offer a catalog course inside one term of this semester.</p>
+                    <p className="dz-modal-sub">Offer a catalog course inside one term of this session.</p>
                     <form onSubmit={handleCreateOffering} className="dz-form">
                         {offeringError && (
                             <div className="alert alert-error">

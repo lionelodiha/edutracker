@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: edutracker
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./backend/EduTracker.Api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:10000
+      - key: DemoMode__Enabled
+        value: "true"
+      - key: ConnectionStrings__Database
+        sync: false
+      - key: ConnectionStrings__Redis
+        value: ""
+      - key: DataEncryptionOptions__Keys__1
+        sync: false
+      - key: HashingOptions__EmailHmacKey
+        sync: false
+      - key: SuperAdminSeedOptions__FirstName
+        value: Admin
+      - key: SuperAdminSeedOptions__LastName
+        value: Super
+      - key: SuperAdminSeedOptions__UserName
+        sync: false
+      - key: SuperAdminSeedOptions__Email
+        sync: false
+      - key: SuperAdminSeedOptions__Password
+        sync: false

@@ -1,0 +1,37 @@
+/* School Settings — Vercel/Geist settings pattern. Tokens from styles/workspace.css. */
+
+.dz-scope .se-page .se-layout { display: grid; grid-template-columns: 180px minmax(0, 760px); gap: 2rem; align-items: start; }
+.dz-scope .se-page .se-nav { position: sticky; top: 1rem; display: grid; gap: .1rem; }
+.dz-scope .se-page .se-nav a { padding: .5rem .7rem; border-radius: 6px; color: var(--text-secondary); text-decoration: none; font-size: .88rem; font-weight: 500; }
+@media (hover: hover) and (pointer: fine) { .dz-scope .se-page .se-nav a:hover { background: var(--ws-raised); color: var(--text-primary); } }
+.dz-scope .se-page .se-nav a.se-nav-danger { color: #fca5a5; }
+.dz-scope .se-page .se-sections { display: grid; gap: 1.25rem; min-width: 0; }
+
+.dz-scope .se-page .se-card { background: var(--ws-surface); border: 1px solid var(--ws-line); border-radius: 10px; overflow: hidden; scroll-margin-top: 1rem; }
+.dz-scope .se-page .se-card-body { padding: 1.35rem 1.4rem 1.25rem; display: grid; gap: .55rem; }
+.dz-scope .se-page .se-card-body h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.dz-scope .se-page .se-card-body > p { margin: 0 0 .35rem; color: var(--text-secondary); font-size: .88rem; line-height: 1.6; max-width: 62ch; }
+.dz-scope .se-page .se-input { max-width: 420px; }
+.dz-scope .se-page .se-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; min-height: 56px; padding: .7rem 1.4rem; border-top: 1px solid var(--ws-line); background: rgba(255, 255, 255, .02); color: var(--text-muted); font-size: .82rem; }
+
+.dz-scope .se-page .se-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.5rem; margin: .25rem 0 0; }
+.dz-scope .se-page .se-facts div { display: grid; gap: .2rem; min-width: 0; }
+.dz-scope .se-page .se-facts .se-fact-wide { grid-column: 1 / -1; }
+.dz-scope .se-page .se-facts dt { color: var(--text-muted); font-size: .76rem; font-weight: 600; }
+.dz-scope .se-page .se-facts dd { margin: 0; display: flex; align-items: center; gap: .6rem; font-size: .9rem; min-width: 0; }
+.dz-scope .se-page .se-id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+
+.dz-scope .se-page .se-card-danger { border-color: rgba(248, 113, 113, .35); }
+.dz-scope .se-page .se-card-danger .se-card-foot { background: rgba(248, 113, 113, .05); border-top-color: rgba(248, 113, 113, .2); }
+
+.dz-scope .se-delete { display: grid; gap: .9rem; }
+.dz-scope .se-delete h2 { margin: 0; font-size: 1.2rem; }
+.dz-scope .se-delete > p { margin: 0; color: var(--text-secondary); font-size: .88rem; line-height: 1.6; }
+.dz-scope .se-confirm-name { color: var(--text-primary); user-select: all; }
+
+@media (max-width: 900px) {
+  .dz-scope .se-page .se-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .dz-scope .se-page .se-nav { position: static; display: flex; overflow-x: auto; gap: .25rem; border-bottom: 1px solid var(--ws-line); padding-bottom: .5rem; }
+  .dz-scope .se-page .se-nav a { white-space: nowrap; }
+  .dz-scope .se-page .se-facts { grid-template-columns: minmax(0, 1fr); }
+}

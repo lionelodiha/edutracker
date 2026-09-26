@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useLayoutEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
 import { useAuth } from "./context/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardLayout from "./layouts/DashboardLayout";
+import OrganizationLayout from "./layouts/OrganizationLayout";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import OrganizationsPage from "./pages/OrganizationsPage";
 import OrganizationDetailsPage from "./pages/dashboard/OrganizationDetailsPage";
@@ -19,6 +21,13 @@ import SuperAdminDashboardPage from "./pages/dashboard/SuperAdminDashboardPage";
 import PortalLoginPage from "./pages/PortalLoginPage";
 import PortalSignupPage from "./pages/PortalSignupPage";
 import ProfilePage from "./pages/ProfilePage";
+import CohortWorkspacePage from "./features/cohorts/CohortWorkspacePage";
+import FacultyWorkspacePage from "./features/faculty/FacultyWorkspacePage";
+import PendingRecordPage from "./features/onboarding/PendingRecordPage";
+import FacultiesListPage from "./pages/organization/FacultiesListPage";
+import AcademicStructurePage from "./pages/organization/AcademicStructurePage";
+import StaffPage from "./pages/organization/StaffPage";
+import SchoolSettingsPage from "./pages/organization/SchoolSettingsPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,9 +56,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // Removed PublicRoute to let Auth pages manage their own redirect animations.
 
+// Every new page opens at the top. Links to a #section still land on it.
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useLayoutEffect(() => {
+    if (hash) {
+      document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView();
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname, hash]);
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           {/* Landing page */}
@@ -70,13 +93,34 @@ function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="organizations" element={<OrganizationsPage />} />
-            <Route path="organizations/:id" element={<OrganizationDetailsPage />} />
-            <Route path="organizations/:id/semesters" element={<SemestersPage />} />
-            <Route path="organizations/:id/semesters/:semesterId" element={<SemesterDetailsPage />} />
-            <Route path="organizations/:id/classes/:classId" element={<ClassDetailsPage />} />
-            <Route path="organizations/:id/classes/:classId/attendance" element={<AttendancePage />} />
-            <Route path="organizations/:id/courses" element={<CoursesPage />} />
             <Route path="profile" element={<ProfilePage />} />
+
+            <Route path="organizations/:id" element={<OrganizationLayout />}>
+              <Route index element={<OrganizationDetailsPage />} />
+
+              <Route path="faculties" element={<FacultiesListPage />} />
+              <Route path="faculties/:facultyId/*" element={<FacultyWorkspacePage />} />
+
+              <Route path="structure" element={<AcademicStructurePage />} />
+              <Route path="structure/faculties/:facultyId" element={<AcademicStructurePage />} />
+              <Route path="structure/departments/new" element={<AcademicStructurePage />} />
+              <Route path="structure/departments/:departmentId" element={<AcademicStructurePage />} />
+              <Route path="structure/departments/:departmentId/edit" element={<AcademicStructurePage />} />
+              <Route path="sessions" element={<SemestersPage />} />
+              <Route path="sessions/:semesterId" element={<SemesterDetailsPage />} />
+              <Route path="sessions/:semesterId/groups/*" element={<CohortWorkspacePage />} />
+              <Route path="courses" element={<CoursesPage />} />
+              <Route path="classes/:classId" element={<ClassDetailsPage />} />
+              <Route path="classes/:classId/attendance" element={<AttendancePage />} />
+
+              <Route path="staff" element={<StaffPage />} />
+              <Route path="settings" element={<SchoolSettingsPage />} />
+
+              {/* Legacy bookmarks */}
+              <Route path="semesters" element={<SemestersPage />} />
+              <Route path="semesters/:semesterId" element={<SemesterDetailsPage />} />
+              <Route path="semesters/:semesterId/groups/*" element={<CohortWorkspacePage />} />
+            </Route>
           </Route>
 
           {/* Student & Teacher Portals & Login (Mocks) */}
@@ -87,6 +131,10 @@ function App() {
           
           {/* Global / Super Admin (Mock) */}
           <Route path="/super-admin" element={<SuperAdminDashboardPage />} />
+
+
+          {/* Public join form — no auth, the person has no account yet. */}
+          <Route path="/join/:token" element={<PendingRecordPage />} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />

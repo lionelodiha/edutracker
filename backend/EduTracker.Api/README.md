@@ -25,7 +25,8 @@ EduTracker uses a **session-based authentication** scheme backed by an HTTP-only
 - Cookie name: `edu_session_id`
 - Set by: `POST /api/auth/login` and `POST /api/auth/refresh`
 - Cleared by: `POST /api/auth/logout`
-- Cookie flags: `HttpOnly`, `Secure`, `SameSite=None`
+- Cookie flags in production: `HttpOnly`, `Secure`, `SameSite=Lax` (the
+  frontend and API are served from the same origin)
 
 When calling protected endpoints from a browser client, make sure credentials are included so cookies are sent.
 
