@@ -1,5 +1,4 @@
-# Keep the build context small — the Dockerfile only needs
-# Directory.*.props + backend/.
+# The Dockerfile builds both the frontend and backend from the repo root.
 .git/
 .vs/
 .vscode/
@@ -8,8 +7,11 @@
 **/obj/
 **/TestResults/
 
-node_modules/
-frontend/
+**/node_modules/
+**/dist/
+frontend/edu-tracker/.vite/
+frontend/edu-tracker/.env*
+.claude/
 backend/src/
 backend/prisma/
 backend/EduTracker/

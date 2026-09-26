@@ -4,6 +4,7 @@ import { readSchoolSetup } from "../features/cohorts/schoolSetup";
 import { getGroupSettings } from "../features/cohorts/settings";
 import { approvedStudentsInCohort, resetFacultyMocks } from "./faculty";
 import { facultyHandlers } from "./facultyHandlers";
+import { academicHandlers } from "./academicHandlers";
 
 const API = "*";
 let cohortStore: Cohort[] = [];
@@ -78,7 +79,7 @@ function fail(id: string, title: string, status: number) {
   return HttpResponse.json({ id, title, details: [] }, { status });
 }
 
-// This development mock accepts the active application's organization ID.
+// Demo handlers accept the active application's organization ID.
 // Authentication remains the real API's responsibility; this is not an auth emulator.
 function orgGuard(organizationId: string | null) {
   if (!organizationId?.trim()) return fail("VALIDATION_FAILED", "organizationId is required.", 400);
@@ -268,4 +269,4 @@ export function resetCohortMocks() {
   resetFacultyMocks();
 }
 
-export const handlers = [...cohortHandlers, ...facultyHandlers];
+export const handlers = [...cohortHandlers, ...facultyHandlers, ...academicHandlers];

@@ -12,9 +12,11 @@ using EduTracker.Application;
 using EduTracker.Application.CQRS.Messaging;
 using EduTracker.Infrastructure;
 using EduTracker.Persistence;
+using EduTracker.Persistence.Context;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -78,5 +80,23 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapEndpointModules();
+app.MapGet("/api/client-config", (HttpContext context) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-store";
+    return Results.Ok(new { demoMode = app.Configuration.GetValue<bool>("DemoMode:Enabled") });
+});
+app.MapGet("/health", async (AppDbContext db, CancellationToken cancellationToken) =>
+    await db.Database.CanConnectAsync(cancellationToken)
+        ? Results.Ok(new { status = "ok" })
+        : Results.StatusCode(StatusCodes.Status503ServiceUnavailable));
+
+// Serve the production frontend and API on one origin for first-party cookies.
+if (app.Environment.WebRootFileProvider.GetFileInfo("index.html").Exists)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+    app.MapFallback("/api/{**path}", () => Results.NotFound());
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();

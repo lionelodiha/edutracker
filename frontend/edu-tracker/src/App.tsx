@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardLayout from "./layouts/DashboardLayout";
+import OrganizationLayout from "./layouts/OrganizationLayout";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import OrganizationsPage from "./pages/OrganizationsPage";
 import OrganizationDetailsPage from "./pages/dashboard/OrganizationDetailsPage";
@@ -21,6 +22,10 @@ import ProfilePage from "./pages/ProfilePage";
 import CohortWorkspacePage from "./features/cohorts/CohortWorkspacePage";
 import FacultyWorkspacePage from "./features/faculty/FacultyWorkspacePage";
 import PendingRecordPage from "./features/onboarding/PendingRecordPage";
+import FacultiesListPage from "./pages/organization/FacultiesListPage";
+import AcademicStructurePage from "./pages/organization/AcademicStructurePage";
+import StaffPage from "./pages/organization/StaffPage";
+import SchoolSettingsPage from "./pages/organization/SchoolSettingsPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -72,20 +77,34 @@ function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="organizations" element={<OrganizationsPage />} />
-            <Route path="organizations/:id" element={<OrganizationDetailsPage />} />
-            <Route path="organizations/:id/sessions" element={<SemestersPage />} />
-            <Route path="organizations/:id/sessions/:semesterId" element={<SemesterDetailsPage />} />
-            <Route path="organizations/:id/classes/:classId" element={<ClassDetailsPage />} />
-            <Route path="organizations/:id/classes/:classId/attendance" element={<AttendancePage />} />
-            <Route path="organizations/:id/courses" element={<CoursesPage />} />
-            <Route path="organizations/:id/sessions/:semesterId/groups/*" element={<CohortWorkspacePage />} />
-            {/* FACULTY-BUILD §8 — faculty workspace with bookmarkable tab routes. */}
-            <Route path="organizations/:id/faculties/:facultyId/*" element={<FacultyWorkspacePage />} />
-            {/* Existing bookmarks continue to work; all new links use sessions. */}
-            <Route path="organizations/:id/semesters" element={<SemestersPage />} />
-            <Route path="organizations/:id/semesters/:semesterId" element={<SemesterDetailsPage />} />
-            <Route path="organizations/:id/semesters/:semesterId/groups/*" element={<CohortWorkspacePage />} />
             <Route path="profile" element={<ProfilePage />} />
+
+            <Route path="organizations/:id" element={<OrganizationLayout />}>
+              <Route index element={<OrganizationDetailsPage />} />
+
+              <Route path="faculties" element={<FacultiesListPage />} />
+              <Route path="faculties/:facultyId/*" element={<FacultyWorkspacePage />} />
+
+              <Route path="structure" element={<AcademicStructurePage />} />
+              <Route path="structure/faculties/:facultyId" element={<AcademicStructurePage />} />
+              <Route path="structure/departments/new" element={<AcademicStructurePage />} />
+              <Route path="structure/departments/:departmentId" element={<AcademicStructurePage />} />
+              <Route path="structure/departments/:departmentId/edit" element={<AcademicStructurePage />} />
+              <Route path="sessions" element={<SemestersPage />} />
+              <Route path="sessions/:semesterId" element={<SemesterDetailsPage />} />
+              <Route path="sessions/:semesterId/groups/*" element={<CohortWorkspacePage />} />
+              <Route path="courses" element={<CoursesPage />} />
+              <Route path="classes/:classId" element={<ClassDetailsPage />} />
+              <Route path="classes/:classId/attendance" element={<AttendancePage />} />
+
+              <Route path="staff" element={<StaffPage />} />
+              <Route path="settings" element={<SchoolSettingsPage />} />
+
+              {/* Legacy bookmarks */}
+              <Route path="semesters" element={<SemestersPage />} />
+              <Route path="semesters/:semesterId" element={<SemesterDetailsPage />} />
+              <Route path="semesters/:semesterId/groups/*" element={<CohortWorkspacePage />} />
+            </Route>
           </Route>
 
           {/* Student & Teacher Portals & Login (Mocks) */}

@@ -12,32 +12,15 @@ namespace EduTracker.Api.Hosting;
 
 internal sealed class StartupTasksHostedService(
     IServiceProvider serviceProvider,
-    IHostApplicationLifetime appLifetime,
     ILogger<StartupTasksHostedService> logger
 ) : IHostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        appLifetime.ApplicationStarted.Register(() =>
-        {
-            _ = Task.Run(() => RunStartupTasksAsync(CancellationToken.None));
-        });
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-    private async Task RunStartupTasksAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         using IServiceScope scope = serviceProvider.CreateScope();
 
         if (!ValidateConfiguration(scope.ServiceProvider))
-        {
-            Environment.ExitCode = 1;
-            appLifetime.StopApplication();
-            return;
-        }
+            throw new InvalidOperationException("Startup configuration validation failed.");
 
         try
         {
@@ -46,11 +29,11 @@ internal sealed class StartupTasksHostedService(
         catch (Exception ex)
         {
             logger.LogCritical(ex, "Super admin seeding failed. Shutting down application.");
-
-            Environment.ExitCode = 1;
-            appLifetime.StopApplication();
+            throw;
         }
     }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     private bool ValidateConfiguration(IServiceProvider services)
     {

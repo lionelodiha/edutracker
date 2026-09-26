@@ -1,0 +1,96 @@
+/* Organization workspace design system — docs/design-system.md.
+   Scoped to .dz-org-content so only the pages inside an organization change.
+   Selectors start with `.dz-scope .dz-org-content` (0,2,0 + element class) so they
+   beat app-theme.css, which loads later and styles `.dz-scope .dz-*` at 0,2,0. */
+
+.dz-scope .dz-org-content {
+  --ws-surface: #0e141f;
+  --ws-raised: #131b2a;
+  --ws-line: rgba(255, 255, 255, 0.07);
+  --ws-line-strong: rgba(255, 255, 255, 0.12);
+  --ws-accent: #8b5cf6;
+  --ws-accent-light: #a78bfa;
+  --ws-signal: #22d3ee;
+  --ws-danger: #f87171;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Surfaces: flat, hairline, modest radius. No gradient, no drop shadow. ─── */
+.dz-scope .dz-org-content .dz-card {
+  background: var(--ws-surface);
+  border: 1px solid var(--ws-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+/* ─── Page title: keep Newsreader italic, slightly calmer size ─── */
+.dz-scope .dz-org-content .dz-page-title { font-size: clamp(28px, 2.6vw, 36px); line-height: 1.15; }
+.dz-scope .dz-org-content .dz-page-head { padding: 4px 0 20px; margin-bottom: 4px; border-bottom-color: var(--ws-line); }
+
+/* ─── Buttons: no glow, named transitions, press feedback, hover gated ─── */
+.dz-scope .dz-org-content .dz-btn-green,
+.dz-scope .dz-org-content .dz-btn-outline,
+.dz-scope .dz-org-content .dz-pill-btn,
+.dz-scope .dz-org-content .ws-btn {
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 140ms var(--ease-out);
+  box-shadow: none;
+  border-radius: 6px;
+}
+.dz-scope .dz-org-content .dz-btn-green { background: var(--ws-accent); border: 1px solid transparent; color: #fff; padding: .6rem 1rem; font-weight: 600; }
+.dz-scope .dz-org-content .dz-btn-outline { background: transparent; border: 1px solid var(--ws-line-strong); color: var(--text-primary); padding: .58rem 1rem; font-weight: 600; }
+.dz-scope .dz-org-content .dz-pill-btn { border: 1px solid var(--ws-line-strong); border-radius: 999px; }
+.dz-scope .dz-org-content .dz-btn-green:disabled,
+.dz-scope .dz-org-content .dz-btn-outline:disabled { opacity: .45; cursor: not-allowed; }
+@media (hover: hover) and (pointer: fine) {
+  .dz-scope .dz-org-content .dz-btn-green:hover:not(:disabled) { background: #9a6ff8; transform: none; box-shadow: none; }
+  .dz-scope .dz-org-content .dz-btn-outline:hover:not(:disabled),
+  .dz-scope .dz-org-content .dz-pill-btn:hover:not(:disabled) { border-color: rgba(167, 139, 250, .55); background: rgba(139, 92, 246, .08); color: #fff; }
+}
+.dz-scope .dz-org-content .dz-btn-green:active:not(:disabled),
+.dz-scope .dz-org-content .dz-btn-outline:active:not(:disabled),
+.dz-scope .dz-org-content .dz-pill-btn:active:not(:disabled),
+.dz-scope .dz-org-content .ws-btn:active:not(:disabled) { transform: scale(0.97); }
+.dz-scope .dz-org-content :is(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--ws-accent-light); outline-offset: 2px; }
+
+/* Danger button */
+.dz-scope .dz-org-content .ws-btn-danger { display: inline-flex; align-items: center; gap: .5rem; padding: .58rem 1rem; border: 1px solid rgba(248, 113, 113, .45); background: rgba(248, 113, 113, .08); color: var(--ws-danger); font: inherit; font-weight: 600; font-size: .85rem; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .dz-scope .dz-org-content .ws-btn-danger:hover:not(:disabled) { background: rgba(248, 113, 113, .16); } }
+
+/* ─── Inputs ─── */
+.dz-scope .dz-org-content .input { border-radius: 6px; border-color: var(--ws-line-strong); background: #0a0e14; transition: border-color 150ms ease; }
+.dz-scope .dz-org-content .input:focus { border-color: var(--ws-accent); box-shadow: 0 0 0 3px rgba(139, 92, 246, .18); }
+
+/* ─── Shared list rows (directory, settings) ─── */
+.dz-scope .dz-org-content .ws-surface { background: var(--ws-surface); border: 1px solid var(--ws-line); border-radius: 10px; overflow: hidden; }
+.dz-scope .dz-org-content .ws-row { display: grid; align-items: center; gap: 1rem; padding: .7rem 1rem; min-height: 52px; border-top: 1px solid var(--ws-line); text-align: left; width: 100%; background: transparent; color: inherit; font: inherit; border-left: 0; border-right: 0; border-bottom: 0; }
+.dz-scope .dz-org-content .ws-row:first-child { border-top: 0; }
+.dz-scope .dz-org-content button.ws-row { cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .dz-scope .dz-org-content button.ws-row:hover { background: var(--ws-raised); } }
+.dz-scope .dz-org-content .ws-row-head { min-height: 38px; padding-top: .5rem; padding-bottom: .5rem; font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); background: rgba(255, 255, 255, .015); }
+.dz-scope .dz-org-content .ws-person { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.dz-scope .dz-org-content .ws-person strong { display: block; font-size: .9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-scope .dz-org-content .ws-person small { display: block; color: var(--text-muted); font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-scope .dz-org-content .ws-avatar { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; font-size: .72rem; font-weight: 700; }
+.dz-scope .dz-org-content .ws-muted { color: var(--text-muted); font-size: .84rem; }
+.dz-scope .dz-org-content .ws-mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .8rem; }
+
+/* ─── Toast (Sonner-style: bottom, quiet, ease-out) ─── */
+.dz-scope .ws-toast { position: fixed; z-index: 120; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem; border-radius: 10px; background: #161f30; border: 1px solid var(--ws-line-strong, rgba(255,255,255,.12)); color: var(--text-primary); font-size: .88rem; box-shadow: 0 12px 32px -12px rgba(0, 0, 0, .7); transition: opacity 240ms cubic-bezier(0.23, 1, 0.32, 1), transform 240ms cubic-bezier(0.23, 1, 0.32, 1); }
+@starting-style { .dz-scope .ws-toast { opacity: 0; transform: translate(-50%, 12px); } }
+.dz-scope .ws-toast-success::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+.dz-scope .ws-toast-error::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #f87171; }
+
+/* ─── Modal entry (centre origin, from 0.96 + opacity) ─── */
+.dz-scope .dz-org-content .modal-content { border-radius: 12px; border: 1px solid var(--ws-line-strong); background: #0f1624; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .8); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+@starting-style { .dz-scope .dz-org-content .modal-content { opacity: 0; transform: scale(0.96); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dz-scope .dz-org-content .dz-btn-green:active, .dz-scope .dz-org-content .dz-btn-outline:active,
+  .dz-scope .dz-org-content .dz-pill-btn:active, .dz-scope .dz-org-content .ws-btn:active { transform: none; }
+  .dz-scope .ws-toast { transition: opacity 200ms ease; }
+  @starting-style { .dz-scope .ws-toast { transform: translateX(-50%); } }
+  @starting-style { .dz-scope .dz-org-content .modal-content { transform: none; } }
+}

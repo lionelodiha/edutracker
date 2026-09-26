@@ -5,6 +5,9 @@ A full‑stack web application with an ASP.NET Core backend API and a React (Vit
 - Backend: ASP.NET Core (net10.0), EF Core, PostgreSQL, Scalar/OpenAPI
 - Frontend: React 19, Vite, TypeScript, Tailwind CSS
 
+For the Render web service and Supabase PostgreSQL deployment, see
+[docs/render-supabase.md](docs/render-supabase.md).
+
 ## Monorepo Layout
 
 ```

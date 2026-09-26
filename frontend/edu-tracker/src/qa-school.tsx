@@ -9,8 +9,11 @@ import { getGroupSettings } from "./features/cohorts/settings";
 import { fixtureId } from "./features/cohorts/fixtureId";
 import { startMocks } from "./mocks/browser";
 import { worker } from "./mocks/browser";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, passthrough } from "msw";
 import FacultyWorkspacePage from "./features/faculty/FacultyWorkspacePage";
+import OrganizationLayout from "./layouts/OrganizationLayout";
+import OrganizationDetailsPage from "./pages/dashboard/OrganizationDetailsPage";
+import AcademicStructurePage from "./pages/organization/AcademicStructurePage";
 import { AuthProvider } from "./context/AuthContext";
 import { QA_FACULTY_ID, QA_FACULTY_ORG, seedFacultyQa } from "./qa-faculty";
 import "./index.css";
@@ -30,5 +33,35 @@ await startMocks();
 worker.use(http.get("*/api/users/me", () => HttpResponse.json({
   success: true, data: { id: "qa-dean-user", userName: "qa-dean", firstName: "Adaeze", middleName: null, lastName: "Okafor", role: "User" },
 })));
+const overviewIds = new Set(["qa-overview-new", QA_FACULTY_ORG, "qa-overview-failed", "qa-overview-members-failed"]);
+worker.use(
+  http.get("*/api/organizations/:id", ({ params }) => {
+    const id = String(params.id);
+    if (!overviewIds.has(id)) return passthrough();
+    return HttpResponse.json({ success: true, data: { id, name: id === QA_FACULTY_ORG ? "QA Faculty School" : id === "qa-overview-new" ? "New School" : "Partial School", ownerUserId: "qa-dean-user", createdAt: "2026-09-10T09:00:00Z" } });
+  }),
+  http.get("*/api/organizations/:id/members", ({ params }) => {
+    const id = String(params.id);
+    if (!overviewIds.has(id)) return passthrough();
+    if (id === "qa-overview-members-failed") return HttpResponse.json({ success: false }, { status: 503 });
+    const make = (id: string, firstName: string, lastName: string, role: string, joinedAt: string) => ({ id, userId: id, userName: `${firstName}.${lastName}`.toLowerCase(), firstName, lastName, role, status: "Active", joinedAt });
+    const owner = make("owner", "Lionel", "Odiha", "Owner", "2026-09-10T09:00:00Z");
+    return HttpResponse.json({ success: true, data: id === "qa-overview-new" ? [owner] : [owner,
+      make("teacher", "Ada", "Bello", "Teacher", "2026-09-24T08:00:00Z"),
+      make("admin", "Kay", "Eze", "Admin", "2026-09-20T09:00:00Z"),
+      make("student", "Amara", "Nwosu", "Student", "2026-09-22T09:00:00Z"),
+      make("moderator", "Femi", "Ojo", "Moderator", "2026-09-18T09:00:00Z"),
+    ] });
+  }),
+  http.get("*/api/semesters", ({ request }) => {
+    const id = new URL(request.url).searchParams.get("organizationId");
+    if (!id || !overviewIds.has(id)) return passthrough();
+    if (id === "qa-overview-failed") return HttpResponse.json({ success: false }, { status: 503 });
+    return HttpResponse.json({ success: true, data: id === "qa-overview-new" ? [] : [
+      { id: "session-old", organizationId: id, startYear: 2024, endYear: 2025, session: "2024 / 2025", createdAt: "2024-09-12T09:00:00Z" },
+      { id: "session-current", organizationId: id, startYear: 2026, endYear: 2027, session: "2026 / 2027", createdAt: "2026-09-12T09:00:00Z" },
+    ] });
+  }),
+);
 seedFacultyQa();
-createRoot(document.getElementById("root")!).render(<AuthProvider><HashRouter><Routes><Route path="/dashboard/organizations/:id/faculties/:facultyId/*" element={<FacultyWorkspacePage />} /><Route path="/:model/*" element={<Fixture />} /></Routes></HashRouter></AuthProvider>);
+createRoot(document.getElementById("root")!).render(<AuthProvider><HashRouter><Routes><Route path="/dashboard/organizations/:id" element={<div className="dz-scope"><OrganizationLayout /></div>}><Route index element={<OrganizationDetailsPage />} /><Route path="structure" element={<AcademicStructurePage />} /><Route path="structure/faculties/:facultyId" element={<AcademicStructurePage />} /><Route path="structure/departments/new" element={<AcademicStructurePage />} /><Route path="structure/departments/:departmentId" element={<AcademicStructurePage />} /></Route><Route path="/dashboard/organizations/:id/faculties/:facultyId/*" element={<FacultyWorkspacePage />} /><Route path="/:model/*" element={<Fixture />} /></Routes></HashRouter></AuthProvider>);

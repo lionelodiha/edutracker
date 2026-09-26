@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE } from "../apiBase";
+import { isDemoMode } from "../demoMode";
 import ComingSoonPage from "./ComingSoonPage";
 
 /** Local mock portal sign-in for accounts created through faculty approval. */
@@ -11,7 +12,7 @@ export default function PortalLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const mockMode = import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === "true";
+  const mockMode = isDemoMode();
 
   async function signIn(event: React.FormEvent) {
     event.preventDefault();

@@ -1,0 +1,106 @@
+/* Overview — the school's front door. Tokens from styles/workspace.css (docs/design-system.md).
+   One surface per section, hairline dividers, no card-per-number. */
+
+.dz-scope .ov-page { min-width: 0; gap: 1.5rem; }
+.dz-scope .ov-page .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ─── Header ─── */
+.dz-scope .ov-header { display: flex; align-items: center; gap: 1rem; min-width: 0; padding-bottom: 1.25rem; border-bottom: 1px solid var(--ws-line); }
+.dz-scope .ov-header-tile { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; min-width: 52px; border-radius: 12px; font-size: 1.45rem; font-weight: 800; }
+.dz-scope .ov-header-copy { flex: 1; min-width: 0; }
+.dz-scope .ov-header-copy .dz-page-title { margin: 0; overflow-wrap: anywhere; }
+.dz-scope .ov-facts { display: flex; flex-wrap: wrap; gap: .25rem .9rem; margin: .45rem 0 0; color: var(--text-secondary); font-size: .88rem; }
+.dz-scope .ov-facts span + span::before { content: ""; display: inline-block; width: 3px; height: 3px; margin-right: .9rem; border-radius: 50%; background: var(--text-muted); vertical-align: middle; }
+.dz-scope .ov-warn { color: var(--warn); font-weight: 600; }
+.dz-scope .ov-header-actions { display: flex; gap: .6rem; flex-shrink: 0; }
+
+/* ─── Stats: one surface, five cells ─── */
+.dz-scope .ov-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--ws-surface); border: 1px solid var(--ws-line); border-radius: 10px; overflow: hidden; }
+.dz-scope .ov-stat { display: grid; gap: .3rem; padding: 1.05rem 1.25rem; text-decoration: none; color: inherit; min-width: 0; transition: background-color 150ms ease; }
+.dz-scope .ov-stat + .ov-stat { border-left: 1px solid var(--ws-line); }
+.dz-scope .ov-stat strong { font-size: 1.75rem; font-weight: 650; line-height: 1.05; letter-spacing: -.02em; }
+.dz-scope .ov-stat span { color: var(--text-muted); font-size: .8rem; }
+/* Zeros are real but not news: they recede so actual figures lead. */
+.dz-scope .ov-stat.is-zero strong { color: #3d4760; }
+@media (hover: hover) and (pointer: fine) { .dz-scope .ov-stat:hover { background: var(--ws-raised); } .dz-scope .ov-stat:hover span { color: var(--text-secondary); } }
+
+/* ─── Setup band ─── */
+.dz-scope .ov-setup { display: grid; gap: 1rem; padding: 1.2rem 1.35rem; border: 1px solid rgba(139, 92, 246, .28); border-radius: 10px; background: linear-gradient(180deg, rgba(139, 92, 246, .08), rgba(139, 92, 246, .02)); }
+.dz-scope .ov-setup-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.dz-scope .ov-setup-head h2 { margin: 0; font-size: 1.02rem; font-weight: 700; }
+.dz-scope .ov-setup-head p { margin: .2rem 0 0; color: var(--text-secondary); font-size: .85rem; }
+.dz-scope .ov-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .5rem; }
+.dz-scope .ov-steps li { display: grid; gap: .5rem; min-width: 0; }
+.dz-scope .ov-step-bar { height: 4px; border-radius: 99px; background: var(--ws-line-strong); }
+.dz-scope .ov-steps li.is-done .ov-step-bar { background: var(--ws-accent); }
+.dz-scope .ov-steps li.is-next .ov-step-bar { background: rgba(139, 92, 246, .38); }
+.dz-scope .ov-step-label { display: flex; align-items: center; gap: .35rem; color: var(--text-muted); font-size: .8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-scope .ov-steps li.is-done .ov-step-label { color: var(--text-secondary); }
+.dz-scope .ov-steps li.is-next .ov-step-label { color: var(--text-primary); font-weight: 600; }
+.dz-scope .ov-check { color: var(--ws-accent-light); font-weight: 800; }
+
+/* ─── Two columns of panels ─── */
+.dz-scope .ov-columns { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 1.25rem; align-items: start; }
+.dz-scope .ov-column { display: grid; gap: 1.25rem; min-width: 0; }
+.dz-scope .ov-panel { background: var(--ws-surface); border: 1px solid var(--ws-line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.dz-scope .ov-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1.1rem; border-bottom: 1px solid var(--ws-line); }
+.dz-scope .ov-panel-head h2 { margin: 0; font-size: .92rem; font-weight: 700; }
+.dz-scope .ov-panel-head a { color: var(--text-secondary); text-decoration: none; font-size: .82rem; font-weight: 500; }
+@media (hover: hover) and (pointer: fine) { .dz-scope .ov-panel-head a:hover { color: var(--ws-accent-light); } }
+.dz-scope .ov-panel-body { display: grid; gap: .5rem; justify-items: start; padding: 1.1rem; }
+.dz-scope .ov-pad { padding: 1rem 1.1rem; margin: 0; }
+.dz-scope .ov-muted { color: var(--text-muted); font-size: .84rem; margin: 0; }
+.dz-scope .ov-empty { display: grid; gap: .75rem; justify-items: start; padding: 1.1rem; }
+.dz-scope .ov-empty p { margin: 0; color: var(--text-secondary); font-size: .88rem; }
+
+/* Rows */
+.dz-scope .ov-rows { list-style: none; margin: 0; padding: 0; }
+.dz-scope .ov-rows > li + li { border-top: 1px solid var(--ws-line); }
+.dz-scope .ov-row { display: flex; align-items: center; gap: .8rem; min-height: 54px; padding: .6rem 1.1rem; color: inherit; text-decoration: none; min-width: 0; transition: background-color 150ms ease; }
+.dz-scope a.ov-row strong { flex: 1; min-width: 0; font-size: .9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-scope .ov-row-meta { color: var(--text-muted); font-size: .82rem; white-space: nowrap; }
+.dz-scope .ov-row-todo { color: var(--warn); font-weight: 500; }
+.dz-scope .ov-chevron { color: var(--text-muted); font-size: 1.2rem; line-height: 1; }
+.dz-scope .ov-row-more { justify-content: center; color: var(--text-secondary); font-size: .85rem; min-height: 44px; }
+@media (hover: hover) and (pointer: fine) { .dz-scope a.ov-row:hover { background: var(--ws-raised); } .dz-scope a.ov-row:hover .ov-chevron { color: var(--text-primary); } }
+.dz-scope .ov-mark { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 8px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .66rem; font-weight: 800; letter-spacing: .02em; }
+.dz-scope .ov-avatar { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; font-size: .72rem; font-weight: 700; }
+.dz-scope .ov-person { display: grid; flex: 1; min-width: 0; }
+.dz-scope .ov-person strong { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-scope .ov-person small { color: var(--text-muted); font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-scope .ov-role { padding: .15rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; white-space: nowrap; background: rgba(148, 163, 184, .12); color: var(--text-secondary); }
+.dz-scope .ov-role-owner, .dz-scope .ov-role-admin { background: rgba(139, 92, 246, .16); color: #c4b5fd; }
+.dz-scope .ov-role-teacher { background: rgba(34, 211, 238, .12); color: #67e8f9; }
+
+/* Session */
+.dz-scope .ov-session-name { margin: 0; font-size: 1.6rem; font-weight: 650; letter-spacing: -.02em; line-height: 1.15; }
+.dz-scope .ov-session-none { color: var(--text-secondary); font-size: 1.2rem; }
+.dz-scope .ov-panel-body .dz-btn-outline { margin-top: .5rem; }
+
+/* Activity timeline */
+.dz-scope .ov-timeline { list-style: none; margin: 0; padding: .6rem 1.1rem .8rem; }
+.dz-scope .ov-timeline li { position: relative; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; align-items: baseline; gap: .6rem; padding: .5rem 0; font-size: .87rem; }
+.dz-scope .ov-timeline li::before { content: ""; position: absolute; left: 4px; top: 1.3rem; bottom: -0.4rem; width: 1px; background: var(--ws-line-strong); }
+.dz-scope .ov-timeline li:last-child::before { display: none; }
+.dz-scope .ov-timeline-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--ws-accent); background: var(--ws-surface); position: relative; top: 1px; }
+.dz-scope .ov-timeline li:first-child .ov-timeline-dot { background: var(--ws-accent); }
+.dz-scope .ov-timeline-text { color: var(--text-primary); min-width: 0; overflow-wrap: anywhere; }
+.dz-scope .ov-timeline time { color: var(--text-muted); font-size: .78rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1100px) {
+  .dz-scope .ov-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .dz-scope .ov-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dz-scope .ov-stat + .ov-stat { border-left: 0; }
+  .dz-scope .ov-stat { border-top: 1px solid var(--ws-line); }
+  .dz-scope .ov-stat:nth-child(-n+2) { border-top: 0; }
+  .dz-scope .ov-stat:nth-child(even) { border-left: 1px solid var(--ws-line); }
+  .dz-scope .ov-steps { grid-template-columns: repeat(5, minmax(56px, 1fr)); overflow-x: auto; }
+}
+@media (max-width: 560px) {
+  .dz-scope .ov-header { flex-wrap: wrap; }
+  .dz-scope .ov-header-actions { width: 100%; }
+  .dz-scope .ov-header-actions > * { flex: 1; }
+  .dz-scope .ov-step-label { font-size: .72rem; }
+}

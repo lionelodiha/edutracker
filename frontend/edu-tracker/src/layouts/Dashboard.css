@@ -56,6 +56,10 @@
   --error: #f87171;
   --error-bg: rgba(248, 113, 113, 0.12);
 
+  /* Height of .dz-topbar (padding 1rem top/bottom + tallest child, the
+     ~46px account chip) — pins the sticky org sidebar directly under it. */
+  --topbar-h: 78px;
+
   /* ─── Shadows ─── */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
@@ -71,6 +75,71 @@
   min-height: 100vh;
   background: var(--bg-primary);
   color: var(--text-primary);
+}
+
+.dz-shell--top { flex-direction: column; }
+/* Two classes (0,2,0) beat the base .dz-main (0,1,0) no matter where the
+   rule sits in the file — a single class here loses to the later .dz-main
+   rule and leaves a 248px gutter where the old fixed sidebar was. */
+.dz-main.dz-main--full { margin-left: 0; }
+/* Without the sidebar every page gets the whole viewport, so the 1320px cap
+   from app-theme.css centred pages with wide empty gutters. Fill the width and
+   inset content by the top bar's own 2rem so edges line up with the logo and
+   account chip. .dz-scope prefix (0,3,0) beats app-theme.css, which loads later. */
+.dz-scope .dz-main--full .dz-content { margin: 0; padding: 1.75rem 2rem 2.5rem; }
+.dz-scope .dz-main--full .dz-page { max-width: none; margin: 0; }
+
+.dz-account-wrap { position: relative; }
+.dz-account-menu {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 200px; padding: 0.35rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow-sm); z-index: 50;
+}
+.dz-account-menu a, .dz-account-menu button {
+  display: flex; align-items: center; gap: 0.5rem; width: 100%;
+  padding: 0.55rem 0.7rem; border-radius: 8px; font-size: 0.85rem;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-primary); text-decoration: none; font-family: inherit;
+  text-align: left;
+}
+.dz-account-menu a:hover, .dz-account-menu button:hover { background: var(--bg-secondary); }
+
+/* Inside an organization the sidebar sits flush against the left edge, so the
+   content wrapper drops its own margin/padding and .dz-org-content takes it over. */
+.dz-scope .dz-content:has(> .dz-org-shell) { margin: 0; padding: 0; }
+.dz-org-shell { display: flex; align-items: flex-start; min-height: 100%; }
+/* Higher specificity (.dz-sidebar.dz-org-sidebar = 0,2,0) beats the base
+   .dz-sidebar fixed positioning regardless of source order. The top bar scrolls
+   away, so the sidebar sticks to the top of the viewport, not below the bar. */
+.dz-sidebar.dz-org-sidebar {
+  position: sticky; top: 0; left: auto; bottom: auto;
+  height: 100vh; z-index: 1;
+  border-right: 1px solid var(--border);
+}
+.dz-org-sidebar nav { flex: 1; padding: 0.5rem 0.75rem; }
+.dz-org-content { flex: 1; min-width: 0; padding: 1.75rem 2rem 2.5rem; }
+/* .dz-page is capped and centred (max-width 1200px; margin: 0 auto). Next to the
+   sidebar that centring leaves an empty gap on wide screens, so pages start
+   right beside the menu and fill the width instead. The .dz-scope prefix
+   (0,3,0) is needed to beat app-theme.css, which loads later. */
+.dz-scope .dz-org-content .dz-page { max-width: none; margin: 0; }
+.dz-org-back { display: block; padding: 1rem 1.25rem 0.25rem; font-size: 0.8rem; color: var(--text-muted); text-decoration: none; }
+.dz-org-back:hover { color: var(--accent-light); }
+.dz-org-name { padding: 0 1.25rem 1rem; font-weight: 700; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 960px) {
+  .dz-scope .dz-main--full .dz-content { padding: 1.25rem 1rem 2rem; }
+  .dz-org-shell { flex-direction: column; }
+  .dz-sidebar.dz-org-sidebar {
+    position: static; width: 100%; height: auto; display: flex;
+    border-right: none; border-bottom: 1px solid var(--border);
+  }
+  .dz-org-sidebar nav { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0 1rem 0.75rem; }
+  .dz-org-sidebar .dz-nav-label { display: none; }
+  .dz-org-sidebar .dz-nav-link { flex-shrink: 0; white-space: nowrap; margin-bottom: 0; }
+  .dz-org-sidebar .dz-nav-link.active::before { display: none; }
+  .dz-org-content { padding: 1.25rem 1rem 2rem; }
 }
 
 .dz-sidebar {
@@ -150,6 +219,18 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 2rem;
+}
+
+.dz-demo-indicator {
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .dz-search {
@@ -850,12 +931,6 @@ a.dz-row:hover {
   100% { background-position: -200% 0; }
 }
 
-/* ─── Mobile nav ─── */
-
-.dz-mobile-nav {
-  display: none;
-}
-
 /* ─── Responsive ─── */
 
 @media (max-width: 1150px) {
@@ -885,13 +960,6 @@ a.dz-row:hover {
 
   .dz-main {
     margin-left: 0;
-  }
-
-  .dz-mobile-nav {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem 0;
-    overflow-x: auto;
   }
 
   .dz-content {

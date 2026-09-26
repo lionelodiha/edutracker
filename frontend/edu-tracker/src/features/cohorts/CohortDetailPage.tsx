@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import Modal from "../../components/Modal";
+import { isDemoMode } from "../../demoMode";
 import { cohortApi } from "./api";
 import type { Cohort, CohortStudent } from "./types";
 import { useCohortWorkspace } from "./workspace";
@@ -234,7 +235,7 @@ function CohortDetail({ cohortId, workspace }: { cohortId: string; workspace: Wo
                 </div>
                 <div className="school-actions">
                     <button className="dz-btn-outline" disabled={busy} onClick={() => { setMutationError(null); setAddOpen(true); }}>Correct placement</button>
-                    {import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === "true" && <button className="dz-btn-green" disabled={busy} onClick={() => { setMutationError(null); setStudentName(""); setAdmissionNumber(""); setAdmitOpen(true); }}>+ Student record</button>}
+                    {isDemoMode() && <button className="dz-btn-green" disabled={busy} onClick={() => { setMutationError(null); setStudentName(""); setAdmissionNumber(""); setAdmitOpen(true); }}>+ Student record</button>}
                 </div>
             </header>
 

@@ -1,6 +1,13 @@
 # Build stage — .NET 10 SDK. Build context must be the REPO ROOT
 # (central package management + shared props live there):
 #   docker build -f backend/EduTracker.Api/Dockerfile .
+FROM node:22-alpine AS frontend
+WORKDIR /web
+COPY frontend/edu-tracker/package*.json ./
+RUN npm ci
+COPY frontend/edu-tracker/ ./
+RUN npm run build
+
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -20,8 +27,9 @@ RUN dotnet publish backend/EduTracker.Api/EduTracker.Api.csproj -c Release -o /a
 # Runtime stage.
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-EXPOSE 8080
+EXPOSE 8080 10000
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 COPY --from=build /app/publish .
+COPY --from=frontend /web/dist ./wwwroot
 USER app
 ENTRYPOINT ["dotnet", "EduTracker.Api.dll"]
