@@ -2,12 +2,13 @@ services:
   - type: web
     name: edutracker
     runtime: docker
+    branch: PROD
     plan: free
     region: frankfurt
     dockerfilePath: ./backend/EduTracker.Api/Dockerfile
     dockerContext: .
     healthCheckPath: /health
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production

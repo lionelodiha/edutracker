@@ -1,0 +1,82 @@
+name: Production CI
+
+on:
+  pull_request:
+    branches: [PROD]
+  push:
+    branches: [PROD]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend/edu-tracker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/edu-tracker/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore edutracker.slnx
+      - run: dotnet build edutracker.slnx --configuration Release --no-restore
+
+  container:
+    name: Container
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --file backend/EduTracker.Api/Dockerfile --tag edutracker-ci:${{ github.sha }} .
+
+  migrate:
+    name: Migrate Supabase
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PROD'
+    needs: [frontend, backend, container]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: production-database
+      cancel-in-progress: false
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Check database secret
+        env:
+          ConnectionStrings__Database: ${{ secrets.PROD_DATABASE_CONNECTION }}
+        run: |
+          if [[ -z "$ConnectionStrings__Database" ]]; then
+            echo 'Set PROD_DATABASE_CONNECTION in the production GitHub environment.' >&2
+            exit 1
+          fi
+      - name: Install EF Core CLI
+        run: |
+          dotnet tool install --global dotnet-ef --version 10.0.4
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+      - name: Apply EF Core migrations
+        env:
+          ConnectionStrings__Database: ${{ secrets.PROD_DATABASE_CONNECTION }}
+        run: dotnet ef database update --project backend/EduTracker.Persistence --startup-project backend/EduTracker.Api

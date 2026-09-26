@@ -36,8 +36,14 @@ project is active before a presentation.
 
 ## 2. Apply the database migrations
 
-The API does not migrate on startup. Apply migrations once before the first
-Render deployment, then repeat for future schema changes. From the repo root in
+The API does not migrate on startup. The `PROD` branch runs EF Core migrations
+in GitHub Actions after the build checks pass and before Render deploys. The
+`production` GitHub environment needs a `PROD_DATABASE_CONNECTION` secret with
+the same Npgsql Session pooler connection string used by Render. Restrict that
+environment to the `PROD` branch. The workflow fails closed if the secret is
+missing or a migration fails.
+
+For a one-time manual migration or recovery, run this from the repo root in
 PowerShell, with `dotnet ef` installed:
 
 ```powershell
@@ -47,7 +53,9 @@ Remove-Item Env:ConnectionStrings__Database
 ```
 
 Use Supabase's Session pooler connection details here too. Do not commit the
-connection string or put it in a frontend `VITE_` variable.
+connection string or put it in a frontend `VITE_` variable. Keep schema changes
+compatible with the version of the app that is still serving traffic while the
+new deployment builds.
 
 If you prefer Supabase's SQL Editor, generate the same idempotent migration
 script locally and run its contents there:
@@ -61,16 +69,19 @@ migrations in the repository.
 
 ## 3. Create the Render service
 
-Push the deployment changes to the branch you want to host. In Render, create
-a **Blueprint** from `render.yaml` and select that branch. It creates one free
-Docker web service. With a connected GitHub repository, new commits to the
-linked branch trigger deploys.
+Render production uses the exact Git branch `PROD`. Create a **Blueprint** from
+the connected GitHub repository, select `PROD`, and use its root `render.yaml`.
+It creates one free Docker web service. The Blueprint sets the service branch to
+`PROD` and `autoDeployTrigger: checksPass`, so Render deploys only after the
+GitHub checks, including database migration, pass. Connect the repository
+through Render's GitHub integration; a public repository URL cannot auto-deploy.
 
-If Render's connected GitHub account does not list this repository, its
-**Public Git Repository** URL also works for the first deployment. Select the
-branch containing `render.yaml`. Render does not automatically deploy changes
-from a public URL that has not been connected to its GitHub integration; use
-manual Blueprint syncs until that repository is connected.
+Before the first deploy, create the `production` GitHub environment, add its
+`PROD_DATABASE_CONNECTION` secret, and configure the `PROD` branch rule to
+require a pull request and the **Frontend**, **Backend**, and **Container**
+checks. Then changes flow through a PR into `PROD`; pushes to that branch run
+the migration job and Render deploys the checked commit. See
+[`production-cicd.md`](production-cicd.md) for the setup and release flow.
 
 During creation, fill in the `sync: false` environment variables:
 
