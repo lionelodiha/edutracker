@@ -65,7 +65,7 @@ export function seedSchool(organizationId: string, sessionId: string, structure:
   }));
   const cohorts: Cohort[] = [];
   const studentsByCohort: Record<string, CohortStudent[]> = {};
-  // PEOPLE-AND-COURSES §1 rule 4: only Programme units generate cohorts; faculties
+  // Only Programme units generate cohorts; faculties
   // and departments are containers. Transitional: a department with no programme
   // children still generates (it acts as its own programme until programmes exist).
   const generatesCohorts = (placementUnitKey: string | null): boolean => {

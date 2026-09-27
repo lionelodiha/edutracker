@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §8 — the faculty workspace shell and routing.
+ * The faculty workspace shell and routing.
  *
  * A faculty is a place you go to work, not a tab. The organization page
  * lists faculties as cards that navigate INTO this workspace.

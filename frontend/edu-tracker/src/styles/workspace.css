@@ -1,4 +1,4 @@
-/* Organization workspace design system — docs/design-system.md.
+/* Organization workspace design system.
    Scoped to .dz-org-content so only the pages inside an organization change.
    Selectors start with `.dz-scope .dz-org-content` (0,2,0 + element class) so they
    beat app-theme.css, which loads later and styles `.dz-scope .dz-*` at 0,2,0. */

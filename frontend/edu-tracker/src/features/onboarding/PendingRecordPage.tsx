@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §5 — public join form.
+ * Public join form.
  * Route: /join/:token. Unauthenticated — the person has no account yet.
  * The invitation already knows the placement; the page shows the school,
  * programme and level as read-only text and collects only what the

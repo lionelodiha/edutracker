@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §10 — documents and board render an empty state
+ * Documents and board render an empty state
  * naming what will go there and nothing else.
  */
 export function DocumentsStub() {

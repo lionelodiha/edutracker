@@ -1,5 +1,5 @@
 /**
- * Faculty mock store — FACULTY-BUILD §§1–7, 11.
+ * Faculty mock store.
  *
  * Every business rule in the spec is enforced here (the mock is the server),
  * not in comments and not in the UI. Handlers in facultyHandlers.ts stay thin.
@@ -104,7 +104,7 @@ function loadDB(organizationId: string): OrgDB {
     }
   } catch { /* Tests and restricted browsers use memory. */ }
   memory.set(organizationId, db);
-  // Seed ranks for a new organization (FACULTY-BUILD §2).
+  // Seed ranks for a new organization.
   if (!db.ranks.length) {
     const model = readSchoolSetup(organizationId)?.model ?? getGroupSettings(organizationId).model;
     db.ranks = buildSeedRanks(organizationId, model, name => fixtureId(organizationId, "rank", name));
@@ -1220,7 +1220,7 @@ export function facultyTestUtils(organizationId: string) {
       return course;
     },
     assignCourse(courseId: string, sessionId: string, staffProfileId: string, role: "Lead" | "Assistant" = "Lead"): CourseAssignment {
-      // FACULTY-BUILD §1 — a staff member whose status is not Active must not
+      // A staff member whose status is not Active must not
       // be assignable to a course. Reject with 409 STAFF_NOT_ACTIVE.
       const holder = db.staff.find(s => s.staffProfileId === staffProfileId && s.organizationId === organizationId);
       if (!holder) throw Object.assign(new Error("Staff record not found."), { status: 404, code: "STAFF_NOT_FOUND" });

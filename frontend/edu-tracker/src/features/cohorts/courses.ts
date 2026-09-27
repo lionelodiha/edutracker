@@ -1,7 +1,7 @@
 /**
  * Minimal teaching model backing the faculty tracking pages.
  *
- * Shape follows PEOPLE-AND-COURSES §2–§4: a Course is owned by the department
+ * A Course is owned by the department
  * that teaches it; CourseAssignment links staff to a course per session;
  * Registration links students to a course per session. Results and attendance
  * are per (course, session) states, which is all the tracker needs.

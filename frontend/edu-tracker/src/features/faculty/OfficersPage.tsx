@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §3 + §8 — officers (appointments).
+ * Officers (appointments).
  * Scope per post is fixed in one table (POST_SCOPE); the form only
  * offers the valid scope for the chosen post. Ending sets endsOn —
  * rows are never deleted. Expired terms flag amber.

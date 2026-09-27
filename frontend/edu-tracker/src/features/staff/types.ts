@@ -1,4 +1,4 @@
-/** FACULTY-BUILD §1 — staff records. Faculty membership is derived, never stored. */
+/** Staff records. Faculty membership is derived, never stored. */
 
 export type StaffKind = "Academic" | "Administrative" | "Technical";
 

@@ -1,4 +1,4 @@
-/* Academic structure screens — ACADEMIC-DESIGN.md.
+/* Academic structure screens.
    Everything is scoped under .dz-scope so app-theme.css (which loads later and
    styles .dz-scope .dz-*) cannot override it. Dark-theme tokens only. */
 

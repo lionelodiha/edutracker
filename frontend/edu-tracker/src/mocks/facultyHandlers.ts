@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §11 — mock endpoints for the faculty system.
+ * Mock endpoints for the faculty system.
  *
  * Same conventions as the cohort handlers: the ok/fail envelopes, a delay,
  * orgGuard, and persistence (the faculty store writes localStorage after every

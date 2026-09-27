@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { monogramColour } from "./helpers";
 import type { AcademicSession } from "./types";
 
-/* Shared building blocks for the academic structure screens (ACADEMIC-DESIGN §2). */
+/* Shared building blocks for the academic structure screens. */
 
 export function Monogram({ code, size = 40 }: { code: string; size?: number }) {
   const colour = monogramColour(code || "?");

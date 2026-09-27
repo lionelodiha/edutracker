@@ -1,4 +1,4 @@
-/** FACULTY-BUILD §2 — academic ranks are records, not an enum. */
+/** Academic ranks are records, not an enum. */
 
 export type AcademicRank = {
   rankId: string;
