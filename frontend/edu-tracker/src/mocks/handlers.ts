@@ -264,7 +264,7 @@ export function resetCohortMocks() {
   for (const key of Object.keys(studentStore)) delete studentStore[key];
   studentDirectory.clear();
   seeded.clear();
-  // FACULTY-BUILD §11 — clear everything added by the faculty system too,
+  // Clear everything added by the faculty system too,
   // or the tests will leak into each other.
   resetFacultyMocks();
 }

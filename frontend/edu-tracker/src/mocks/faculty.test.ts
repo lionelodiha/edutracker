@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §12 — all twenty-four must pass.
+ * All twenty-four must pass.
  * Derivation (1–4) · staff rules (5–8) · appointments (9–13) ·
  * onboarding (14–22) · tracking (23–24), plus endpoint wiring checks.
  */

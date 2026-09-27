@@ -16,8 +16,8 @@ export type AcademicUnitOption = {
   id: string;
   parentId: string | null;
   name: string;
-  /** PEOPLE-AND-COURSES §1. Present for University trees; inferred from depth when absent. */
+  /** Present for University trees; inferred from depth when absent. */
   kind?: "Faculty" | "Department" | "Programme";
-  /** FACULTY-BUILD §7 unit code (max 6 chars, uppercase, unique among siblings). */
+  /** Unit code (max 6 chars, uppercase, unique among siblings). */
   code?: string;
 };

@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §8 — lecturer directory.
+ * Lecturer directory.
  * staffOfFaculty() filtered to Academic, grouped by department,
  * filterable by rank and status, searchable by name and staff number.
  * Outstanding-results column sorts descending by default: a Dean opens

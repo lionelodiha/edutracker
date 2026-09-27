@@ -4,7 +4,7 @@ export type AcademicUnitNode = {
   key: string;
   parent: string | null;
   name: string;
-  /** PEOPLE-AND-COURSES §1 + FACULTY-BUILD §7. Optional so saved setups pre-dating kinds keep loading; inferred from depth when absent. */
+  /** Optional so saved setups pre-dating kinds keep loading; inferred from depth when absent. */
   kind?: UnitKind;
   /** Short code used by identifier generation (max 6 chars, uppercase, unique among siblings). */
   code?: string;
@@ -61,7 +61,7 @@ export function unitDepth(structure: SchoolStructure, key: string | null): numbe
   return depth;
 }
 
-/** PEOPLE-AND-COURSES §1: kind is structural. Inferred from depth when not stored. */
+/** Kind is structural. Inferred from depth when not stored. */
 export function unitKindOf(structure: SchoolStructure, key: string | null): UnitKind | null {
   if (!key) return null;
   const unit = structure.units.find(item => item.key === key);
@@ -74,7 +74,7 @@ export function unitKindOf(structure: SchoolStructure, key: string | null): Unit
   return "Programme";
 }
 
-/** Validate a unit code per FACULTY-BUILD §7. Returns the normalized code. */
+/** Validate a unit code. Returns the normalized code. */
 export function normalizeUnitCode(code: string, siblings: AcademicUnitNode[], selfKey: string | null = null): string {
   const clean = code.trim().toUpperCase();
   if (!clean) throw new Error("Enter a unit code.");
@@ -105,7 +105,7 @@ export function addAcademicUnit(setup: SchoolSetup, name: string, parent: string
   const parentUnit = next.structure.units.find(unit => unit.key === parent);
   if (parent && !parentUnit) throw new Error("Choose an existing parent.");
   if (setup.model !== "University" && parent) throw new Error("Streams belong directly to the school.");
-  // PEOPLE-AND-COURSES §1 kind rules: Faculty → Department → Programme, programmes are leaves.
+  // Kind rules: Faculty → Department → Programme, programmes are leaves.
   // Kind is structural (derived from depth), so a faculty child is always a
   // department and can never be a programme: rule 2 holds by construction.
   if (setup.model === "University" && parent !== null) {

@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §9 — student tracking page.
+ * Student tracking page.
  * Header is the derived chain (never stored on the student), then
  * registered courses, attendance, results, level adviser, and the
  * session-by-session history that makes it a tracker, not a profile.
