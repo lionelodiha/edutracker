@@ -13,12 +13,14 @@ import type { OrganizationContext } from "../../layouts/OrganizationLayout";
 import { readSchoolSetup } from "../../features/cohorts/schoolSetup";
 import { AcHeader, Badge } from "../../features/academics/ui";
 import { formatDay } from "../../features/academics/helpers";
+import { portalUrl } from "../../features/portal/helpers";
 import "../../features/academics/academics.css";
 import "./settings.css";
 
 const SECTIONS = [
     { id: "general", label: "General" },
     { id: "academic", label: "Academic" },
+    { id: "portal", label: "Portal link" },
     { id: "people", label: "People & access" },
     { id: "danger", label: "Danger zone" },
 ] as const;
@@ -95,6 +97,12 @@ export default function SchoolSettingsPage() {
         catch { show("Couldn't copy — select the ID and copy it manually", "error"); }
     };
 
+    const portalLink = portalUrl(organizationId);
+    const copyPortal = async () => {
+        try { await navigator.clipboard.writeText(portalLink); show("Portal link copied"); }
+        catch { show("Couldn't copy — select the link and copy it manually", "error"); }
+    };
+
     const base = `/dashboard/organizations/${organizationId}`;
     const modelLabel = setup?.model ? `${setup.model} school` : null;
 
@@ -145,6 +153,20 @@ export default function SchoolSettingsPage() {
                         <footer className="se-card-foot">
                             <span>{modelLabel ? `Set up as a ${modelLabel.toLowerCase()}.` : "Not set up yet."}</span>
                             <Link className="dz-btn-outline" to={`${base}/structure`}>Open Academic Structure</Link>
+                        </footer>
+                    </section>
+
+                    <section id="portal" className="se-card">
+                        <div className="se-card-body">
+                            <h2>Student &amp; staff portal</h2>
+                            <p>Students and staff use their own portal, separate from this admin workspace. Share this link with them. It opens your school's sign-in page, and everything they do there (timetables, coursework, marks, leave) shows up here.</p>
+                            <dl className="se-facts">
+                                <div className="se-fact-wide"><dt>Portal link</dt><dd><code className="ws-mono se-id">{portalLink}</code><button type="button" className="dz-pill-btn" onClick={() => void copyPortal()}>Copy</button></dd></div>
+                            </dl>
+                        </div>
+                        <footer className="se-card-foot">
+                            <span>Approved students and staff also get this link in their welcome email.</span>
+                            <a className="dz-btn-outline" href={portalLink} target="_blank" rel="noopener noreferrer">Open portal ↗</a>
                         </footer>
                     </section>
 

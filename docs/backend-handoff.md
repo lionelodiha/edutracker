@@ -1,12 +1,20 @@
-# What changed before the PROD branch
+# Backend handoff: what the frontend built, and what the API needs next
 
-This covers every code change made on `Leo's-branch` between the point it split from
-`main` (`e6c1508`, 18 Sep 2026) and the commit the `PROD` branch was created from
-(`ec89e0b`, 26 Sep 2026): **5 commits, 127 files, +15,275 / −2,698 lines.**
+**Start here if you're building backend features.** This covers every frontend change made
+on `Leo's-branch` since it split from `main` (`e6c1508`, 18 Sep 2026):
 
-The second half of this document is the backend to-do list: **47 endpoints the frontend
-already calls that the real API does not have yet**, the data model they need, and the
-places where the new screens and the existing backend disagree.
+- **Before `PROD`** (up to `ec89e0b`, 26 Sep): 5 commits, 127 files, +15,275 / −2,698
+  lines. The first part of this document.
+- **Since `PROD`** (26 Sep onward): the phone layout, fixes, the CI pipeline on `PROD`, and
+  the **student and staff portals** with assessment and results. See
+  [Since PROD was created](#since-prod-was-created).
+
+The second half is the backend to-do list: **60 endpoints the frontend already calls that
+the real API does not have yet** (47 from before `PROD`, 13 for the portals), the data
+model they need, and the places where the new screens and the existing backend disagree.
+
+**The mock backend stays.** Every mocked endpoint keeps working until its real version
+ships. Replace them one at a time, as described below; don't remove `src/mocks/` wholesale.
 
 ---
 
@@ -30,7 +38,8 @@ That means that right now, on the live site:
 | **Sessions tab, curriculum, course catalogue** | **Mock → this browser only** |
 | **Student groups (cohorts)** | **Mock → this browser only** |
 | **Faculty system** (staff records, ranks, officers, invitations, approvals, tracking) | **Mock → this browser only** |
-| **Portal login** (students and teachers) | **Mock → this browser only** |
+| **Portal login** (students and staff) | **Mock → this browser only** |
+| **Student and staff portals** (timetables, coursework, result sheets, marks, notifications, leave, tasks) and the department **Results** tab | **Mock → this browser only** |
 
 So two people using the same school see different academic data, and clearing browser
 data wipes it. The "Demo data" chip in the top bar is there to say so.
@@ -390,7 +399,7 @@ These exist and the frontend uses most of them. All paths start with `/api`.
 The `Faculty` and `PortalInvite` entities exist in the database, but **no endpoints
 expose them**.
 
-## Endpoints to build (47)
+## Endpoints to build (60)
 
 All paths start with `/api`. Status codes and error ids below are what the mocks return
 today, and the screens already handle them.
@@ -482,6 +491,52 @@ The response types are in `src/features/staff/`, `src/features/onboarding/`,
 of `src/mocks/faculty.ts` (`StaffTracking`, `StudentTracking`, `FacultySummary`,
 `ApprovalResult`).
 
+### D. Student and staff portals, assessment and results (13)
+
+Built after `PROD`. Where to look:
+
+| What | File |
+| --- | --- |
+| Every request the pages make | `src/features/portal/api.ts` |
+| Every response shape (the contract) | `src/features/portal/types.ts` |
+| The mock routes | `src/mocks/portalHandlers.ts` |
+| Every rule, as working code | `src/mocks/portal.ts` |
+| Marking scheme, grading, GPA, positions | `src/features/assessment/scheme.ts` |
+| Rules as tests | `src/mocks/portal.test.ts` |
+
+In the mock, portal calls carry `?organizationId=&userId=` because the mock sign-in has no
+server session. **The real API must ignore both** and take the user and organization
+from the session.
+
+| # | Method | Path | Request → Response | Rules and errors |
+| --- | --- | --- | --- | --- |
+| 48 | GET | `/portal/schools/{schoolId}` | → `PortalOrganization { organizationId, name, model }` | **Public.** The school's sign-in page shows its name. `SCHOOL_NOT_FOUND` 404 |
+| 49 | GET | `/portal/me` | → `StudentPortal` \| `TeacherPortal` \| `NonTeachingPortal` (by the `role` field) | Everything that person's portal shows, in one response. Staff with `kind = Academic` get the teaching portal; Administrative and Technical staff get the non-teaching one. `PORTAL_SESSION_INVALID` 401 |
+| 50 | GET | `/portal/sheets/{offeringId}` | → `ResultSheet` | Only the offering's lecturer. `NOT_COURSE_LECTURER` 403, `OFFERING_NOT_FOUND` 404 (also for other schools' offerings) |
+| 51 | PUT | `/portal/sheets/{offeringId}/scores` | `{ scores: { [studentProfileId]: { [componentKey]: number \| null } } }` → `ResultSheet` | Draft save; send only changed cells. Each mark 0 ≤ mark ≤ max, whole or half. Student must be on the roster. Published marks can't change. `SCORES_INVALID` 422 (up to 5 messages joined), `SHEET_SUBMITTED` 409, `TERM_CLOSED` 409 |
+| 52 | POST | `/portal/sheets/{offeringId}/publish` | `{ components: string[] }` → `ResultSheet` | In-course components only. Every student on the roster needs a mark for each one. Notifies the students. `EXAM_WITH_SUBMISSION` 409, `MARKS_MISSING` 409 |
+| 53 | POST | `/portal/sheets/{offeringId}/submit` | → `ResultSheet` | Every student needs every mark. Publishes everything, locks the sheet, notifies the students and the department's HOD. `MARKS_MISSING` 409, `ROSTER_EMPTY` 409 |
+| 54 | POST | `/portal/coursework` | `{ offeringId, componentKey, title, instructions, dueAt }` → 201 `{ itemId }` | Lecturer only. Test, assignment or project; not the exam. `dueAt` in the future. Notifies the students. `VALIDATION_FAILED` 400 |
+| 55 | POST | `/portal/coursework/{itemId}/submission` | `{ note, fileName }` → 200 | Students on the roster, assignments and projects only, before the deadline, not after marking. A new hand-in replaces the old. `DEADLINE_PASSED` 409, `NOT_SUBMITTABLE` 409, `ALREADY_MARKED` 409, `COURSEWORK_NOT_FOUND` 404. **Real file upload is still to design:** the mock keeps only the file name |
+| 56 | POST | `/portal/notifications/{notificationId}/read` | → 200 | `notificationId` may be `all` |
+| 57 | POST | `/portal/leave` | `{ type, startsOn, endsOn, reason }` → 201 `LeaveRequest` | Counts working days (Mon–Fri). Not in the past; casual ≤ 7 days; no overlap. Annual leave within the balance: 30 working days a year from grade level 07, 21 below. Notifies the supervisor. `LEAVE_OVERLAPS` 409, `LEAVE_EXCEEDS_BALANCE` 409 |
+| 58 | PATCH | `/portal/tasks/{taskId}` | `{ status: "Open" \| "In progress" \| "Done" }` → 200 | Only your own tasks. `TASK_NOT_FOUND` 404 |
+| 59 | GET | `/organizations/{id}/departments/{departmentId}/results?sessionId=` | → `DepartmentResultRow[]` | The department's Results tab: every offering's sheet status. Averages only after submission. `DEPARTMENT_NOT_FOUND` 404 |
+| 60 | GET | `/organizations/{id}/results/{offeringId}` | → `ResultSheet` (read-only, drafts included) | For the HOD, exam officer and admins |
+
+**The assessment scheme** (`scheme.ts`) should become server-side configuration, but its
+current values are the source of truth until then:
+
+- Every school: 30 marks in-course (CA), 70 marks exam.
+- **University:** Test 15, Assignment 10, Project 5. Grades on the NUC 5-point scale
+  (A ≥ 70 … F < 40), with GPA weighted by credit units and a CGPA with class of degree.
+- **Secondary:** 1st Test 10, 2nd Test 10, Assignment 10. WAEC A1–F9.
+- **Primary:** as secondary, graded A–F.
+- Class position uses competition ranking: ties share a position, and the next skips.
+
+**How a sheet's status is worked out.** It's derived, not stored: *Not started* (no marks),
+*Partial* (some marks or something published), *Submitted* (locked).
+
 ## Data model changes
 
 **Extend what exists:**
@@ -509,6 +564,23 @@ of `src/mocks/faculty.ts` (`StaffTracking`, `StudentTracking`, `FacultySummary`,
   issued-identifiers table so a number can never be reused.
 - **Teaching:** `CourseAssignment`, `Registration`, results and attendance summaries.
   These back the tracking pages and can come last.
+- **Portals** (all keyed on the course offering, so every record traces back to "this
+  course, this session and term, this lecturer"):
+  - `Enrolment` (offering, student). Until course registration exists, the mock also puts
+    active students on offerings that match their department and level.
+  - `TimetableSlot` (offering, weekday, start, end, venue).
+  - `CourseworkItem` (offering, component key, title, instructions, due at, posted at) and
+    `CourseworkSubmission` (item, student, submitted at, note, file).
+  - `ResultSheet` (offering, status `Draft`/`Submitted`, submitted at, updated at),
+    `ResultMark` (sheet, student, component key, mark) and `PublishedComponent` (sheet,
+    component key, published at).
+  - `Notification` (recipient, kind, title, body, link, created at, read at).
+  - `LevelAdviser` (department, level, staff), a per-level form teacher or level adviser.
+    It may fold into the existing `Appointment` (post `LevelAdviser`).
+  - `TermRemark` (student, term, comment) for the report card.
+  - **Non-teaching staff:** `StaffEmploymentRecord` (cadre, salary scale, grade level,
+    step, confirmed on, next promotion due, supervisor), `LeaveRequest`, `DutyShift`,
+    `WorkTask` and `Appraisal`.
 
 **Constraints:**
 
@@ -562,6 +634,14 @@ browser. The real API must not:
   (`src/features/onboarding/passwords.ts`), which is only acceptable in a demo.
 - **Make portal login create a real session** (the same cookies as `/auth/login`) instead
   of the mock's `sessionStorage` entry.
+- **Portals: never trust the `organizationId` and `userId` query parameters.** They exist
+  only because the mock has no session. The school in `/portal/<school>` must match the
+  signed-in person's organization.
+- **Marks:** only the offering's assigned lecturer can read or change its sheet. Published
+  marks and submitted sheets are immutable. Corrections after submission need a
+  separate, audited amendment flow (not built yet; HOD approval is the likely rule).
+- **Students see only published components,** and grades only after submission. The
+  department can see drafts; students can't.
 
 ## Suggested order
 
@@ -579,14 +659,24 @@ Each step can ship on its own. When an endpoint is live, delete its handler from
 7. **Cohorts and students** (16–22, 44–45).
 8. **Tracking pages and the faculty summary** (30, 46, 47), once registrations, results
    and attendance exist.
+9. **Portal read side:** portal login with a real session (40), the school lookup (48)
+   and `GET /portal/me` (49). This needs enrolments and timetable slots on top of steps 2–4.
+10. **Marking:** result sheets, publish and submit (50–53), then the department Results
+    tab (59–60).
+11. **Coursework and notifications** (54–56). Design file storage for hand-ins here.
+12. **Non-teaching staff:** leave and tasks (57–58), plus employment records, duty roster
+    and appraisals.
 
 ---
 
-## After `PROD` was created
+## Since `PROD` was created
 
-These came later and aren't covered in detail here:
+### Already on `PROD` and `main`
 
-- **CI/CD for `PROD`:** build, tests, Docker image and Supabase migrations before Render
+- **CI/CD** (`.github/workflows/prod.yml` on `PROD`): on every pull request and push to
+  `PROD`, it builds and tests the frontend, builds the backend, and builds the Docker
+  image. On push it then applies EF Core migrations to Supabase, using the
+  `PROD_DATABASE_CONNECTION` secret in the `production` environment, before Render
   deploys.
 - **Phone layout:** a bottom tab bar in the school workspace, a one-row top bar and
   compact stats.
@@ -596,6 +686,30 @@ These came later and aren't covered in detail here:
   - On phones, the landing page's "Get started" moved into the menu.
 - **Merge into `main`:** `Leo's-branch` was merged into `main`, and the planning docs were
   removed.
+
+### New on `Leo's-branch`: student and staff portals (frontend and mock only)
+
+No backend code changed. What the backend needs is in [section D](#d-student-and-staff-portals-assessment-and-results-13).
+
+- **Portals live outside the admin app.** Each school has its own address:
+  `/portal/<schoolId>` is its sign-in page, with areas at `/student`, `/teacher` and
+  `/staff` under it. Admins never enter the portal; School Settings has a **Portal link**
+  card to copy and share it, and approval emails include it. The old `/portal-login` is
+  now "find your school's portal", and the old `/student-portal` URLs redirect.
+- **Students:** timetable, coursework with hand-in, results (marks as they're published,
+  grades after submission; GPA/CGPA at university, a report card with class position at
+  secondary level), notifications, and profile.
+- **Teaching staff:** today's classes and next-class reminders, classes and coursework
+  posting, and the **result sheet**. On the sheet, lecturers type marks or use a CSV
+  template (matched by matric number), save drafts, publish in-course marks, and submit
+  the final result, which locks the sheet.
+- **Non-teaching staff:** duty roster, leave (balance and requests), tasks, notices, and
+  service record (cadre, grade level, promotion, appraisals).
+- **School side:** a **Results** tab on each department, showing each offering's sheet
+  status, averages after submission, and the full sheet.
+- **Demo:** `/portal/demo-university` and `/portal/demo-secondary` have demo accounts
+  (password `Demo@2026`), built from `src/mocks/portalDemo.ts`.
+- **Old stubs removed:** `StudentDashboardPage.tsx` and `TeacherDashboardPage.tsx`.
 
 ## Full specifications
 

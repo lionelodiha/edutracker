@@ -8,6 +8,10 @@ A full‑stack web application with an ASP.NET Core backend API and a React (Vit
 For the Render web service and Supabase PostgreSQL deployment, see
 [docs/render-supabase.md](docs/render-supabase.md).
 
+Building backend features? Start with [docs/backend-handoff.md](docs/backend-handoff.md):
+what the frontend has built against the mock backend, and the endpoints, data model and
+security rules the real API needs next.
+
 ## Monorepo Layout
 
 ```

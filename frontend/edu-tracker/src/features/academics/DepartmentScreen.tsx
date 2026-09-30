@@ -5,10 +5,11 @@ import { facultyApi } from "../faculty/api";
 import { academicApi } from "./api";
 import type { AcademicOffering, CatalogueCourse, StructureResponse } from "./types";
 import { allCourses, count, initials, PAGE_SIZE, surname } from "./helpers";
+import DepartmentResults from "./DepartmentResults";
 import { AcHeader, Badge, Drawer, EmptyState, Meter, SessionPicker, Skeleton, StatCells, Tabs } from "./ui";
 
 type Props = { organizationId: string; departmentId: string; structure: StructureResponse; session: SessionControl; onRefresh: () => void };
-type View = "levels" | "catalogue" | "lecturers" | "students" | "admission";
+type View = "levels" | "catalogue" | "lecturers" | "students" | "results" | "admission";
 type Person = { staffProfileId: string; fullName: string };
 type Learner = { studentProfileId: string; fullName: string; matriculationNumber: string; entryStageId: string; entrySessionId: string; status: string };
 const LOAD_RANGE = { min: 15, max: 24 };
@@ -36,6 +37,7 @@ export default function DepartmentScreen({ organizationId, departmentId, structu
     { value: "catalogue", label: "Catalogue" },
     { value: "lecturers", label: university ? "Lecturers" : "Teachers" },
     { value: "students", label: "Students" },
+    { value: "results", label: "Results" },
     { value: "admission", label: university ? "Admission" : "Capacity" },
   ];
   const view = views.find(item => item.value === params.get("view"))?.value ?? "levels";
@@ -142,6 +144,8 @@ export default function DepartmentScreen({ organizationId, departmentId, structu
           <thead><tr><th>Matric no.</th><th>Name</th><th>Entry level</th><th>Status</th></tr></thead>
           <tbody>{students.map(person => <tr key={person.studentProfileId}><td><span className="ac-mono">{person.matriculationNumber}</span></td><td>{person.fullName}</td><td>{entryLevel(person.entryStageId)}</td><td><Badge tone={person.status === "Active" ? "current" : "neutral"}>{person.status}</Badge></td></tr>)}</tbody>
         </table></div></section></>)}
+
+    {view === "results" && <DepartmentResults organizationId={organizationId} departmentId={departmentId} sessionId={selected?.sessionId ?? null} university={university} />}
 
     {view === "admission" && <section className="dz-card" style={{ display: "grid", gap: "1rem", padding: "1.3rem" }}>
       <div className="ac-review-head"><h2 style={{ margin: 0, fontSize: "1.05rem" }}>{university ? "Admission rules" : "Capacity"}</h2><Link className="dz-btn-outline" to={`${base}/departments/${departmentId}/edit?step=2`}>Edit</Link></div>

@@ -14,8 +14,6 @@ import CoursesPage from "./pages/dashboard/CoursesPage";
 import SemesterDetailsPage from "./pages/dashboard/SemesterDetailsPage";
 import ClassDetailsPage from "./pages/dashboard/ClassDetailsPage";
 import AttendancePage from "./pages/dashboard/AttendancePage";
-import TeacherDashboardPage from "./pages/dashboard/TeacherDashboardPage";
-import StudentDashboardPage from "./pages/dashboard/StudentDashboardPage";
 import SuperAdminDashboardPage from "./pages/dashboard/SuperAdminDashboardPage";
 import PortalLoginPage from "./pages/PortalLoginPage";
 import PortalSignupPage from "./pages/PortalSignupPage";
@@ -27,6 +25,13 @@ import FacultiesListPage from "./pages/organization/FacultiesListPage";
 import AcademicStructurePage from "./pages/organization/AcademicStructurePage";
 import StaffPage from "./pages/organization/StaffPage";
 import SchoolSettingsPage from "./pages/organization/SchoolSettingsPage";
+import PortalLayout from "./features/portal/PortalLayout";
+import { NotificationsPage, ProfilePage as PortalProfilePage, TimetablePage } from "./features/portal/SharedPages";
+import { StudentCourseworkPage, StudentHome, StudentResultsPage } from "./features/portal/StudentPages";
+import { TeacherClassPage, TeacherClassesPage, TeacherHome, TeacherResultsPage } from "./features/portal/TeacherPages";
+import ResultSheetPage from "./features/portal/ResultSheetPage";
+import { DutyRosterPage, LeavePage, StaffHome, TasksPage } from "./features/portal/StaffPages";
+import PortalSignInPage, { LegacyPortalRedirect } from "./features/portal/PortalSignInPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -122,12 +127,42 @@ function App() {
             </Route>
           </Route>
 
-          {/* Student & Teacher Portals & Login (Mocks) */}
+          {/* Student and staff portals: outside the admin app, one address per school.
+              Schools share /portal/<school>; sign-in is mocked until the portal API ships. */}
           <Route path="/portal-login" element={<PortalLoginPage />} />
           <Route path="/portal-signup" element={<PortalSignupPage />} />
-          <Route path="/student-portal" element={<StudentDashboardPage />} />
-          <Route path="/teacher-portal" element={<TeacherDashboardPage />} />
-          
+          <Route path="/portal/:schoolId" element={<PortalSignInPage />} />
+          <Route path="/portal/:schoolId/student" element={<PortalLayout role="Student" />}>
+            <Route index element={<StudentHome />} />
+            <Route path="timetable" element={<TimetablePage />} />
+            <Route path="coursework" element={<StudentCourseworkPage />} />
+            <Route path="results" element={<StudentResultsPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<PortalProfilePage />} />
+          </Route>
+          <Route path="/portal/:schoolId/teacher" element={<PortalLayout role="Teaching" />}>
+            <Route index element={<TeacherHome />} />
+            <Route path="timetable" element={<TimetablePage />} />
+            <Route path="classes" element={<TeacherClassesPage />} />
+            <Route path="classes/:offeringId" element={<TeacherClassPage />} />
+            <Route path="results" element={<TeacherResultsPage />} />
+            <Route path="results/:offeringId" element={<ResultSheetPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<PortalProfilePage />} />
+          </Route>
+          <Route path="/portal/:schoolId/staff" element={<PortalLayout role="NonTeaching" />}>
+            <Route index element={<StaffHome />} />
+            <Route path="roster" element={<DutyRosterPage />} />
+            <Route path="leave" element={<LeavePage />} />
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<PortalProfilePage />} />
+          </Route>
+          {/* Earlier portal addresses. */}
+          <Route path="/student-portal/*" element={<LegacyPortalRedirect />} />
+          <Route path="/teacher-portal/*" element={<LegacyPortalRedirect />} />
+          <Route path="/staff-portal/*" element={<LegacyPortalRedirect />} />
+
           {/* Global / Super Admin (Mock) */}
           <Route path="/super-admin" element={<SuperAdminDashboardPage />} />
 

@@ -822,7 +822,7 @@ export function approvePending(
     pending.status = "Approved";
     pending.reviewedBy = reviewerId;
     invitation.status = "Approved";
-    db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Matriculation number: ${identifier}. School email: ${schoolEmail}.`, createdAt: nowISO() });
+    db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Matriculation number: ${identifier}. School email: ${schoolEmail}. Sign in at /portal/${organizationId}`, createdAt: nowISO() });
     saveDB(organizationId);
     return ok({ type: "Student", student, matriculationNumber: identifier, schoolEmail, cohortId });
   }
@@ -882,7 +882,7 @@ export function approvePending(
   pending.status = "Approved";
   pending.reviewedBy = reviewerId;
   invitation.status = "Approved";
-  db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Staff number: ${staffNumber}. School email: ${schoolEmail}.`, createdAt: nowISO() });
+  db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Staff number: ${staffNumber}. School email: ${schoolEmail}. Sign in at /portal/${organizationId}`, createdAt: nowISO() });
   saveDB(organizationId);
   return ok({ type: "Staff", staff: profile, staffNumber, schoolEmail });
 }
@@ -1282,4 +1282,15 @@ export function facultyTestUtils(organizationId: string) {
 
 export function lookupStaffOrg(staffProfileId: string): string | null {
   return findOrgOfStaff(staffProfileId)?.organizationId ?? null;
+}
+
+/** Read-only view of an organization's people, for the portal store. */
+export function facultyRecords(organizationId: string): {
+  students: StudentProfile[];
+  staff: StaffProfile[];
+  ranks: AcademicRank[];
+  appointments: Appointment[];
+} {
+  const db = loadDB(organizationId);
+  return { students: db.students, staff: db.staff, ranks: db.ranks, appointments: db.appointments };
 }
