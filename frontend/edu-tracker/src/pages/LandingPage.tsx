@@ -15,34 +15,40 @@ function Icon({ name, size = 20 }: { name: "grid" | "people" | "book" | "arrow" 
     return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-const previewTabs = ["Overview", "Academic year", "Members"] as const;
-type PreviewTab = typeof previewTabs[number];
-
 function ProductPreview() {
-    const [tab, setTab] = useState<PreviewTab>("Overview");
+    const stats = [
+        { label: "Total Organizations", value: "3", note: "2 owned by you" },
+        { label: "Pending Invites", value: "1", note: "Awaiting your response" },
+        { label: "Active Sessions", value: "4", note: "of 5 total sessions" },
+        { label: "Account Role", value: "Owner", note: "@alexojo" },
+    ];
+    const activity = [38, 72, 51, 90, 62, 43, 75];
     return <div className="lp-preview-wrap" id="preview">
-        <div className="lp-preview-label"><span><span className="lp-status-dot" /> A little less admin. A lot more clarity.</span><span>EXPLORE THE PREVIEW ↘</span></div>
-        <div className="lp-preview">
-            <aside className="lp-sidebar">
-                <Logo markSize={27} fontSize="1.08rem" color="var(--lp-ink)" markFill="var(--lp-accent)" />
-                <div className="lp-school"><span className="lp-school-avatar">R</span><div><strong>Ridgeway Academy</strong><small>School workspace</small></div></div>
-                <span className="lp-sidebar-label">WORKSPACE</span>
-                <div className="lp-preview-controls" role="group" aria-label="Product preview">
-                    {previewTabs.map((item, index) => <button key={item} id={`preview-tab-${index}`} aria-pressed={tab === item} aria-controls="preview-panel" onClick={() => setTab(item)} className={tab === item ? "is-active" : ""}><Icon name={index === 0 ? "grid" : index === 1 ? "book" : "people"} size={17} />{item}</button>)}
+        <div className="lp-preview-label"><span><span className="lp-status-dot" /> Your dashboard, at a glance.</span><span>PRODUCT PREVIEW ↘</span></div>
+        <div className="lp-preview lp-dashboard-preview" role="img" aria-label="Illustration of the EduTracker dashboard showing organizations, invites, sessions, and account activity">
+            <div className="lp-dash-topbar">
+                <Logo markSize={26} fontSize="1.08rem" color="var(--lp-ink)" markFill="var(--lp-accent)" />
+                <span className="lp-dash-search">⌕ &nbsp; Search organizations <small>⌘ F</small></span>
+                <span className="lp-dash-topbar-spacer" />
+                <span className="lp-dash-bell" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" /></svg><i /></span>
+                <span className="lp-dash-user"><b>AO</b><span>Alex Ojo</span></span>
+            </div>
+            <div className="lp-dash-body">
+                <div className="lp-dash-heading"><div><h3>Dashboard</h3><p>Good morning, Alex. Your schools, invites, and sessions at a glance.</p></div><div className="lp-dash-heading-actions"><span>+ New Organization</span><span>View All</span></div></div>
+                <div className="lp-dash-stats">{stats.map((item, index) => <div className={`lp-dash-stat ${index === 0 ? "is-featured" : ""}`} key={item.label}><div><span>{item.label}</span><span aria-hidden="true">↗</span></div><strong>{item.value}</strong><small>{item.note}</small></div>)}</div>
+                <div className="lp-dash-card-grid">
+                    <div className="lp-dash-card lp-dash-activity"><h4>Session Activity</h4><div className="lp-dash-bars">{activity.map((height, index) => <div key={index}><span style={{ height: `${height}%` }} /><small>{"SMTWTFS"[index]}</small></div>)}</div><p>Sign-ins per weekday, all time</p></div>
+                    <div className="lp-dash-card lp-dash-reminders"><h4>Reminders</h4><strong>1 invitation waiting</strong><p>Ridgeway Academy invited you to join their workspace.</p><span>Review Invite</span></div>
+                    <div className="lp-dash-card lp-dash-organizations"><h4>Organizations <small>+ New</small></h4>{[["R", "Ridgeway Academy", "Owner · Active"], ["W", "Westbridge School", "Admin · Active"], ["O", "Oakfield College", "Member · Active"]].map((row) => <div className="lp-dash-list-row" key={row[0]}><b>{row[0]}</b><span><strong>{row[1]}</strong><small>{row[2]}</small></span></div>)}</div>
                 </div>
-                <div className="lp-sidebar-bottom"><span className="lp-user-avatar">AO</span><div><strong>Alex Ojo</strong><small>Organization owner</small></div></div>
-            </aside>
-            <div key={tab} className="lp-preview-main" id="preview-panel" role="region" aria-labelledby={`preview-tab-${previewTabs.indexOf(tab)}`}>
-                <div className="lp-preview-top"><span>Workspace <span>/</span> <strong>{tab}</strong></span><span className="lp-demo-badge">Sample workspace</span></div>
-                <div className="lp-preview-heading"><div><span className="lp-overline">2026 / 2027 ACADEMIC YEAR</span><h3>{tab === "Overview" ? "A clear view of your school." : tab === "Academic year" ? "Your year, beautifully organized." : "The right people. The right access."}</h3><p>{tab === "Overview" ? "Your people, courses, and classes. All together." : tab === "Academic year" ? "From the first term to the last class." : "A shared workspace with a role for everyone."}</p></div><span className="lp-term-badge"><span className="lp-status-dot" /> Autumn term</span></div>
-                <div className="lp-metrics">{[{ icon: "people", label: "Members", value: "128", note: "Connected in one place" }, { icon: "book", label: "Courses", value: "12", note: "Across your academic year" }, { icon: "grid", label: "Classes", value: "24", note: "Organized and ready" }].map(item => <div key={item.label}><span><Icon name={item.icon as "people" | "book" | "grid"} size={16} />{item.label}</span><strong>{item.value}<small>{item.note}</small></strong></div>)}</div>
-                <div className="lp-preview-table"><div className="lp-table-heading"><h4>{tab === "Members" ? "Your team" : tab === "Academic year" ? "Academic structure" : "Your courses"}</h4><span>{tab === "Members" ? "MEMBERS & ROLES" : "AUTUMN · 2026"}</span></div>
-                    <div className="lp-table-columns"><span>{tab === "Members" ? "Name" : tab === "Academic year" ? "Session / term" : "Course name"}</span><span>{tab === "Members" ? "Role" : "Details"}</span><span>Status</span></div>
-                    {(tab === "Members" ? [ ["AO", "Alex Ojo", "Organization owner", "Owner", "Joined"], ["SW", "Sarah Williams", "Teaching team", "Teacher", "Joined"], ["JD", "James Davis", "Teaching team", "Teacher", "Invited"] ] : tab === "Academic year" ? [["01", "First term", "2026 / 2027", "Autumn term", "Active"], ["02", "Second term", "2026 / 2027", "Spring term", "Upcoming"], ["03", "Third term", "2026 / 2027", "Summer term", "Upcoming"]] : [["MA", "Further Algebra", "MATH-201", "8 classes", "Active"], ["EN", "English Literature", "ENG-102", "6 classes", "Active"], ["PH", "Applied Physics", "PHY-201", "10 classes", "Active"]]).map((row, index) => <div className="lp-table-row" key={row[0]}><div><span className={`lp-course-icon lp-tone-${index}`}>{row[0]}</span><span><strong>{row[1]}</strong><small>{row[2]}</small></span></div><span>{row[3]}</span><span className={`lp-row-status ${row[4] === "Upcoming" || row[4] === "Invited" ? "is-pending" : ""}`}>{row[4]}</span></div>)}
+                <div className="lp-dash-card-grid lp-dash-card-grid--bottom">
+                    <div className="lp-dash-card lp-dash-sessions"><h4>Sessions <small>Manage</small></h4><div className="lp-dash-list-row"><b>▣</b><span><strong>4e9c2b81…</strong><small>Created today · Remembered</small></span><em>Active</em></div><div className="lp-dash-list-row"><b>▣</b><span><strong>8a17f30d…</strong><small>Created yesterday</small></span><em>Active</em></div></div>
+                    <div className="lp-dash-card lp-dash-health"><h4>Session Health</h4><div><strong>80%</strong><span>Sessions Active</span></div></div>
+                    <div className="lp-dash-card lp-dash-account"><h4>Account</h4><div><b>AO</b><span><strong>Alex Ojo</strong><small>@alexojo</small></span></div><span>Owner</span></div>
                 </div>
             </div>
         </div>
-        <p className="lp-preview-caption">An interactive illustration with sample data. Your workspace starts with you.</p>
+        <p className="lp-preview-caption">Illustrative data in the same layout as the signed-in dashboard. Your counts and organizations come from your account.</p>
     </div>;
 }
 
