@@ -5,7 +5,7 @@ School management platform. Multi-tenant organizations own academic records with
 | Layer    | Stack                                                                                                             |
 | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | Backend  | ASP.NET Core (.NET 10), EF Core + PostgreSQL, Redis, session auth — see [backend/README](./backend/README.md)     |
-| Frontend | React 19, Vite, TypeScript, Tailwind CSS — see [frontend/edu-tracker/README](../../frontend/edu-tracker/README.md) |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS — see [frontend/web-app/README](../../frontend/web-app/README.md) |
 | Ops      | Aspire (local orchestration), Docker, Render, GitHub Actions CI                                                   |
 
 ---

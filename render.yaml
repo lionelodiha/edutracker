@@ -52,8 +52,8 @@ services:
     plan: free
     branch: deploy
     autoDeploy: false
-    dockerfilePath: ./frontend/edu-tracker/Dockerfile
-    dockerContext: ./frontend/edu-tracker
+    dockerfilePath: ./frontend/web-app/Dockerfile
+    dockerContext: ./frontend/web-app
     healthCheckPath: /
     envVars:
       - key: API_SCHEME
