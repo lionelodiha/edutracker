@@ -1,21 +1,16 @@
-# The Dockerfile builds both the frontend and backend from the repo root.
-.git/
-.vs/
-.vscode/
-.idea/
-**/bin/
-**/obj/
-**/TestResults/
+.git
+.vscode
 
-**/node_modules/
-**/dist/
-frontend/edu-tracker/.vite/
-frontend/edu-tracker/.env*
-.claude/
-backend/src/
-backend/prisma/
-backend/EduTracker/
+# Node
+**/node_modules
+**/dist
 
-.env
+# .NET build output
+**/bin
+**/obj
+publish
+
+# Secrets and noise
+**/.env
+**/.env.*
 *.log
-tmp_*

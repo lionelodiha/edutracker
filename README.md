@@ -1,169 +1,98 @@
 # EduTracker
 
-A full‑stack web application with an ASP.NET Core backend API and a React (Vite + TypeScript) frontend. The backend uses Entity Framework Core with PostgreSQL, CQRS-style application layers, and secure session-based authentication. The frontend consumes the API and can generate typed API clients from the OpenAPI spec.
+School management platform. Multi-tenant organizations own academic records with invites, member roles, session auth, and secure data handling.
 
-- Backend: ASP.NET Core (net10.0), EF Core, PostgreSQL, Scalar/OpenAPI
-- Frontend: React 19, Vite, TypeScript, Tailwind CSS
+| Layer    | Stack                                                                                                             |
+| -------- | ----------------------------------------------------------------------------------------------------------------- |
+| Backend  | ASP.NET Core (.NET 10), EF Core + PostgreSQL, Redis, session auth — see [backend/README](./backend/README.md)     |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS — see [frontend/edu-tracker/README](../../frontend/edu-tracker/README.md) |
+| Ops      | Aspire (local orchestration), Docker, Render, GitHub Actions CI                                                   |
 
-For the Render web service and Supabase PostgreSQL deployment, see
-[docs/render-supabase.md](docs/render-supabase.md).
+---
 
-## Monorepo Layout
+## Repository layout
 
 ```
-/ (repo root)
-├─ backend/
-│  ├─ EduTracker.Api/              # ASP.NET Core web API
-│  ├─ EduTracker.Application/      # Business logic, CQRS, responses, validation
-│  ├─ EduTracker.Domain/           # Entities, abstractions, enums
-│  ├─ EduTracker.Infrastructure/   # Crypto, hashing, cache, external services
-│  └─ EduTracker.Persistence/      # EF Core DbContext, configurations, migrations
-├─ frontend/
-│  └─ edu-tracker/                 # React + Vite frontend
-├─ edutracker.slnx                 # Solution
-├─ Directory.Build.props           # Shared .NET build properties (net10.0)
-├─ Directory.Packages.props        # Central package management
-└─ LICENSE
+/
+├─ .github/                 # CI: check → build → migrate → deploy
+├─ aspire/                  # Local orchestration: api + worker + web
+├─ backend/                 # src + test
+├─ frontend/                # React SPA
+├─ shared-config/           # Shared appsettings (base defaults + Development overrides)
+├─ monitoring/              # Standalone Prometheus + Grafana datasource configs
+├─ global.json              # .NET SDK pin
+├─ LICENSE                  # MIT
+├─ edutracker.slnx          # Solution (aspire + backend projects)
+└─ render.yaml              # Render DB + Redis + backend + frontend
 ```
 
-## Requirements
+Detailed guides:
 
-- .NET SDK 10.0
-- Node.js LTS and npm
-- PostgreSQL 18+ (or a compatible managed instance)
+* [backend/README](./backend/README.md) — architecture, auth, worker/outbox, CLI, database, backend tests
 
-Optional but recommended:
-- Redis (for distributed cache implementation present in Infrastructure)
-- Docker (for local DB if preferred)
+---
+
+## Prerequisites
+
+* **.NET SDK 10.0** (pinned by `global.json`)
+* **Node** + npm (Docker builds use `node:24-alpine`; CI uses Node 24)
+* **Your own PostgreSQL and Redis locally** — Aspire orchestrates only API + worker + web
+* **Aspire CLI**: [Get started with Aspire](https://aspire.dev/get-started/install-cli/)
+* **Docker** — required for backend integration tests (Testcontainers)
+
+---
+
+## Quickstart (full stack via Aspire)
+
+```bash
+# 1. Set secrets once (shared across Api/Worker/Cli/Persistence/AppHost)
+cd backend/src/EduTracker.Api
+dotnet user-secrets set "ConnectionStrings:Database" "Host=localhost;Port=5432;Database=edutracker;Username=postgres;Password=postgres"
+dotnet user-secrets set "ConnectionStrings:Redis" "localhost:6379,abortConnect=false"
+dotnet user-secrets set "DataEncryptionOptions:Keys:1" "<YOUR_32_BYTE_KEY_BASE64>"
+dotnet user-secrets set "DataEncryptionOptions:CurrentKeyVersion" "1"
+dotnet user-secrets set "HashingOptions:EmailHmacKey" "<YOUR_32_BYTE_KEY_BASE64>"
+
+# 2. Run everything from the repo root
+cd ../../..
+aspire run
+```
+
+First run: the Aspire dashboard prompts for any missing values (prefilled from user-secrets). Tick **Save** for future runs.
+
+```bash
+# 3. Migrate + seed
+dotnet ef database update --project backend/src/EduTracker.Persistence
+dotnet run --project backend/src/EduTracker.Cli -- seed super-admin --first-name Admin --last-name Super --username admin --email admin@example.com --password "ChangeMe!123"
+```
+
+Open the Vite app URL shown by Aspire and sign in. API reference: Scalar UI + `/openapi/v1.json` in Development.
+
+Key rotation and per-service config: see [backend/README](./backend/README.md).
+
+---
 
 ## Configuration
 
-Backend configuration is read via appsettings and environment variables.
+Base defaults live in `shared-config/appsettings.Shared.json`. The five secrets above are the only required values; everything else ships with working defaults. No `.env` files in the repo. CI needs `DB_CONNECTION_STRING`, `RENDER_API_DEPLOY_HOOK`, `RENDER_WEB_DEPLOY_HOOK`; Render uses `sync: false` dashboard secrets (see `render.yaml`).
 
-- Connection string key: `ConnectionStrings:Database`
-- CORS: frontend allowed origin defaults to `http://localhost:3000`
-- Super admin seeding (executed at startup via mediator):
-  - Options type: `SuperAdminSeedOptions`
-  - Supplied via user-secrets or environment variables (see example below)
+---
 
-Example environment variables (PowerShell):
+## CI and deployment
 
-```
-$env:ConnectionStrings__Database = "Host=localhost;Port=5432;Database=edutracker;Username=postgres;Password=postgres"
-$env:SuperAdminSeed__FirstName = "Admin"
-$env:SuperAdminSeed__MiddleName = ""
-$env:SuperAdminSeed__LastName = "User"
-$env:SuperAdminSeed__UserName = "admin"
-$env:SuperAdminSeed__Email = "admin@example.com"
-$env:SuperAdminSeed__Password = "ChangeMe!123"
-```
+`.github/workflows/ci.yml` on `main`: `check` (lint + typecheck + build + test) → `build` (validates Docker images) → `migrate` (CLI `db migrate`, additive-only) → `deploy` (Render hooks). `render.yaml` has `autoDeploy: false` — deploys are gated on CI.
 
-Alternatively, for local development you can use .NET user-secrets in `EduTracker.Api`:
-
-```
-cd backend/EduTracker.Api
-# Set secrets
-dotnet user-secrets set "ConnectionStrings:Database" "Host=localhost;Port=5432;Database=edutracker;Username=postgres;Password=postgres"
-dotnet user-secrets set "SuperAdminSeed:FirstName" "Admin"
-dotnet user-secrets set "SuperAdminSeed:MiddleName" ""
-dotnet user-secrets set "SuperAdminSeed:LastName" "User"
-dotnet user-secrets set "SuperAdminSeed:UserName" "admin"
-dotnet user-secrets set "SuperAdminSeed:Email" "admin@example.com"
-dotnet user-secrets set "SuperAdminSeed:Password" "ChangeMe!123"
-```
-
-## Getting Started (Development)
-
-1) Backend API
-
-``` bash
-cd backend/EduTracker.Api
-dotnet restore
-dotnet ef database update --project ../EduTracker.Persistence
-dotnet run
-```
-
-- API base URL in development: typically `https://localhost:3187` (per launchSettings)
-- OpenAPI JSON: `/openapi/v1.json`
-- Scalar UI (interactive docs): available in Development environment
-
-2) Frontend
-
-``` bash
-cd frontend/edu-tracker
-npm install
-npm run dev
-```
-
-- Frontend dev server: `http://localhost:3000`
-- The frontend expects the API to allow CORS from `http://localhost:3000`
-
-3) Generate typed API client (optional but recommended)
-
-``` bash
-cd frontend/edu-tracker
-npm run openapi-ts   # reads the backend OpenAPI at http://localhost:3187/openapi/v1.json
-```
-
-## Database & Migrations
-
-- DbContext: `EduTracker.Persistence.Context.AppDbContext`
-- Provider: Npgsql (PostgreSQL)
-- Migrations are located under `backend/EduTracker.Persistence/Migrations`
-
-Common EF Core commands (run in `backend/EduTracker.Api` or a project with the design-time factory, if present):
-
-``` bash
-# Add a new migration (from repo root)
- dotnet ef migrations add <Name> --project backend/EduTracker.Persistence --startup-project backend/EduTracker.Api
-
-# Update database (from repo root)
- dotnet ef database update --project backend/EduTracker.Persistence --startup-project backend/EduTracker.Api
-```
-
-## Authentication & Sessions
-
-- Authentication scheme: custom session-based scheme (`AuthenticationSchemes.Session`)
-- Middleware: `TraceIdMiddleware`, `ExceptionHandlingMiddleware`
-- Authorization: custom policies are registered via extension methods
-- Cookies: handled via `CookieService` (backend) with credentials allowed in CORS
-
-Ensure the frontend uses credentials for protected endpoints when necessary.
-
-## Caching & Security Services
-
-- Caching: `RedisCacheService` (wire up Redis connection if using distributed cache)
-- Encryption: `AesGcmDataEncryptionService`
-- Hashing: `HashingService`
-
-## NPM/Yarn Scripts (frontend)
-
-- `npm run dev` — start Vite dev server
-- `npm run build` — type-check and build production bundle
-- `npm run preview` — preview build locally
-- `npm run lint` — run ESLint
-- `npm run openapi-ts` — generate typed API client from backend OpenAPI
+---
 
 ## Troubleshooting
 
-- 404 on OpenAPI or Scalar UI:
-  - Ensure the environment is Development.
-  - Confirm the API is running and `app.MapOpenApi()` is executed (it is within Development block).
-- CORS errors from frontend:
-  - Verify API is running and CORS origin includes `http://localhost:3000`.
-- Database connection failures:
-  - Validate `ConnectionStrings:Database` via env vars or user-secrets.
-  - Ensure PostgreSQL is reachable and the database exists (EF will create schema on migrate).
-- Super admin not created on startup:
-  - Check `SuperAdminSeed` values provided via configuration.
-  - Inspect logs for mediator/validation errors.
+* Scalar not loading — dev-only, API must be running.
+* DB/Redis connection — verify the two connection strings, services running, migrations applied.
+* Aspire blocks on secrets — fill the 5 prompts or prefill via user-secrets.
+* Frontend “Can’t reach the server” — API down or Render cold-start; retry. `401` alone means signed out.
 
-## Build & Deploy (overview)
-
-- Backend can be containerized and configured via environment variables noted above.
-- Frontend builds to static assets (`dist/`) via `npm run build` and can be served from any static host or reverse-proxied behind the API.
-- For production, disable Developer-only endpoints and ensure HTTPS redirection is enabled (already enabled outside Development).
+---
 
 ## License
 
-This project is distributed under the terms of the MIT License. See the LICENSE file for details.
+MIT — see [LICENSE](./LICENSE). Copyright (c) 2026 Victor Awugosi.

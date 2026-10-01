@@ -1,0 +1,15 @@
+# Grafana normally asks you to click through a setup wizard on first run.
+# This file configures it at startup instead, so the stack comes up
+# already wired together - no manual steps, and it works the same way
+# on anyone else's machine.
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # "prometheus" is the Aspire resource name, resolved by Docker's DNS.
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

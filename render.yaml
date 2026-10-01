@@ -1,35 +1,64 @@
+# Production environment as one file. Secrets ("sync: false") live in the dashboard.
+# Deploys are gated: PRs from main -> deploy must be approved before merging. No direct commits to deploy.
+# No worker service on free plan: the worker runs INSIDE edutracker-backend.
+
+databases:
+  - name: edutracker-db
+    databaseName: edutracker
+    user: edutracker
+    plan: free
+
 services:
+  - type: keyvalue
+    name: edutracker-redis
+    plan: free
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+
   - type: web
-    name: edutracker
+    name: edutracker-backend
     runtime: docker
     plan: free
-    region: frankfurt
-    dockerfilePath: ./backend/EduTracker.Api/Dockerfile
+    branch: deploy
+    autoDeploy: false
+    dockerfilePath: ./backend/Dockerfile
     dockerContext: .
-    healthCheckPath: /health
-    autoDeployTrigger: commit
+    healthCheckPath: /api
     envVars:
-      - key: ASPNETCORE_ENVIRONMENT
-        value: Production
-      - key: ASPNETCORE_URLS
-        value: http://0.0.0.0:10000
-      - key: DemoMode__Enabled
-        value: "true"
       - key: ConnectionStrings__Database
         sync: false
       - key: ConnectionStrings__Redis
-        value: ""
+        sync: false
       - key: DataEncryptionOptions__Keys__1
         sync: false
       - key: HashingOptions__EmailHmacKey
         sync: false
-      - key: SuperAdminSeedOptions__FirstName
-        value: Admin
-      - key: SuperAdminSeedOptions__LastName
-        value: Super
-      - key: SuperAdminSeedOptions__UserName
+      - key: DataEncryptionOptions__CurrentKeyVersion
         sync: false
-      - key: SuperAdminSeedOptions__Email
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
         sync: false
-      - key: SuperAdminSeedOptions__Password
+      - key: OTEL_EXPORTER_OTLP_HEADERS
         sync: false
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: URLS
+        value: http://+:8080
+      - key: PORT
+        value: "8080"
+
+  - type: web
+    name: edutracker-frontend
+    runtime: docker
+    plan: free
+    branch: deploy
+    autoDeploy: false
+    dockerfilePath: ./frontend/edu-tracker/Dockerfile
+    dockerContext: ./frontend/edu-tracker
+    healthCheckPath: /
+    envVars:
+      - key: API_SCHEME
+        value: https
+      - key: API_HOST
+        value: edutracker-backend.onrender.com
+      - key: PORT
+        value: "80"

@@ -1,0 +1,13 @@
+<Project>
+
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)appsettings.Shared.json" Link="appsettings.Shared.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="$(MSBuildThisFileDirectory)appsettings.Shared.Development.json" Link="appsettings.Shared.Development.json" Condition="Exists('$(MSBuildThisFileDirectory)appsettings.Shared.Development.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

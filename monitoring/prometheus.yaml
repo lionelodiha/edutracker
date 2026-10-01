@@ -1,0 +1,22 @@
+# Prometheus stores every measurement with a timestamp, so you can ask
+# "what did this look like an hour ago" instead of only "right now".
+
+global:
+  # How often to collect. 15s is a sane default: frequent enough to
+  # catch a real outage, cheap enough to keep on a laptop.
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+storage:
+  tsdb:
+    # The API pushes metrics to us rather than us pulling from it, and
+    # pushed batches can arrive slightly out of order. Without this
+    # window, Prometheus rejects them.
+    out_of_order_time_window: 30m
+
+scrape_configs:
+  # Prometheus watching itself. If this stops, monitoring is down -
+  # and monitoring that can't tell you it's broken is worse than none.
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

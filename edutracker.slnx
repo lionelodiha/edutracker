@@ -1,19 +1,23 @@
 <Solution>
 
-  <Folder Name="/config/">
-    <File Path=".gitignore" />
-    <File Path="Directory.Build.props" />
-    <File Path="Directory.Packages.props" />
+  <Folder Name="/aspire/">
+    <Project Path="aspire/EduTracker.AppHost/EduTracker.AppHost.csproj" />
   </Folder>
 
-  <Folder Name="/backend/">
-    <Project Path="backend/EduTracker.Api.IntegrationTests/EduTracker.Api.IntegrationTests.csproj" />
-    <Project Path="backend/EduTracker.Api/EduTracker.Api.csproj" />
-    <Project Path="backend/EduTracker.Application/EduTracker.Application.csproj" />
-    <Project Path="backend/EduTracker.Domain.Tests/EduTracker.Domain.Tests.csproj" />
-    <Project Path="backend/EduTracker.Domain/EduTracker.Domain.csproj" />
-    <Project Path="backend/EduTracker.Infrastructure/EduTracker.Infrastructure.csproj" />
-    <Project Path="backend/EduTracker.Persistence/EduTracker.Persistence.csproj" />
+  <Folder Name="/backend/src/">
+    <Project Path="backend/src/EduTracker.Api/EduTracker.Api.csproj" />
+    <Project Path="backend/src/EduTracker.Application/EduTracker.Application.csproj" />
+    <Project Path="backend/src/EduTracker.Cli/EduTracker.Cli.csproj" />
+    <Project Path="backend/src/EduTracker.Domain/EduTracker.Domain.csproj" />
+    <Project Path="backend/src/EduTracker.Infrastructure/EduTracker.Infrastructure.csproj" />
+    <Project Path="backend/src/EduTracker.Persistence/EduTracker.Persistence.csproj" />
+    <Project Path="backend/src/EduTracker.Worker/EduTracker.Worker.csproj" />
+    <Project Path="backend/src/EduTracker.Shared/EduTracker.Shared.csproj" />
+  </Folder>
+
+  <Folder Name="/backend/test/">
+    <Project Path="backend/test/EduTracker.Api.IntegrationTests/EduTracker.Api.IntegrationTests.csproj" />
+    <Project Path="backend/test/EduTracker.Domain.Tests/EduTracker.Domain.Tests.csproj" />
   </Folder>
 
 </Solution>
