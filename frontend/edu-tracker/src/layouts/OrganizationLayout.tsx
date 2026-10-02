@@ -62,10 +62,7 @@ export default function OrganizationLayout() {
         { to: base, label: "Overview", short: "Overview", icon: <HomeIcon />, end: true as const, forceActive: false },
         { to: `${base}/structure`, label: "Academic Structure", short: "Structure", icon: <CalendarIcon />, end: undefined, forceActive: structureActive },
         { to: `${base}/staff`, label: "Staff & Teachers", short: "Staff", icon: <UsersIcon />, end: undefined, forceActive: false },
-<<<<<<< HEAD
-=======
         { to: `${base}/invites`, label: "Invites & requests", short: "Invites", icon: <MailIcon />, end: undefined, forceActive: false },
->>>>>>> Leo's-branch
         { to: `${base}/settings`, label: "School Settings", short: "Settings", icon: <SettingsIcon />, end: undefined, forceActive: false },
     ];
 

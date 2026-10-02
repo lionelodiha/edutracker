@@ -45,15 +45,6 @@ function DashboardShell() {
                     </label>
 
                     <div className="dz-topbar-spacer" />
-<<<<<<< HEAD
-
-                    {isDemoMode() && (
-                        <span className="dz-demo-indicator" title="Academic, cohort and faculty data is stored in this browser for the demo.">
-                            Demo data
-                        </span>
-                    )}
-=======
->>>>>>> Leo's-branch
 
                     <Link
                         to="/dashboard#invites"

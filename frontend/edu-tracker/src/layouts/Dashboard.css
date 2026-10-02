@@ -1552,11 +1552,7 @@ a.dz-row:hover {
   /* Workspace sections become a bottom tab bar. */
   .dz-org-sidebar nav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
-<<<<<<< HEAD
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem;
-=======
     display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.15rem;
->>>>>>> Leo's-branch
     padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
     background: rgba(13, 19, 32, 0.94);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
