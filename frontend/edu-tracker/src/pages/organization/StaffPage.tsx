@@ -15,15 +15,18 @@ import { facultyApi, FacultyApiError } from "../../features/faculty/api";
 import type { StaffProfile } from "../../features/staff/types";
 import type { OrganizationContext } from "../../layouts/OrganizationLayout";
 import { AcHeader, Badge, Drawer, EmptyState, Segmented } from "../../features/academics/ui";
+import { LeaveRequestsView } from "./StaffOperations";
 import { formatDay, initials, monogramColour } from "../../features/academics/helpers";
 import "../../features/academics/academics.css";
 import "./staff.css";
 
 type AddStaffRole = Extract<OrganizationMemberRole, "Admin" | "Moderator" | "Teacher" | "Student">;
 type AddStaffForm = { firstName: string; middleName: string; lastName: string; userName: string; email: string; password: string; role: AddStaffRole };
-type View = "accounts" | "records";
+type View = "accounts" | "records" | "leave";
 const ROLES: AddStaffRole[] = ["Admin", "Moderator", "Teacher", "Student"];
-const EMPTY_STAFF_FORM: AddStaffForm = { firstName: "", middleName: "", lastName: "", userName: "", email: "", password: "", role: "Teacher" };
+/** Accounts made by hand are only for people who run the admin app. Students and staff join through an invite link. */
+const OFFICE_ROLES: AddStaffRole[] = ["Admin", "Moderator"];
+const EMPTY_STAFF_FORM: AddStaffForm = { firstName: "", middleName: "", lastName: "", userName: "", email: "", password: "", role: "Admin" };
 
 const roleTone = (role: string) => role === "Admin" || role === "Owner" ? "code" : role === "Teacher" ? "upcoming" : "neutral";
 const statusTone = (status: string) => status === "Active" ? "current" : status === "Banned" || status === "Suspended" ? "warn" : "closed";
@@ -53,7 +56,6 @@ export default function StaffPage() {
     const [facultyFilter, setFacultyFilter] = useState("");
     const [kindFilter, setKindFilter] = useState("");
     const [openMember, setOpenMember] = useState<OrganizationMemberResponse | null>(null);
-    const [openRecord, setOpenRecord] = useState<StaffProfile | null>(null);
 
     const [showAddStaff, setShowAddStaff] = useState(false);
     const [addStaffForm, setAddStaffForm] = useState<AddStaffForm>(EMPTY_STAFF_FORM);
@@ -66,8 +68,8 @@ export default function StaffPage() {
     const faculties = useMemo(() => units.filter((u) => u.parent === null), [units]);
     const unitName = useMemo(() => new Map(units.map((u) => [u.key, u.name])), [units]);
     const isOwner = org ? org.ownerUserId === user?.id : false;
-    /** Faculty-office staff sit on the faculty itself; everyone else on a department under it. */
-    const facultyOf = (s: StaffProfile) => s.unitKind === "Faculty" ? s.unitId : units.find((u) => u.key === s.unitId)?.parent ?? null;
+    /** Recorded on decisions and assigned tasks. The real API should take it from the session. */
+    const adminName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.userName || "School admin";
 
     const fetchMembers = useCallback(async () => {
         if (!organizationId) return;
@@ -110,7 +112,7 @@ export default function StaffPage() {
         .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
     const openAddStaffModal = () => {
-        setAddStaffForm({ ...EMPTY_STAFF_FORM, role: roleFilter || "Teacher" });
+        setAddStaffForm({ ...EMPTY_STAFF_FORM, role: roleFilter && OFFICE_ROLES.includes(roleFilter) ? roleFilter : "Admin" });
         setAddStaffError(null);
         setAddStaffSuccess(null);
         setShowAddStaff(true);
@@ -165,19 +167,22 @@ export default function StaffPage() {
             <AcHeader
                 title="Staff & Teachers"
                 meta={meta}
-                actions={isOwner ? <button className="dz-btn-green" onClick={openAddStaffModal}>+ Add member</button> : undefined}
+                actions={<>
+                    {isOwner && <button className="dz-btn-outline" onClick={openAddStaffModal}>+ Office account</button>}
+                    <Link className="dz-btn-green" to={`/dashboard/organizations/${organizationId}/invites`}>Invite people</Link>
+                </>}
             />
 
             <div className="st-toolbar">
                 <Segmented label="Directory" value={view} onChange={(next) => { setView(next); setQuery(""); }}
-                    options={[{ value: "accounts", label: "School accounts" }, { value: "records", label: "Staff records" }]} />
-                <label className="st-search">
+                    options={[{ value: "accounts", label: "School accounts" }, { value: "records", label: "Staff records" }, { value: "leave", label: "Leave requests" }]} />
+                {view !== "leave" && <label className="st-search">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                     <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={view === "accounts" ? "Search name or username" : "Search name or staff number"} aria-label="Search people" />
-                </label>
+                </label>}
             </div>
 
-            {view === "accounts" ? (
+            {view === "leave" ? <LeaveRequestsView organizationId={organizationId} adminName={adminName} /> : view === "accounts" ? (
                 <>
                     <div className="st-chips" role="radiogroup" aria-label="Filter by role">
                         {([["", "All", people.length], ...ROLES.map((r) => [r, `${r}s`, roleCounts[r]] as const)] as const).map(([value, label, n]) => (
@@ -189,7 +194,7 @@ export default function StaffPage() {
 
                     {membersState === "loading" ? <ListSkeleton />
                         : membersState === "error" ? <EmptyState title="Couldn't load members" text="Check your connection and try again." action={<button className="dz-btn-outline" onClick={() => { setMembersState("loading"); void fetchMembers(); }}>Try again</button>} />
-                        : !people.length ? <EmptyState title="No members yet" text="Add a teacher, student or staff account to start filling this school." action={isOwner ? <button className="dz-btn-green" onClick={openAddStaffModal}>+ Add member</button> : undefined} />
+                        : !people.length ? <EmptyState title="No members yet" text="Students and staff join through an invite link: they fill in their details and you approve them." action={<Link className="dz-btn-green" to={`/dashboard/organizations/${organizationId}/invites`}>Invite people</Link>} />
                         : (
                             <section className="ws-surface" aria-label="School accounts">
                                 <div className="ws-row ws-row-head st-grid-accounts"><span>Member</span><span>Role</span><span>Status</span><span className="st-hide-sm">Joined</span></div>
@@ -220,17 +225,17 @@ export default function StaffPage() {
 
                     {recordsState === "loading" ? <ListSkeleton />
                         : recordsState === "error" ? <EmptyState title="Couldn't load staff records" text={recordsError} />
-                        : !records.length ? <EmptyState title="No staff records yet" text="Staff records are created from a faculty's workspace in Academic Structure." action={<Link className="dz-btn-outline" to={`/dashboard/organizations/${organizationId}/structure`}>Open Academic Structure</Link>} />
+                        : !records.length ? <EmptyState title="No staff records yet" text="Staff records appear here when you approve a teaching or non-teaching staff request." action={<Link className="dz-btn-outline" to={`/dashboard/organizations/${organizationId}/invites`}>Invite people</Link>} />
                         : (
                             <section className="ws-surface" aria-label="Staff records">
                                 <div className="ws-row ws-row-head st-grid-records"><span>Staff</span><span className="st-hide-sm">Unit</span><span>Kind</span><span>Status</span></div>
                                 {shownRecords.length ? shownRecords.map((s) => (
-                                    <button key={s.staffProfileId} type="button" className="ws-row st-grid-records" onClick={() => setOpenRecord(s)}>
+                                    <Link key={s.staffProfileId} className="ws-row st-grid-records st-row-link" to={`/dashboard/organizations/${organizationId}/staff/${s.staffProfileId}`}>
                                         <span className="ws-person"><Avatar name={s.fullName} /><span style={{ minWidth: 0 }}><strong>{s.title ? `${s.title} ` : ""}{s.fullName}</strong><small className="ws-mono">{s.staffNumber}</small></span></span>
                                         <span className="ws-muted st-hide-sm">{unitName.get(s.unitId) ?? "—"}</span>
                                         <span><Badge>{s.kind}</Badge></span>
                                         <span><Badge tone={statusTone(s.status)}>{s.status}</Badge></span>
-                                    </button>
+                                    </Link>
                                 )) : <p className="st-none">No staff match these filters.</p>}
                             </section>
                         )}
@@ -249,35 +254,20 @@ export default function StaffPage() {
                 </Drawer>
             )}
 
-            {openRecord && (
-                <Drawer title={openRecord.fullName} onClose={() => setOpenRecord(null)}
-                    footer={facultyOf(openRecord) ? <><span /><Link className="dz-btn-outline" to={`/dashboard/organizations/${organizationId}/faculties/${facultyOf(openRecord)}`}>Open faculty workspace</Link></> : undefined}>
-                    <div className="st-drawer-hero"><Avatar name={openRecord.fullName} /><div><strong>{openRecord.title ? `${openRecord.title} ` : ""}{openRecord.fullName}</strong><small className="ws-mono">{openRecord.staffNumber}</small></div></div>
-                    <dl className="ac-dl">
-                        <dt>Unit</dt><dd>{unitName.get(openRecord.unitId) ?? "—"} <span className="ws-muted">({openRecord.unitKind})</span></dd>
-                        <dt>Kind</dt><dd>{openRecord.kind}</dd>
-                        <dt>Status</dt><dd><Badge tone={statusTone(openRecord.status)}>{openRecord.status}</Badge></dd>
-                        <dt>School email</dt><dd>{openRecord.schoolEmail || "—"}</dd>
-                        <dt>Appointed</dt><dd>{formatDay(openRecord.appointedOn)}</dd>
-                        {openRecord.highestQualification && <><dt>Qualification</dt><dd>{openRecord.highestQualification}</dd></>}
-                        <dt>Login</dt><dd>{openRecord.userId ? "Has an account" : <Badge tone="warn">No login yet</Badge>}</dd>
-                    </dl>
-                </Drawer>
-            )}
 
             {showAddStaff && (
                 <Modal titleId="add-staff-title" onClose={closeAddStaffModal} maxWidth={520}>
                     <form onSubmit={handleAddStaff} className="dz-form st-form">
                         <div>
-                            <h2 id="add-staff-title" className="st-modal-title">Add member</h2>
-                            <p className="ws-muted" style={{ margin: ".25rem 0 0" }}>Creates an account and adds it to {org?.name ?? "this school"} in one step.</p>
+                            <h2 id="add-staff-title" className="st-modal-title">Add office account</h2>
+                            <p className="ws-muted" style={{ margin: ".25rem 0 0" }}>For people who run {org?.name ?? "this school"} with you in this admin app. Students and staff join through an invite link instead.</p>
                         </div>
                         {addStaffError && <p role="alert" className="ac-notice ac-notice-warn" style={{ margin: 0 }}>{addStaffError}</p>}
                         {addStaffSuccess && <p role="status" className="ac-notice st-notice-ok" style={{ margin: 0 }}>{addStaffSuccess}</p>}
                         <div className="ac-field">
                             <span className="ac-label">Role</span>
                             <div className="st-chips" role="radiogroup" aria-label="Role">
-                                {ROLES.map((r) => <button key={r} type="button" role="radio" aria-checked={addStaffForm.role === r} className={`st-chip ${addStaffForm.role === r ? "active" : ""}`} onClick={() => setAddStaffForm((f) => ({ ...f, role: r }))}>{r}</button>)}
+                                {OFFICE_ROLES.map((r) => <button key={r} type="button" role="radio" aria-checked={addStaffForm.role === r} className={`st-chip ${addStaffForm.role === r ? "active" : ""}`} onClick={() => setAddStaffForm((f) => ({ ...f, role: r }))}>{r}</button>)}
                             </div>
                         </div>
                         <div className="ac-form-grid">

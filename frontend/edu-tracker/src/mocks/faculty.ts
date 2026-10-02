@@ -15,6 +15,7 @@ import { currentPostHolder, postsHeldBy, staffOfFaculty, studentUnitChain } from
 import type { Invitation, PendingRecord } from "../features/onboarding/invitations";
 import { isTokenUsable } from "../features/onboarding/invitations";
 import type { IdentifierFormat } from "../features/onboarding/identifiers";
+import type { JoinLink, JoinRequest } from "../features/onboarding/joinLinks";
 import { verifyPassword, type PasswordCredential } from "../features/onboarding/passwords";
 import {
   DEFAULT_SCHOOL_DOMAIN,
@@ -49,7 +50,7 @@ const err = (status: number, code: string, message: string): OpErr => ({ ok: fal
 type AttendanceRow = AttendanceSummary & { ownerKind: "staff" | "student"; ownerId: string };
 export type MockEmail = { to: string; subject: string; body: string; createdAt: string };
 
-type OrgDB = {
+export type OrgDB = {
   ranks: AcademicRank[];
   staff: StaffProfile[];
   rankHistory: RankHistory[];
@@ -75,6 +76,9 @@ type OrgDB = {
   staffSeq: number;
   domain: string;
   sessionNames: Record<string, string>;
+  /** School invite links and the requests sent through them (see join.ts). */
+  joinLinks: JoinLink[];
+  joinRequests: JoinRequest[];
 };
 
 function emptyDB(): OrgDB {
@@ -84,6 +88,7 @@ function emptyDB(): OrgDB {
     students: [], studentHistory: [], courses: [], assignments: [], registrations: [], offerings: [],
     results: [], studentResults: [], attendance: [], identifierFormat: null, issuedIdentifiers: [],
     usedSerials: {}, emails: [], staffSeq: 0, domain: DEFAULT_SCHOOL_DOMAIN, sessionNames: {},
+    joinLinks: [], joinRequests: [],
   };
 }
 
@@ -585,21 +590,27 @@ export function revokeInvitation(organizationId: string, invitationId: string): 
 }
 
 function findByToken(token: string): { organizationId: string; db: OrgDB; invitation: Invitation } | null {
-  // A public join link is often opened in a new tab or after a reload. Hydrate
-  // persisted organizations before looking up the token.
+  const found = findFacultyOrg(db => db.invitations.some(i => i.token === token));
+  return found ? { ...found, invitation: found.db.invitations.find(i => i.token === token)! } : null;
+}
+
+/** First organization whose store matches. Public links are often opened in a new tab or after a reload, so persisted organizations are hydrated first. */
+export function findFacultyOrg(match: (db: OrgDB) => boolean): { organizationId: string; db: OrgDB } | null {
   if (typeof localStorage !== "undefined") {
     try {
       for (let i = 0; i < localStorage.length; i += 1) {
         const key = localStorage.key(i);
         if (key?.startsWith("edutracker.faculty.")) loadDB(key.slice("edutracker.faculty.".length));
       }
-    } catch { /* In-memory invitations still work when storage is unavailable. */ }
+    } catch { /* In-memory records still work when storage is unavailable. */ }
   }
-  for (const [organizationId, db] of memory.entries()) {
-    const invitation = db.invitations.find(i => i.token === token);
-    if (invitation) return { organizationId, db, invitation };
-  }
+  for (const [organizationId, db] of memory.entries()) if (match(db)) return { organizationId, db };
   return null;
+}
+
+/** Direct access for join.ts, which shares this store's people, accounts and numbering. */
+export function facultyStore(organizationId: string) {
+  return { db: loadDB(organizationId), persist: () => saveDB(organizationId) };
 }
 
 /** Approved students are the source for cohort rosters; no second person row is created. */

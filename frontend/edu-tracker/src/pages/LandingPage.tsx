@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "../components/LogoLockup";
+import Wordmark from "../components/Wordmark";
 import "./LandingPage.css";
 
 function Icon({ name, size = 20 }: { name: "grid" | "people" | "book" | "arrow" | "check" | "shield"; size?: number }) {
@@ -27,7 +27,7 @@ function ProductPreview() {
         <div className="lp-preview-label"><span><span className="lp-status-dot" /> Your dashboard, at a glance.</span><span>PRODUCT PREVIEW ↘</span></div>
         <div className="lp-preview lp-dashboard-preview" role="img" aria-label="Illustration of the EduTracker dashboard showing organizations, invites, sessions, and account activity">
             <div className="lp-dash-topbar">
-                <Logo markSize={26} fontSize="1.08rem" color="var(--lp-ink)" markFill="var(--lp-accent)" />
+                <Wordmark fontSize="1.2rem" />
                 <span className="lp-dash-search">⌕ &nbsp; Search organizations <small>⌘ F</small></span>
                 <span className="lp-dash-topbar-spacer" />
                 <span className="lp-dash-bell" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" /></svg><i /></span>
@@ -154,7 +154,7 @@ export default function LandingPage() {
     return <div className="lp" ref={rootRef}>
         <a className="lp-skip" href="#main">Skip to content</a>
         <header className="lp-header"><nav className="lp-shell lp-nav" aria-label="Main navigation">
-            <Link to="/" aria-label="EduTracker home"><Logo markSize={34} fontSize="1.35rem" color="var(--lp-ink)" markFill="var(--lp-accent)" /></Link>
+            <Link to="/" aria-label="EduTracker home"><Wordmark fontSize="1.75rem" animate /></Link>
             <div className="lp-desktop-links"><a href="#product">Product</a><a href="#workflow">How it works</a><Link to="/portal-login">Student & teacher portal <span>↗</span></Link></div>
             <div className="lp-nav-actions"><Link to="/login" className="lp-signin">Sign in</Link><Link to="/register" className="lp-button lp-button-small lp-nav-cta">Get started <Icon name="arrow" size={16} /></Link><button className="lp-menu-toggle" aria-expanded={menuOpen} aria-controls="landing-mobile-menu" aria-label={menuOpen ? "Close navigation" : "Open navigation"} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "✕" : "☰"}</button></div>
         </nav>{menuOpen && <nav className="lp-mobile-menu" id="landing-mobile-menu" aria-label="Mobile navigation"><a href="#product" onClick={() => setMenuOpen(false)}>Product</a><a href="#workflow" onClick={() => setMenuOpen(false)}>How it works</a><Link to="/portal-login" onClick={() => setMenuOpen(false)}>Student & teacher portal</Link><Link to="/login" onClick={() => setMenuOpen(false)}>Sign in</Link><Link to="/register" className="lp-button lp-mobile-menu-cta" onClick={() => setMenuOpen(false)}>Get started <Icon name="arrow" size={16} /></Link></nav>}</header>
@@ -168,6 +168,6 @@ export default function LandingPage() {
             <section className="lp-workflow" id="workflow" aria-labelledby="workflow-title"><div className="lp-shell"><div className="lp-centered-heading"><span className="lp-overline">A FRESH START, WITHOUT THE FRICTION</span><h2 id="workflow-title">From your first sign-in<br />to your next school year.</h2></div><div className="lp-steps">{[{ title: "Make yourself at home", text: "Create your account. Your dashboard is the starting point for everything ahead." }, { title: "Bring your school together", text: "Add your organization, invite your people, and give everyone the right role." }, { title: "Give your year some structure", text: "Set up sessions, add courses, and organize the classes that bring it all to life." }].map((step, index) => <article key={step.title}><span className="lp-step-number">0{index + 1}</span><h3>{step.title}</h3><p>{step.text}</p></article>)}</div></div></section>
             <section className="lp-shell lp-cta"><div><span className="lp-overline">YOUR NEXT CHAPTER STARTS HERE</span><h2>A more organized year<br />is a few clicks away.</h2><p>Make space for what school is really about.</p></div><Link to="/register" className="lp-button">Let’s get started <Icon name="arrow" /></Link></section>
         </main>
-        <footer className="lp-footer lp-shell"><div><Logo markSize={28} color="var(--lp-ink)" markFill="var(--lp-accent)" /><p>A little clarity for every school day.</p></div><nav aria-label="Footer navigation"><a href="#product">Product</a><a href="#workflow">How it works</a><Link to="/portal-login">Portal sign in</Link></nav><small>© {new Date().getFullYear()} EduTracker</small></footer>
+        <footer className="lp-footer lp-shell"><div><Wordmark fontSize="1.4rem" /><p>A little clarity for every school day.</p></div><nav aria-label="Footer navigation"><a href="#product">Product</a><a href="#workflow">How it works</a><Link to="/portal-login">Portal sign in</Link></nav><small>© {new Date().getFullYear()} EduTracker</small></footer>
     </div>;
 }

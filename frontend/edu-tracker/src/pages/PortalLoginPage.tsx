@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isDemoMode } from "../demoMode";
 import { portalSignIn } from "../features/portal/helpers";
-import { DEMO_ORGS, type DemoSchool } from "../mocks/portalDemo";
 import ComingSoonPage from "./ComingSoonPage";
 import "../layouts/Dashboard.css";
 import "../features/portal/portal.css";
@@ -26,14 +25,6 @@ export default function PortalLoginPage() {
         <label className="input-label">School ID<input className="input" value={schoolId} onChange={event => setSchoolId(event.target.value)} required /></label>
         <button className="dz-btn-green">Go to portal</button>
       </form>
-      <div className="pt-signin-demo">
-        <div className="dz-nav-label" style={{ padding: 0 }}>Or try a demo school</div>
-        {(Object.keys(DEMO_ORGS) as DemoSchool[]).map(school => (
-          <Link key={school} className="dz-btn-outline" to={portalSignIn(DEMO_ORGS[school].organizationId)}>
-            <strong>{DEMO_ORGS[school].name}</strong><small>Student, teaching and non-teaching demo accounts</small>
-          </Link>
-        ))}
-      </div>
       <Link className="dz-reminder-meta" to="/">← EduTracker home</Link>
     </div>
   </main>;

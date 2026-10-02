@@ -1,5 +1,4 @@
 import { readSchoolSetup } from "./schoolSetup";
-import { isDemoMode } from "../../demoMode";
 import { fixtureId } from "./fixtureId";
 import { useState, type FormEvent } from "react";
 import { getGroupSettings, saveGroupSettings } from "./settings";
@@ -86,9 +85,6 @@ export default function CohortWorkspacePage() {
           <span aria-hidden="true"> / </span>{settings.plural}
         </span>
       </nav>
-      {isDemoMode() && (
-        <div className="cohort-preview-banner"><strong>Frontend preview</strong><span>Your school structure and student records are saved in this browser. Automatic promotion is not active yet.</span></div>
-      )}
       <SchoolPreferences key={org.organizationId} organizationId={org.organizationId} />
       <CohortWorkspaceProvider
         key={`${org.organizationId}:${semesterId}`}

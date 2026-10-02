@@ -6,6 +6,7 @@ import { approvedStudentsInCohort, resetFacultyMocks } from "./faculty";
 import { facultyHandlers } from "./facultyHandlers";
 import { academicHandlers } from "./academicHandlers";
 import { portalHandlers } from "./portalHandlers";
+import { joinHandlers } from "./joinHandlers";
 import { resetPortalMocks } from "./portal";
 
 const API = "*";
@@ -272,4 +273,4 @@ export function resetCohortMocks() {
   resetPortalMocks();
 }
 
-export const handlers = [...cohortHandlers, ...facultyHandlers, ...academicHandlers, ...portalHandlers];
+export const handlers = [...cohortHandlers, ...facultyHandlers, ...academicHandlers, ...portalHandlers, ...joinHandlers];

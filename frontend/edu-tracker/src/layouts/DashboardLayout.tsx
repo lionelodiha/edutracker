@@ -1,10 +1,9 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Logo from "../components/LogoLockup";
+import Wordmark from "../components/Wordmark";
 import AccountMenu from "../components/AccountMenu";
 import { BellIcon, SearchIcon } from "../components/icons";
 import { DashboardDataProvider, useDashboardData } from "./DashboardData";
-import { isDemoMode } from "../demoMode";
 import "./Dashboard.css";
 
 function DashboardShell() {
@@ -31,7 +30,7 @@ function DashboardShell() {
             <div className="dz-main dz-main--full">
                 <header className="dz-topbar">
                     <Link to="/dashboard" aria-label="EduTracker home" style={{ display: "inline-flex", textDecoration: "none" }}>
-                        <Logo markSize={32} markFill="#8b5cf6" fontSize="1.1rem" color="#f1f5f9" />
+                        <Wordmark fontSize="1.45rem" />
                     </Link>
 
                     <label className={`dz-search${searchFiltersPage ? "" : " dz-search--desktop-only"}`}>
@@ -46,12 +45,6 @@ function DashboardShell() {
                     </label>
 
                     <div className="dz-topbar-spacer" />
-
-                    {isDemoMode() && (
-                        <span className="dz-demo-indicator" title="Academic, cohort and faculty data is stored in this browser for the demo.">
-                            Demo data
-                        </span>
-                    )}
 
                     <Link
                         to="/dashboard#invites"

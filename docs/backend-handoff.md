@@ -9,9 +9,10 @@ on `Leo's-branch` since it split from `main` (`e6c1508`, 18 Sep 2026):
   the **student and staff portals** with assessment and results. See
   [Since PROD was created](#since-prod-was-created).
 
-The second half is the backend to-do list: **60 endpoints the frontend already calls that
-the real API does not have yet** (47 from before `PROD`, 13 for the portals), the data
-model they need, and the places where the new screens and the existing backend disagree.
+The second half is the backend to-do list: **74 endpoints the frontend already calls that
+the real API does not have yet** (47 from before `PROD`, 13 for the portals, 14 for the
+admin screens that set the portals up), the data model they need, and the places where the
+new screens and the existing backend disagree.
 
 **The mock backend stays.** Every mocked endpoint keeps working until its real version
 ships. Replace them one at a time, as described below; don't remove `src/mocks/` wholesale.
@@ -399,7 +400,7 @@ These exist and the frontend uses most of them. All paths start with `/api`.
 The `Faculty` and `PortalInvite` entities exist in the database, but **no endpoints
 expose them**.
 
-## Endpoints to build (60)
+## Endpoints to build (81)
 
 All paths start with `/api`. Status codes and error ids below are what the mocks return
 today, and the screens already handle them.
@@ -537,6 +538,56 @@ current values are the source of truth until then:
 **How a sheet's status is worked out.** It's derived, not stored: *Not started* (no marks),
 *Partial* (some marks or something published), *Submitted* (locked).
 
+### E. School admin: timetables, registration and staff operations (14)
+
+These are the admin-app screens that set up what the portals show: the department's
+**Timetable** and **Registration** tabs, and on Staff & Teachers the **Leave requests** view
+and the tabs inside a staff record. Client: `src/features/portal/adminApi.ts`. Rules:
+the "School admin" sections at the end of `src/mocks/portal.ts`. Tests:
+`src/mocks/portalAdmin.test.ts`.
+
+**Every one of these needs the caller to be an owner or admin of the organization in the
+path.** The mock doesn't check, because the admin app is already behind the real login.
+
+| # | Method | Path | Request → Response | Rules and errors |
+| --- | --- | --- | --- | --- |
+| 61 | GET | `/organizations/{id}/departments/{departmentId}/timetable?termId=` | → `DepartmentTimetable { termId, termName, termClosed, offerings[], slots: AdminSlot[] }` | `DEPARTMENT_NOT_FOUND` 404, `TERM_NOT_FOUND` 404 |
+| 62 | POST | `/organizations/{id}/timetable/slots` | `{ offeringId, day (1–6, Mon–Sat), start, end ("HH:MM"), venue }` → 201 `AdminSlot` | Between 07:00 and 19:00, end after start. **Clash checks in the same term, same day, overlapping times:** `LEVEL_CLASH` 409 (same department and level), `LECTURER_CLASH` 409 (same lecturer), `VENUE_CLASH` 409 (same venue, case-insensitive). `TERM_CLOSED` 409 |
+| 63 | DELETE | `/organizations/{id}/timetable/slots/{slotId}` | → 200 | `SLOT_NOT_FOUND` 404, `TERM_CLOSED` 409 |
+| 64 | GET | `/organizations/{id}/offerings/{offeringId}/roster` | → `OfferingRoster { students: { …, source: "Registered" \| "Automatic", hasMarks }[], candidates[], locked }` | `locked` once the term is closed or results are submitted |
+| 65 | POST | `/organizations/{id}/offerings/{offeringId}/roster` | `{ studentProfileId }` → 201 | Active students only. `ALREADY_ON_ROSTER` 409, `STUDENT_NOT_ACTIVE` 409, `TERM_CLOSED` 409, `SHEET_SUBMITTED` 409 |
+| 66 | DELETE | `/organizations/{id}/offerings/{offeringId}/roster/{studentProfileId}` | → 200 | Records an explicit drop (see below). `DROP_HAS_MARKS` 409: the lecturer must clear their marks first. `NOT_ON_ROSTER` 404 |
+| 67 | GET | `/organizations/{id}/staff/{staffProfileId}/operations` | → `StaffOperations { record, duties[], tasks[], appraisals[], leave[], supervisors[] }` | `STAFF_NOT_FOUND` 404 |
+| 68 | PUT | `/organizations/{id}/staff/{staffProfileId}/employment` | `EmploymentRecord { cadre, salaryScale, gradeLevel (1–17), step (1–15), confirmedOn, nextPromotionDue, supervisorId }` → 200 | Can't supervise yourself. Grade level sets annual leave (30 days from GL 07, 21 below) |
+| 69 | POST | `/organizations/{id}/staff/{staffProfileId}/duties` | `{ day, start, end, location, role }` → 201 `DutyShift` | `DUTY_OVERLAP` 409 with the person's own shifts. Notifies them |
+| 70 | DELETE | `/organizations/{id}/duties/{dutyId}` | → 200 | `DUTY_NOT_FOUND` 404 |
+| 71 | POST | `/organizations/{id}/staff/{staffProfileId}/tasks` | `{ title, detail, priority: Low\|Normal\|Urgent, dueOn }` → 201 `WorkTask` | Due date not in the past. Notifies them. **Take `requestedBy` from the session**, not the body |
+| 72 | POST | `/organizations/{id}/staff/{staffProfileId}/appraisals` | `{ year, score (0–100), appraiser, comment }` → 201 `Appraisal` | One per person per year: `APPRAISAL_EXISTS` 409. Rating comes from the score: 85+ Outstanding, 70+ Very good, 55+ Good, 40+ Fair, below that Poor |
+| 73 | GET | `/organizations/{id}/leave` | → `LeaveQueueRow[]` (request + staff name, unit, annual days left) | Pending first |
+| 74 | POST | `/organizations/{id}/leave/{requestId}/decision` | `{ decision: Approved\|Declined, note }` → `LeaveRequest` | Only pending requests: `LEAVE_DECIDED` 409. A note is required to decline. Notifies the staff member. **Take `decidedBy` from the session** |
+
+**Registration rule: who is on a course.** Decided per offering. A student is on it if
+they're **registered** by hand, or placed **automatically** (active, and their department
+and level match the offering's), unless they've been **dropped** from that offering.
+Store drops as rows, not as a missing registration. Without a drop row, an automatically
+placed student comes straight back.
+
+### F. School invite links (7)
+
+Replaces creating student and staff accounts by hand. The school makes one link per
+person, the person fills in their own details, and an admin approves and places them.
+Approval creates the profile and the portal account in one step. Mock: `mocks/join.ts`.
+
+| # | Method | Path | Body → response | Rules |
+|---|---|---|---|---|
+| 75 | POST | `/organizations/{id}/join-links` | `{ role: Student\|Teaching\|NonTeaching, sentTo }` → 201 `JoinLink` | Token is random (24+ bytes, URL-safe) and unique. Expires in 14 days. Admin or owner only |
+| 76 | GET | `/organizations/{id}/join-links` | → `{ links, requests, departments, offerings }` | Marks open links past their date `Expired`. `offerings` = the current session's, open terms only |
+| 77 | DELETE | `/organizations/{id}/join-links/{linkId}` | → 200 | Only `Open` links: `JOIN_LINK_USED` 409 |
+| 78 | GET | `/invite-links/{token}` | → `JoinLinkView` | **Public, no auth.** Unknown token: `JOIN_LINK_NOT_FOUND` 404. Departments only while open. Shows the request's status and, once approved, the school email and number |
+| 79 | POST | `/invite-links/{token}` | `JoinDetails + password` → 201 `{ requestId }` | **Public, rate-limit it.** One request per link: `JOIN_LINK_UNUSABLE` 410. Hash the password at once. Same email already pending or approved: `JOIN_EMAIL_TAKEN` 409. Never accept placement beyond the *requested* department and level |
+| 80 | POST | `/organizations/{id}/join-requests/{requestId}/approve` | `{ departmentId, level? , offeringIds? }` → `JoinRequest` with `outcome` | Pending only: `JOIN_REQUEST_DECIDED` 409. Student: allocate the matric number, school email, profile at that level. Teaching: Academic staff, set them as lecturer on each offering. Non-teaching: Administrative staff. All get a portal account with the password they chose. Email the person. **Take `decidedBy` from the session** |
+| 81 | POST | `/organizations/{id}/join-requests/{requestId}/decline` | `{ reason }` → `JoinRequest` | Reason required. Delete the stored password hash. The person sees the reason at their link |
+
 ## Data model changes
 
 **Extend what exists:**
@@ -566,8 +617,9 @@ current values are the source of truth until then:
   These back the tracking pages and can come last.
 - **Portals** (all keyed on the course offering, so every record traces back to "this
   course, this session and term, this lecturer"):
-  - `Enrolment` (offering, student). Until course registration exists, the mock also puts
-    active students on offerings that match their department and level.
+  - `Enrolment` (offering, student, `Dropped` flag). Students are also placed automatically
+    on offerings matching their department and level; a `Dropped` row takes them off one
+    offering. See the registration rule under section E.
   - `TimetableSlot` (offering, weekday, start, end, venue).
   - `CourseworkItem` (offering, component key, title, instructions, due at, posted at) and
     `CourseworkSubmission` (item, student, submitted at, note, file).
@@ -666,6 +718,9 @@ Each step can ship on its own. When an endpoint is live, delete its handler from
 11. **Coursework and notifications** (54–56). Design file storage for hand-ins here.
 12. **Non-teaching staff:** leave and tasks (57–58), plus employment records, duty roster
     and appraisals.
+13. **School admin** (61–74): timetables, course registration, staff operations and leave
+    approvals. Build each alongside the portal step that reads it. For example, timetable
+    slots (61–63) go with step 9, since `/portal/me` shows them.
 
 ---
 
@@ -710,6 +765,12 @@ No backend code changed. What the backend needs is in [section D](#d-student-and
 - **Demo:** `/portal/demo-university` and `/portal/demo-secondary` have demo accounts
   (password `Demo@2026`), built from `src/mocks/portalDemo.ts`.
 - **Old stubs removed:** `StudentDashboardPage.tsx` and `TeacherDashboardPage.tsx`.
+- **Admin screens that feed the portals** (see [section E](#e-school-admin-timetables-registration-and-staff-operations-14)):
+  - Department **Timetable** tab: build the week per level, with clash checks.
+  - Department **Registration** tab: each course's roster, add carry-overs and electives,
+    drop students.
+  - Staff & Teachers → **Leave requests**: approve or decline.
+  - Tabs in a staff record: employment record, duty roster, tasks and appraisals.
 
 ## Full specifications
 

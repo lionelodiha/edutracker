@@ -24,6 +24,9 @@ import PendingRecordPage from "./features/onboarding/PendingRecordPage";
 import FacultiesListPage from "./pages/organization/FacultiesListPage";
 import AcademicStructurePage from "./pages/organization/AcademicStructurePage";
 import StaffPage from "./pages/organization/StaffPage";
+import StaffProfilePage from "./pages/organization/StaffProfilePage";
+import InvitesPage from "./pages/organization/InvitesPage";
+import InvitePage from "./features/onboarding/InvitePage";
 import SchoolSettingsPage from "./pages/organization/SchoolSettingsPage";
 import PortalLayout from "./features/portal/PortalLayout";
 import { NotificationsPage, ProfilePage as PortalProfilePage, TimetablePage } from "./features/portal/SharedPages";
@@ -118,6 +121,8 @@ function App() {
               <Route path="classes/:classId/attendance" element={<AttendancePage />} />
 
               <Route path="staff" element={<StaffPage />} />
+              <Route path="staff/:staffId" element={<StaffProfilePage />} />
+              <Route path="invites" element={<InvitesPage />} />
               <Route path="settings" element={<SchoolSettingsPage />} />
 
               {/* Legacy bookmarks */}
@@ -169,6 +174,7 @@ function App() {
 
           {/* Public join form — no auth, the person has no account yet. */}
           <Route path="/join/:token" element={<PendingRecordPage />} />
+          <Route path="/invite/:token" element={<InvitePage />} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />

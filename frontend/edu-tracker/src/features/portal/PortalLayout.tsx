@@ -5,10 +5,9 @@
  */
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, Navigate, Outlet, useNavigate, useParams } from "react-router-dom";
-import LogoMark from "../../components/Logo";
+import Wordmark from "../../components/Wordmark";
 import { BellIcon, CalendarIcon, HomeIcon, LogOutIcon, UserIcon } from "../../components/icons";
 import { useToast } from "../../components/Toast";
-import { isDemoMode } from "../../demoMode";
 import { clearPortalSession, portalApi, PortalApiError, readPortalSession } from "./api";
 import { portalHome, portalSignIn, useClassReminders, type PortalContext } from "./helpers";
 import type { PortalPayload, PortalRole } from "./types";
@@ -119,7 +118,7 @@ export default function PortalLayout({ role }: { role: PortalRole }) {
     <div className="dz-scope pt-app">
       <aside className="pt-rail">
         <Link to={base} className="pt-rail-brand" aria-label="Portal home">
-          <LogoMark size={34} fill="#8b5cf6" />
+          <Wordmark fontSize="1.5rem" />
           <span><strong>{data?.organization.name ?? "School portal"}</strong><small>{ROLE_LABEL[role]}</small></span>
         </Link>
         <nav aria-label="Portal" className="pt-rail-nav">
@@ -140,11 +139,10 @@ export default function PortalLayout({ role }: { role: PortalRole }) {
       <div className="pt-main">
         <header className="pt-appbar">
           <Link to={base} className="pt-appbar-brand" aria-label="Portal home">
-            <LogoMark size={30} fill="#8b5cf6" />
+            <Wordmark fontSize="1.25rem" />
             <span>{data?.organization.name ?? "School portal"}</span>
           </Link>
           <span className="pt-appbar-spacer" />
-          {isDemoMode() && <span className="pt-demo-chip" title="Portal data is stored in this browser for the demo.">Demo</span>}
           <Link to={`${base}/notifications`} className="pt-icon-btn" aria-label={`Notifications (${unread} unread)`} title="Notifications">
             <BellIcon />
             {unread > 0 && <span className="pt-icon-dot">{unread > 9 ? "9+" : unread}</span>}

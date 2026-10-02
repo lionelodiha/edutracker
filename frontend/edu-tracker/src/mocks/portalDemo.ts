@@ -242,7 +242,6 @@ function seedUniversity(org: string, now: Date) {
   const csc205 = run(current, 1, course("CSC 205", "Operating Systems I", csc.key).courseId, "200L", 3, lecturer);
   const csc207 = run(current, 1, course("CSC 207", "Computer Architecture", csc.key, 2).courseId, "200L", 2, adviser);
   const mth201 = run(current, 1, course("MTH 201", "Mathematical Methods I", mth.key).courseId, "200L", 3, maths);
-  const current200 = [csc201, csc203, csc205, csc207, mth201];
 
   const students = makeStudents(org, domain, "CSC/2025/", [
     "Chiamaka Obi", "Abdulrahman Yusuf", "Blessing Okoro", "David Olatunji", "Esther Bassey", "Farouk Lawal",
@@ -253,7 +252,9 @@ function seedUniversity(org: string, now: Date) {
   const { db, persist } = portalSeedUtils(org);
   for (const student of students) {
     db.levels.push({ studentProfileId: student.studentProfileId, level: "200L" });
-    for (const offering of [...past100, ...current200]) db.enrolments.push({ offeringId: offering.offeringId, studentProfileId: student.studentProfileId });
+    // This session's 200L CSC courses place them automatically. Register by hand only where that
+    // can't: last session's 100L courses (they've moved up) and MTH 201 (another department's course).
+    for (const offering of [...past100, mth201]) db.enrolments.push({ offeringId: offering.offeringId, studentProfileId: student.studentProfileId });
   }
   db.advisers.push({ departmentId: csc.key, levelKey: "200L", staffProfileId: adviser });
   past100.forEach((offering, index) => db.sheets.push(fullSheet("University", offering, students, ability, index < 3 ? "2026-02-20T10:00:00.000Z" : "2026-07-24T10:00:00.000Z")));
@@ -387,11 +388,11 @@ function seedSecondary(org: string, now: Date) {
   const { db, persist } = portalSeedUtils(org);
   for (const student of studentsA) {
     db.levels.push({ studentProfileId: student.studentProfileId, level: "A" });
-    for (const offering of [...pastRuns, ...armA]) db.enrolments.push({ offeringId: offering.offeringId, studentProfileId: student.studentProfileId });
+    // SS 2A subjects place them automatically; last session's SS 1A subjects need registering.
+    for (const offering of pastRuns) db.enrolments.push({ offeringId: offering.offeringId, studentProfileId: student.studentProfileId });
   }
   for (const student of studentsB) {
     db.levels.push({ studentProfileId: student.studentProfileId, level: "B" });
-    for (const offering of armB) db.enrolments.push({ offeringId: offering.offeringId, studentProfileId: student.studentProfileId });
   }
   db.advisers.push({ departmentId: ss2.key, levelKey: "A", staffProfileId: ibe }, { departmentId: ss2.key, levelKey: "B", staffProfileId: bello });
   const termEnds = ["2025-12-12T12:00:00.000Z", "2026-04-02T12:00:00.000Z", "2026-07-22T12:00:00.000Z"];

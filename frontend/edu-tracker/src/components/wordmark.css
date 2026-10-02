@@ -1,0 +1,28 @@
+/* EduTracker wordmark (type only). */
+.ll-word {
+  position: relative; display: inline-block; align-self: flex-start; justify-self: start; width: fit-content; padding-bottom: .2em;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif; font-weight: 800; font-optical-sizing: auto;
+  letter-spacing: -.02em; line-height: 1; color: var(--lp-ink, #f1f5f9); white-space: nowrap;
+}
+.ll-word i {
+  margin-left: .02em; padding-right: .08em; font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 1.14em; letter-spacing: -.01em;
+  background: linear-gradient(100deg, var(--lp-accent-light, #c4b5fd) 10%, var(--lp-signal, #22d3ee) 95%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* The track: a hairline that fades in from the left and ends in a marker. */
+.ll-word::before {
+  content: ""; position: absolute; left: 0; right: .14em; bottom: .02em; height: max(1px, .045em); border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--lp-accent, #8b5cf6) 35%, var(--lp-signal, #22d3ee));
+  transform-origin: left center;
+}
+.ll-word::after {
+  content: ""; position: absolute; right: 0; bottom: -.04em; width: .2em; height: .2em; border-radius: 50%;
+  background: var(--lp-signal, #22d3ee); box-shadow: 0 0 0 .07em rgba(34, 211, 238, .28), 0 0 .5em rgba(34, 211, 238, .55);
+}
+
+/* Plays once: the track draws left to right, then the marker lands. */
+.ll-animate::before { animation: ll-track .7s cubic-bezier(.23, 1, .32, 1) .1s both; }
+.ll-animate::after { animation: ll-marker .45s cubic-bezier(.23, 1, .32, 1) .6s both; }
+@keyframes ll-track { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ll-marker { from { transform: scale(0); } to { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .ll-animate::before, .ll-animate::after { animation: none; } }

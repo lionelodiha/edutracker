@@ -10,6 +10,8 @@ import { http, HttpResponse, delay } from "msw";
 import {
   departmentResults, departmentSheet, getSheet, markRead, portalFor, postCoursework, schoolInfo,
   publishComponents, requestLeave, saveScores, submitCoursework, submitSheet, updateTask,
+  addAppraisal, addDuty, addSlot, assignTask, decideLeave, departmentTimetable, dropStudent,
+  enrolStudent, leaveQueue, offeringRoster, removeDuty, removeSlot, saveEmploymentRecord, staffOperations,
 } from "./portal";
 import type { Op } from "./faculty";
 
@@ -121,5 +123,71 @@ export const portalHandlers = [
   http.get(`${API}/api/organizations/:id/results/:offeringId`, async ({ params }) => {
     await delay(120);
     return send(departmentSheet(String(params.id), String(params.offeringId)), "Result sheet loaded.");
+  }),
+
+  // ── School admin: timetables ──
+  http.get(`${API}/api/organizations/:id/departments/:departmentId/timetable`, async ({ request, params }) => {
+    await delay(120);
+    const termId = new URL(request.url).searchParams.get("termId") ?? "";
+    return send(departmentTimetable(String(params.id), String(params.departmentId), termId), "Timetable loaded.");
+  }),
+  http.post(`${API}/api/organizations/:id/timetable/slots`, async ({ request, params }) => {
+    await delay(150);
+    return send(addSlot(String(params.id), await readBody(request)), "Period added.");
+  }),
+  http.delete(`${API}/api/organizations/:id/timetable/slots/:slotId`, async ({ params }) => {
+    await delay(120);
+    return send(removeSlot(String(params.id), String(params.slotId)), "Period removed.");
+  }),
+
+  // ── School admin: course registration ──
+  http.get(`${API}/api/organizations/:id/offerings/:offeringId/roster`, async ({ params }) => {
+    await delay(120);
+    return send(offeringRoster(String(params.id), String(params.offeringId)), "Roster loaded.");
+  }),
+  http.post(`${API}/api/organizations/:id/offerings/:offeringId/roster`, async ({ request, params }) => {
+    await delay(120);
+    const body = await readBody(request);
+    return send(enrolStudent(String(params.id), String(params.offeringId), String(body.studentProfileId ?? "")), "Student registered.");
+  }),
+  http.delete(`${API}/api/organizations/:id/offerings/:offeringId/roster/:studentProfileId`, async ({ params }) => {
+    await delay(120);
+    return send(dropStudent(String(params.id), String(params.offeringId), String(params.studentProfileId)), "Student dropped.");
+  }),
+
+  // ── School admin: staff operations ──
+  http.get(`${API}/api/organizations/:id/staff/:staffProfileId/operations`, async ({ params }) => {
+    await delay(120);
+    return send(staffOperations(String(params.id), String(params.staffProfileId)), "Staff record loaded.");
+  }),
+  http.put(`${API}/api/organizations/:id/staff/:staffProfileId/employment`, async ({ request, params }) => {
+    await delay(150);
+    return send(saveEmploymentRecord(String(params.id), String(params.staffProfileId), await readBody(request)), "Employment record saved.");
+  }),
+  http.post(`${API}/api/organizations/:id/staff/:staffProfileId/duties`, async ({ request, params }) => {
+    await delay(150);
+    return send(addDuty(String(params.id), String(params.staffProfileId), await readBody(request)), "Shift added.");
+  }),
+  http.delete(`${API}/api/organizations/:id/duties/:dutyId`, async ({ params }) => {
+    await delay(120);
+    return send(removeDuty(String(params.id), String(params.dutyId)), "Shift removed.");
+  }),
+  http.post(`${API}/api/organizations/:id/staff/:staffProfileId/tasks`, async ({ request, params }) => {
+    await delay(150);
+    return send(assignTask(String(params.id), String(params.staffProfileId), await readBody(request)), "Task assigned.");
+  }),
+  http.post(`${API}/api/organizations/:id/staff/:staffProfileId/appraisals`, async ({ request, params }) => {
+    await delay(150);
+    return send(addAppraisal(String(params.id), String(params.staffProfileId), await readBody(request)), "Appraisal recorded.");
+  }),
+
+  // ── School admin: leave approvals ──
+  http.get(`${API}/api/organizations/:id/leave`, async ({ params }) => {
+    await delay(120);
+    return send(leaveQueue(String(params.id)), "Leave requests loaded.");
+  }),
+  http.post(`${API}/api/organizations/:id/leave/:requestId/decision`, async ({ request, params }) => {
+    await delay(150);
+    return send(decideLeave(String(params.id), String(params.requestId), await readBody(request)), "Decision saved.");
   }),
 ];

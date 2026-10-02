@@ -1,0 +1,98 @@
+/* Invites & requests (jr-*). Shares the leave-card language from staff.css. */
+.dz-scope .jr-page { display: grid; gap: 1.5rem; }
+.dz-scope .jr-section { display: grid; gap: .75rem; }
+
+/* First-run: how it works */
+.dz-scope .jr-how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 0; overflow: hidden; }
+.dz-scope .jr-how > div { display: grid; gap: .3rem; align-content: start; padding: 1.1rem 1.2rem; }
+.dz-scope .jr-how > div + div { border-left: 1px solid var(--border); }
+.dz-scope .jr-how strong { font-size: .92rem; }
+.dz-scope .jr-how small { color: var(--text-muted); font-size: .82rem; line-height: 1.5; }
+.dz-scope .jr-how-n { display: grid; place-items: center; width: 26px; height: 26px; margin-bottom: .3rem; border-radius: 50%; background: rgba(139, 92, 246, .18); color: #c4b5fd; font-size: .78rem; font-weight: 700; }
+
+/* Waiting cards */
+.dz-scope .jr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: .9rem; }
+.dz-scope .jr-card { display: grid; gap: .9rem; padding: 1.1rem; align-content: start; }
+.dz-scope .jr-card-head { display: flex; align-items: center; gap: .7rem; }
+.dz-scope .jr-who { display: grid; gap: .1rem; flex: 1; min-width: 0; }
+.dz-scope .jr-who strong { font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dz-scope .jr-who small { color: var(--text-muted); font-size: .78rem; }
+.dz-scope .jr-face { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; font-size: .85rem; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, rgba(139, 92, 246, .4), rgba(34, 211, 238, .28)); }
+.dz-scope .jr-face img { width: 100%; height: 100%; object-fit: cover; }
+.dz-scope .jr-face-sm { width: 34px; height: 34px; font-size: .74rem; }
+.dz-scope .jr-facts { margin: 0; display: grid; gap: .45rem; padding: .8rem .9rem; border-radius: 10px; background: rgba(255, 255, 255, .025); border: 1px solid var(--border); }
+.dz-scope .jr-facts > div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: .6rem; font-size: .84rem; }
+.dz-scope .jr-facts dt { color: var(--text-muted); }
+.dz-scope .jr-facts dd { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.dz-scope .jr-card > .dz-btn-green { justify-content: center; }
+
+/* Links and decided lists */
+.dz-scope .jr-switch { display: flex; }
+.dz-scope .jr-list { padding: 0; overflow: hidden; }
+.dz-scope .jr-row { display: flex; align-items: center; gap: .8rem; width: 100%; padding: .8rem 1.1rem; border: 0; border-top: 1px solid var(--border); background: transparent; color: inherit; font: inherit; text-align: left; }
+.dz-scope .jr-row:first-child { border-top: 0; }
+.dz-scope .jr-row-btn { cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .dz-scope .jr-row-btn:hover { background: rgba(255, 255, 255, .03); } }
+.dz-scope .jr-row-main { display: grid; gap: .12rem; flex: 1; min-width: 0; }
+.dz-scope .jr-row-main strong { font-size: .9rem; }
+.dz-scope .jr-row-main small { color: var(--text-muted); font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dz-scope .jr-row-actions { display: flex; gap: .4rem; flex: none; }
+.dz-scope .jr-row-actions a { text-decoration: none; }
+.dz-scope .dz-org-content .jr-cancel { color: #fca5a5; }
+.dz-scope .jr-row-by { display: grid; justify-items: end; gap: .15rem; flex: none; }
+.dz-scope .jr-row-by small { color: var(--text-muted); font-size: .74rem; }
+.dz-scope .jr-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.dz-scope .jr-dot-Student { background: #22d3ee; }
+.dz-scope .jr-dot-Teaching { background: #a78bfa; }
+.dz-scope .jr-dot-NonTeaching { background: #fbbf24; }
+
+/* New link modal */
+.dz-scope .jr-roles, .jr-roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.jr-role { display: grid; gap: .3rem; align-content: start; padding: .8rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .12); background: transparent; color: var(--text-secondary); font: inherit; text-align: left; cursor: pointer; }
+.jr-role strong { font-size: .86rem; color: var(--text-primary); }
+.jr-role small { font-size: .74rem; color: var(--text-muted); line-height: 1.4; }
+.jr-role.active { border-color: rgba(167, 139, 250, .65); background: rgba(139, 92, 246, .14); }
+.jr-role .jr-dot { width: 10px; height: 10px; border-radius: 50%; }
+.jr-role .jr-dot-Student { background: #22d3ee; }
+.jr-role .jr-dot-Teaching { background: #a78bfa; }
+.jr-role .jr-dot-NonTeaching { background: #fbbf24; }
+.jr-made { display: grid; gap: 1rem; }
+.jr-link-box { padding: .85rem 1rem; border-radius: 10px; background: rgba(34, 211, 238, .06); border: 1px dashed rgba(34, 211, 238, .4); }
+.jr-link-box code { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .82rem; color: #67e8f9; word-break: break-all; }
+.jr-made-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.jr-made-actions > * { justify-content: center; text-decoration: none; }
+
+/* Review drawer */
+.dz-scope .jr-hero { display: flex; align-items: center; gap: .85rem; }
+.dz-scope .jr-hero .jr-face { width: 56px; height: 56px; font-size: 1rem; }
+.dz-scope .jr-hero div { display: grid; gap: .15rem; }
+.dz-scope .jr-hero strong { font-size: 1.05rem; }
+.dz-scope .jr-hero small { color: var(--text-muted); font-size: .8rem; }
+.dz-scope .jr-block { display: grid; gap: .7rem; }
+.dz-scope .jr-block h3 { margin: 0; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.dz-scope .jr-outcome { display: grid; gap: .6rem; justify-items: start; padding: .9rem 1rem; border-radius: 12px; background: rgba(74, 222, 128, .06); border: 1px solid rgba(74, 222, 128, .25); }
+.dz-scope .jr-outcome .ac-dl { width: 100%; }
+.dz-scope .jr-place { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .7rem; }
+.dz-scope .jr-course-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+.dz-scope .jr-toggle { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--text-secondary); cursor: pointer; }
+.dz-scope .jr-courses { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.dz-scope .jr-courses label { display: flex; align-items: center; gap: .7rem; padding: .6rem .75rem; border-radius: 10px; border: 1px solid var(--border); cursor: pointer; }
+.dz-scope .jr-courses label.on { border-color: rgba(167, 139, 250, .6); background: rgba(139, 92, 246, .1); }
+.dz-scope .jr-courses input { accent-color: #8b5cf6; width: 16px; height: 16px; flex: none; }
+.dz-scope .jr-course-code { flex: none; min-width: 64px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .78rem; color: #67e8f9; }
+.dz-scope .jr-course-main { display: grid; gap: .1rem; flex: 1; min-width: 0; }
+.dz-scope .jr-course-main strong { font-size: .86rem; font-weight: 600; }
+.dz-scope .jr-course-main small { color: var(--text-muted); font-size: .74rem; }
+.dz-scope .jr-course-now { color: #fbbf24; }
+.dz-scope .jr-foot { display: flex; gap: .5rem; justify-content: flex-end; width: 100%; }
+
+@media (max-width: 700px) {
+  .dz-scope .jr-how { grid-template-columns: 1fr; }
+  .dz-scope .jr-how > div + div { border-left: 0; border-top: 1px solid var(--border); }
+  .dz-scope .jr-cards { grid-template-columns: 1fr; }
+  .dz-scope .jr-row { flex-wrap: wrap; }
+  .dz-scope .jr-row-actions { width: 100%; padding-left: 1.4rem; }
+  .jr-roles { grid-template-columns: 1fr; }
+  .dz-scope .jr-foot > * { flex: 1; justify-content: center; }
+}

@@ -324,3 +324,64 @@ export type DepartmentResultRow = {
   average: number | null;
   passRate: number | null;
 };
+
+// ─── School admin: timetables, registration, staff operations ─────────────
+
+export type AdminSlot = {
+  slotId: string;
+  offeringId: string;
+  code: string;
+  title: string;
+  levelKey: string;
+  lecturer: string | null;
+  day: Weekday;
+  start: string;
+  end: string;
+  venue: string;
+};
+
+export type DepartmentTimetable = {
+  termId: string;
+  termName: string;
+  termClosed: boolean;
+  offerings: { offeringId: string; code: string; title: string; levelKey: string; lecturer: string | null }[];
+  slots: AdminSlot[];
+};
+
+export type RosterEntry = { studentProfileId: string; fullName: string; matriculationNumber: string; source: "Registered" | "Automatic"; hasMarks: boolean };
+
+export type OfferingRoster = {
+  offeringId: string;
+  code: string;
+  title: string;
+  levelKey: string;
+  locked: boolean;
+  students: RosterEntry[];
+  /** Active students who could be added (not on the roster now). */
+  candidates: { studentProfileId: string; fullName: string; matriculationNumber: string; placement: string }[];
+};
+
+export type EmploymentRecord = {
+  cadre: string;
+  salaryScale: string;
+  gradeLevel: number;
+  step: number;
+  confirmedOn: string | null;
+  nextPromotionDue: string | null;
+  supervisorId: string | null;
+};
+
+export type StaffOperations = {
+  staffProfileId: string;
+  fullName: string;
+  kind: string;
+  record: EmploymentRecord | null;
+  duties: DutyShift[];
+  tasks: WorkTask[];
+  appraisals: Appraisal[];
+  leave: LeaveRequest[];
+  /** Who else could be this person's supervisor. */
+  supervisors: { staffProfileId: string; name: string }[];
+};
+
+export type LeaveQueueRow = LeaveRequest & { staffProfileId: string; staffName: string; unitName: string | null; remaining: number };
