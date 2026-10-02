@@ -92,7 +92,7 @@ export default function RegisterPage() {
                             <div className="success-anim-text">Redirecting to login...</div>
                         </div>
                     ) : (
-                    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <form onSubmit={handleSubmit} className="auth-register-form">
                         {error && (
                             <div className="alert alert-error" role="alert">
                                 <span>⚠️</span>

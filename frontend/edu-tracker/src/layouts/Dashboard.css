@@ -130,7 +130,11 @@
 
 @media (max-width: 960px) {
   .dz-scope .dz-main--full .dz-content { padding: 1.25rem 1rem 2rem; }
-  .dz-org-shell { flex-direction: column; }
+  /* Stretch the content column to the screen: with the shell's flex-start
+     alignment it sized itself to its widest child (a scrollable tab strip)
+     and pushed the whole page wider than the phone. */
+  .dz-org-shell { flex-direction: column; align-items: stretch; }
+  .dz-org-content { width: 100%; min-width: 0; }
   .dz-sidebar.dz-org-sidebar {
     position: static; width: 100%; height: auto; display: flex;
     border-right: none; border-bottom: 1px solid var(--border);
@@ -1548,7 +1552,11 @@ a.dz-row:hover {
   /* Workspace sections become a bottom tab bar. */
   .dz-org-sidebar nav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+<<<<<<< HEAD
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem;
+=======
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.15rem;
+>>>>>>> Leo's-branch
     padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
     background: rgba(13, 19, 32, 0.94);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);

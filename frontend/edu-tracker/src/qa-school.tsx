@@ -14,6 +14,10 @@ import FacultyWorkspacePage from "./features/faculty/FacultyWorkspacePage";
 import OrganizationLayout from "./layouts/OrganizationLayout";
 import OrganizationDetailsPage from "./pages/dashboard/OrganizationDetailsPage";
 import AcademicStructurePage from "./pages/organization/AcademicStructurePage";
+import StaffPage from "./pages/organization/StaffPage";
+import StaffProfilePage from "./pages/organization/StaffProfilePage";
+import InvitesPage from "./pages/organization/InvitesPage";
+import InvitePage from "./features/onboarding/InvitePage";
 import { AuthProvider } from "./context/AuthContext";
 import { QA_FACULTY_ID, QA_FACULTY_ORG, seedFacultyQa } from "./qa-faculty";
 import "./index.css";
@@ -64,4 +68,4 @@ worker.use(
   }),
 );
 seedFacultyQa();
-createRoot(document.getElementById("root")!).render(<AuthProvider><HashRouter><Routes><Route path="/dashboard/organizations/:id" element={<div className="dz-scope"><OrganizationLayout /></div>}><Route index element={<OrganizationDetailsPage />} /><Route path="structure" element={<AcademicStructurePage />} /><Route path="structure/faculties/:facultyId" element={<AcademicStructurePage />} /><Route path="structure/departments/new" element={<AcademicStructurePage />} /><Route path="structure/departments/:departmentId" element={<AcademicStructurePage />} /></Route><Route path="/dashboard/organizations/:id/faculties/:facultyId/*" element={<FacultyWorkspacePage />} /><Route path="/:model/*" element={<Fixture />} /></Routes></HashRouter></AuthProvider>);
+createRoot(document.getElementById("root")!).render(<AuthProvider><HashRouter><Routes><Route path="/dashboard/organizations/:id" element={<div className="dz-scope dz-shell dz-shell--top"><div className="dz-main dz-main--full"><main className="dz-content"><OrganizationLayout /></main></div></div>}><Route index element={<OrganizationDetailsPage />} /><Route path="structure" element={<AcademicStructurePage />} /><Route path="structure/faculties/:facultyId" element={<AcademicStructurePage />} /><Route path="structure/departments/new" element={<AcademicStructurePage />} /><Route path="structure/departments/:departmentId" element={<AcademicStructurePage />} /><Route path="staff" element={<StaffPage />} /><Route path="staff/:staffId" element={<StaffProfilePage />} /><Route path="invites" element={<InvitesPage />} /></Route><Route path="/invite/:token" element={<InvitePage />} /><Route path="/dashboard/organizations/:id/faculties/:facultyId/*" element={<FacultyWorkspacePage />} /><Route path="/:model/*" element={<Fixture />} /></Routes></HashRouter></AuthProvider>);

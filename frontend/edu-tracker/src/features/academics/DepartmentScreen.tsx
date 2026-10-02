@@ -5,10 +5,13 @@ import { facultyApi } from "../faculty/api";
 import { academicApi } from "./api";
 import type { AcademicOffering, CatalogueCourse, StructureResponse } from "./types";
 import { allCourses, count, initials, PAGE_SIZE, surname } from "./helpers";
-import { AcHeader, Badge, Drawer, EmptyState, Meter, SessionPicker, Skeleton, StatCells, Tabs } from "./ui";
+import DepartmentResults from "./DepartmentResults";
+import LevelTimetable from "./DepartmentTimetable";
+import OfferingStudents from "./OfferingStudents";
+import { AcHeader, Badge, Drawer, EmptyState, Meter, Segmented, SessionPicker, Skeleton, StatCells, Tabs } from "./ui";
 
 type Props = { organizationId: string; departmentId: string; structure: StructureResponse; session: SessionControl; onRefresh: () => void };
-type View = "levels" | "catalogue" | "lecturers" | "students" | "admission";
+type View = "levels" | "catalogue" | "lecturers" | "students" | "results" | "admission";
 type Person = { staffProfileId: string; fullName: string };
 type Learner = { studentProfileId: string; fullName: string; matriculationNumber: string; entryStageId: string; entrySessionId: string; status: string };
 const LOAD_RANGE = { min: 15, max: 24 };
@@ -36,9 +39,11 @@ export default function DepartmentScreen({ organizationId, departmentId, structu
     { value: "catalogue", label: "Catalogue" },
     { value: "lecturers", label: university ? "Lecturers" : "Teachers" },
     { value: "students", label: "Students" },
+    { value: "results", label: "Results" },
     { value: "admission", label: university ? "Admission" : "Capacity" },
   ];
   const view = views.find(item => item.value === params.get("view"))?.value ?? "levels";
+  const levelView = params.get("lv") === "timetable" ? "timetable" : "courses";
   const levels = detail?.levels ?? [];
   const level = levels.includes(params.get("level") ?? "") ? params.get("level")! : levels[0] ?? "";
 
@@ -102,8 +107,12 @@ export default function DepartmentScreen({ organizationId, departmentId, structu
       })}</nav>
       <div>
         <div className="ac-level-head"><div><h2>{level}</h2><p>{selected ? selected.name : "No session yet — showing the plan"}</p></div>
-          {!readonly && <button className="dz-btn-green" onClick={() => setDrawer({ kind: "add" })}>+ Add {university ? "course" : "subject"}</button>}</div>
-        <div className="ac-term-grid">{terms.map(term => {
+          <div className="ac-actions">
+            {selected && <Segmented label={`${level} view`} value={levelView} onChange={next => setQuery("lv", next)} options={[{ value: "courses", label: university ? "Courses" : "Subjects" }, { value: "timetable", label: "Timetable" }]} />}
+            {!readonly && levelView === "courses" && <button className="dz-btn-green" onClick={() => setDrawer({ kind: "add" })}>+ Add {university ? "course" : "subject"}</button>}
+          </div></div>
+        {levelView === "timetable" && selected ? <LevelTimetable key={`${selected.sessionId}-${level}`} organizationId={organizationId} departmentId={departmentId} terms={selected.terms} level={level} university={university} readonly={readonly} />
+        : <div className="ac-term-grid">{terms.map(term => {
           const runs = offerings.filter(run => run.levelKey === level && run.termId === term.termId).sort((a, b) => (courseById.get(a.courseId)?.code ?? "").localeCompare(courseById.get(b.courseId)?.code ?? ""));
           const total = runs.reduce((sum, run) => sum + run.units, 0);
           const training = detail.industrialTraining?.level === level && detail.industrialTraining.termOrdinal === term.ordinal;
@@ -114,7 +123,7 @@ export default function DepartmentScreen({ organizationId, departmentId, structu
               : runs.length ? runs.map(run => <OfferingRow key={run.offeringId} run={run} course={courseById.get(run.courseId)} lecturer={run.lecturerStaffProfileId ? staffById.get(run.lecturerStaffProfileId) : undefined} onOpen={readonly || term.status === "Closed" ? undefined : () => setDrawer({ kind: "edit", offering: run })} />)
               : <p className="ac-term-empty">No {university ? "courses" : "subjects"} this {termWord} yet.</p>}
           </section>;
-        })}</div>
+        })}</div>}
       </div>
     </div>}
 
@@ -142,6 +151,8 @@ export default function DepartmentScreen({ organizationId, departmentId, structu
           <thead><tr><th>Matric no.</th><th>Name</th><th>Entry level</th><th>Status</th></tr></thead>
           <tbody>{students.map(person => <tr key={person.studentProfileId}><td><span className="ac-mono">{person.matriculationNumber}</span></td><td>{person.fullName}</td><td>{entryLevel(person.entryStageId)}</td><td><Badge tone={person.status === "Active" ? "current" : "neutral"}>{person.status}</Badge></td></tr>)}</tbody>
         </table></div></section></>)}
+
+    {view === "results" && <DepartmentResults organizationId={organizationId} departmentId={departmentId} sessionId={selected?.sessionId ?? null} university={university} />}
 
     {view === "admission" && <section className="dz-card" style={{ display: "grid", gap: "1rem", padding: "1.3rem" }}>
       <div className="ac-review-head"><h2 style={{ margin: 0, fontSize: "1.05rem" }}>{university ? "Admission rules" : "Capacity"}</h2><Link className="dz-btn-outline" to={`${base}/departments/${departmentId}/edit?step=2`}>Edit</Link></div>
@@ -246,5 +257,6 @@ function OfferingDrawer({ organizationId, departmentId, departmentCode, sessionI
     <label className="ac-check"><input type="checkbox" checked={compulsory} onChange={event => setCompulsory(event.target.checked)} />Compulsory</label>
     {!existing && <p className="ac-hint">Adds it to the department catalogue and schedules it for this session.</p>}
     {error && <p role="alert" className="ac-error">{error}</p>}
+    {existing && <OfferingStudents organizationId={organizationId} offeringId={existing.offeringId} level={level} />}
   </Drawer>;
 }

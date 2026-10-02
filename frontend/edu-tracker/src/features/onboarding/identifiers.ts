@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §7 — identifier generation.
+ * Identifier generation.
  *
  * Both identifiers are generated, stored, and emailed. Neither is ever
  * editable in the UI. The serial is allocated at approval, never at form

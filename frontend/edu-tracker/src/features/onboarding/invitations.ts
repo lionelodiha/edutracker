@@ -1,4 +1,4 @@
-/** FACULTY-BUILD §4–§5 — invitations and pending records. */
+/** Invitations and pending records. */
 
 import type { StaffKind } from "../staff/types";
 

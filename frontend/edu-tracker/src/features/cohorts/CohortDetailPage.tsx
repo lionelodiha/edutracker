@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import Modal from "../../components/Modal";
-import { isDemoMode } from "../../demoMode";
 import { cohortApi } from "./api";
 import type { Cohort, CohortStudent } from "./types";
 import { useCohortWorkspace } from "./workspace";
@@ -147,9 +146,6 @@ function CohortDetail({ cohortId, workspace }: { cohortId: string; workspace: Wo
     const [query, setQuery] = useState("");
     const [status, setStatus] = useState<CohortStudent["status"] | "">("");
     const [addOpen, setAddOpen] = useState(false);
-    const [admitOpen, setAdmitOpen] = useState(false);
-    const [studentName, setStudentName] = useState("");
-    const [admissionNumber, setAdmissionNumber] = useState("");
     const [removeTarget, setRemoveTarget] = useState<CohortStudent | null>(null);
     const [mutation, setMutation] = useState<"add" | "remove" | null>(null);
     const [mutationError, setMutationError] = useState<string | null>(null);
@@ -186,7 +182,6 @@ function CohortDetail({ cohortId, workspace }: { cohortId: string; workspace: Wo
             await action();
             if (!mounted.current) return;
             setAddOpen(false);
-            setAdmitOpen(false);
             setRemoveTarget(null);
             setNotice(successMessage);
             try {
@@ -235,7 +230,6 @@ function CohortDetail({ cohortId, workspace }: { cohortId: string; workspace: Wo
                 </div>
                 <div className="school-actions">
                     <button className="dz-btn-outline" disabled={busy} onClick={() => { setMutationError(null); setAddOpen(true); }}>Correct placement</button>
-                    {isDemoMode() && <button className="dz-btn-green" disabled={busy} onClick={() => { setMutationError(null); setStudentName(""); setAdmissionNumber(""); setAdmitOpen(true); }}>+ Student record</button>}
                 </div>
             </header>
 
@@ -318,16 +312,6 @@ function CohortDetail({ cohortId, workspace }: { cohortId: string; workspace: Wo
                 )}
             </section>
 
-            {admitOpen && <Modal titleId="admit-student-title" onClose={() => { if (!busy) setAdmitOpen(false); }}>
-                <h2 id="admit-student-title" className="dz-modal-title">New student record</h2>
-                <p className="dz-modal-sub">Admit a student into {cohort.displayName}. This frontend record is saved in this browser.</p>
-                <form className="dz-form" onSubmit={event => { event.preventDefault(); void updateMembership("add", () => cohortApi.admitStudent(cohortId, { fullName: studentName, admissionNumber }), "Student record saved."); }}>
-                    <label className="input-label">Full name<input className="input" required maxLength={120} value={studentName} onChange={event => setStudentName(event.target.value)} /></label>
-                    <label className="input-label">Admission number<input className="input" required maxLength={80} value={admissionNumber} onChange={event => setAdmissionNumber(event.target.value)} /></label>
-                    {mutationError && <p role="alert" className="cohort-error">{mutationError}</p>}
-                    <div className="dz-form-actions"><button type="button" className="dz-btn-outline" disabled={busy} onClick={() => setAdmitOpen(false)}>Cancel</button><button className="dz-btn-green" disabled={busy}>{busy ? "Saving…" : "Save student record"}</button></div>
-                </form>
-            </Modal>}
             {addOpen && <AddStudentsDialog
                 availableStudents={workspace.availableStudents}
                 currentStudents={students}

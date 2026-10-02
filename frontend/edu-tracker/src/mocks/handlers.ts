@@ -5,6 +5,9 @@ import { getGroupSettings } from "../features/cohorts/settings";
 import { approvedStudentsInCohort, resetFacultyMocks } from "./faculty";
 import { facultyHandlers } from "./facultyHandlers";
 import { academicHandlers } from "./academicHandlers";
+import { portalHandlers } from "./portalHandlers";
+import { joinHandlers } from "./joinHandlers";
+import { resetPortalMocks } from "./portal";
 
 const API = "*";
 let cohortStore: Cohort[] = [];
@@ -264,9 +267,10 @@ export function resetCohortMocks() {
   for (const key of Object.keys(studentStore)) delete studentStore[key];
   studentDirectory.clear();
   seeded.clear();
-  // FACULTY-BUILD §11 — clear everything added by the faculty system too,
+  // Clear everything added by the faculty system too,
   // or the tests will leak into each other.
   resetFacultyMocks();
+  resetPortalMocks();
 }
 
-export const handlers = [...cohortHandlers, ...facultyHandlers, ...academicHandlers];
+export const handlers = [...cohortHandlers, ...facultyHandlers, ...academicHandlers, ...portalHandlers, ...joinHandlers];

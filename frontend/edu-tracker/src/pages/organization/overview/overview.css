@@ -1,4 +1,4 @@
-/* Overview — the school's front door. Tokens from styles/workspace.css (docs/design-system.md).
+/* Overview — the school's front door. Tokens from styles/workspace.css.
    One surface per section, hairline dividers, no card-per-number. */
 
 .dz-scope .ov-page { min-width: 0; gap: 1.5rem; }

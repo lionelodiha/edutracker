@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §1 — the only code that decides faculty membership.
+ * The only code that decides faculty membership.
  *
  * Staff belong to a department. Faculty membership is calculated, never entered.
  * There must be no second place in the codebase that decides who is in a

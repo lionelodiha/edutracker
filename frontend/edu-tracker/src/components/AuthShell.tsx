@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import Logo from "./LogoLockup";
+import Wordmark from "./Wordmark";
 import "./AuthShell.css";
 
 export default function AuthShell({ mode, children }: { mode: "login" | "register"; children: ReactNode }) {
     const registering = mode === "register";
     return <div className={`auth-scene auth-scene-${mode}`}>
         <header className="auth-topbar">
-            <Link to="/" aria-label="EduTracker home"><Logo markSize={34} fontSize="1.3rem" markFill="#8b5cf6" color="#f1f5f9" /></Link>
+            <Link to="/" aria-label="EduTracker home"><Wordmark fontSize="1.6rem" /></Link>
             <Link to="/" className="auth-back"><span aria-hidden="true">←</span> Back to home</Link>
         </header>
         <main className="auth-stage">

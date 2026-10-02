@@ -1,5 +1,5 @@
 /**
- * Faculty mock store — FACULTY-BUILD §§1–7, 11.
+ * Faculty mock store.
  *
  * Every business rule in the spec is enforced here (the mock is the server),
  * not in comments and not in the UI. Handlers in facultyHandlers.ts stay thin.
@@ -15,6 +15,7 @@ import { currentPostHolder, postsHeldBy, staffOfFaculty, studentUnitChain } from
 import type { Invitation, PendingRecord } from "../features/onboarding/invitations";
 import { isTokenUsable } from "../features/onboarding/invitations";
 import type { IdentifierFormat } from "../features/onboarding/identifiers";
+import type { JoinLink, JoinRequest } from "../features/onboarding/joinLinks";
 import { verifyPassword, type PasswordCredential } from "../features/onboarding/passwords";
 import {
   DEFAULT_SCHOOL_DOMAIN,
@@ -49,7 +50,7 @@ const err = (status: number, code: string, message: string): OpErr => ({ ok: fal
 type AttendanceRow = AttendanceSummary & { ownerKind: "staff" | "student"; ownerId: string };
 export type MockEmail = { to: string; subject: string; body: string; createdAt: string };
 
-type OrgDB = {
+export type OrgDB = {
   ranks: AcademicRank[];
   staff: StaffProfile[];
   rankHistory: RankHistory[];
@@ -75,6 +76,9 @@ type OrgDB = {
   staffSeq: number;
   domain: string;
   sessionNames: Record<string, string>;
+  /** School invite links and the requests sent through them (see join.ts). */
+  joinLinks: JoinLink[];
+  joinRequests: JoinRequest[];
 };
 
 function emptyDB(): OrgDB {
@@ -84,6 +88,7 @@ function emptyDB(): OrgDB {
     students: [], studentHistory: [], courses: [], assignments: [], registrations: [], offerings: [],
     results: [], studentResults: [], attendance: [], identifierFormat: null, issuedIdentifiers: [],
     usedSerials: {}, emails: [], staffSeq: 0, domain: DEFAULT_SCHOOL_DOMAIN, sessionNames: {},
+    joinLinks: [], joinRequests: [],
   };
 }
 
@@ -104,7 +109,7 @@ function loadDB(organizationId: string): OrgDB {
     }
   } catch { /* Tests and restricted browsers use memory. */ }
   memory.set(organizationId, db);
-  // Seed ranks for a new organization (FACULTY-BUILD §2).
+  // Seed ranks for a new organization.
   if (!db.ranks.length) {
     const model = readSchoolSetup(organizationId)?.model ?? getGroupSettings(organizationId).model;
     db.ranks = buildSeedRanks(organizationId, model, name => fixtureId(organizationId, "rank", name));
@@ -585,21 +590,27 @@ export function revokeInvitation(organizationId: string, invitationId: string): 
 }
 
 function findByToken(token: string): { organizationId: string; db: OrgDB; invitation: Invitation } | null {
-  // A public join link is often opened in a new tab or after a reload. Hydrate
-  // persisted organizations before looking up the token.
+  const found = findFacultyOrg(db => db.invitations.some(i => i.token === token));
+  return found ? { ...found, invitation: found.db.invitations.find(i => i.token === token)! } : null;
+}
+
+/** First organization whose store matches. Public links are often opened in a new tab or after a reload, so persisted organizations are hydrated first. */
+export function findFacultyOrg(match: (db: OrgDB) => boolean): { organizationId: string; db: OrgDB } | null {
   if (typeof localStorage !== "undefined") {
     try {
       for (let i = 0; i < localStorage.length; i += 1) {
         const key = localStorage.key(i);
         if (key?.startsWith("edutracker.faculty.")) loadDB(key.slice("edutracker.faculty.".length));
       }
-    } catch { /* In-memory invitations still work when storage is unavailable. */ }
+    } catch { /* In-memory records still work when storage is unavailable. */ }
   }
-  for (const [organizationId, db] of memory.entries()) {
-    const invitation = db.invitations.find(i => i.token === token);
-    if (invitation) return { organizationId, db, invitation };
-  }
+  for (const [organizationId, db] of memory.entries()) if (match(db)) return { organizationId, db };
   return null;
+}
+
+/** Direct access for join.ts, which shares this store's people, accounts and numbering. */
+export function facultyStore(organizationId: string) {
+  return { db: loadDB(organizationId), persist: () => saveDB(organizationId) };
 }
 
 /** Approved students are the source for cohort rosters; no second person row is created. */
@@ -822,7 +833,7 @@ export function approvePending(
     pending.status = "Approved";
     pending.reviewedBy = reviewerId;
     invitation.status = "Approved";
-    db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Matriculation number: ${identifier}. School email: ${schoolEmail}.`, createdAt: nowISO() });
+    db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Matriculation number: ${identifier}. School email: ${schoolEmail}. Sign in at /portal/${organizationId}`, createdAt: nowISO() });
     saveDB(organizationId);
     return ok({ type: "Student", student, matriculationNumber: identifier, schoolEmail, cohortId });
   }
@@ -882,7 +893,7 @@ export function approvePending(
   pending.status = "Approved";
   pending.reviewedBy = reviewerId;
   invitation.status = "Approved";
-  db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Staff number: ${staffNumber}. School email: ${schoolEmail}.`, createdAt: nowISO() });
+  db.outbox.push({ to: invitation.email, subject: "Your school account is ready", body: `Staff number: ${staffNumber}. School email: ${schoolEmail}. Sign in at /portal/${organizationId}`, createdAt: nowISO() });
   saveDB(organizationId);
   return ok({ type: "Staff", staff: profile, staffNumber, schoolEmail });
 }
@@ -1220,7 +1231,7 @@ export function facultyTestUtils(organizationId: string) {
       return course;
     },
     assignCourse(courseId: string, sessionId: string, staffProfileId: string, role: "Lead" | "Assistant" = "Lead"): CourseAssignment {
-      // FACULTY-BUILD §1 — a staff member whose status is not Active must not
+      // A staff member whose status is not Active must not
       // be assignable to a course. Reject with 409 STAFF_NOT_ACTIVE.
       const holder = db.staff.find(s => s.staffProfileId === staffProfileId && s.organizationId === organizationId);
       if (!holder) throw Object.assign(new Error("Staff record not found."), { status: 404, code: "STAFF_NOT_FOUND" });
@@ -1282,4 +1293,15 @@ export function facultyTestUtils(organizationId: string) {
 
 export function lookupStaffOrg(staffProfileId: string): string | null {
   return findOrgOfStaff(staffProfileId)?.organizationId ?? null;
+}
+
+/** Read-only view of an organization's people, for the portal store. */
+export function facultyRecords(organizationId: string): {
+  students: StudentProfile[];
+  staff: StaffProfile[];
+  ranks: AcademicRank[];
+  appointments: Appointment[];
+} {
+  const db = loadDB(organizationId);
+  return { students: db.students, staff: db.staff, ranks: db.ranks, appointments: db.appointments };
 }

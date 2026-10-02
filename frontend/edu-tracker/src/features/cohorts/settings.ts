@@ -1,7 +1,7 @@
 export type SchoolModel = "Primary" | "Secondary" | "University";
 export type GroupSettings = { singular: string; plural: string; model: SchoolModel };
 
-/** PEOPLE-AND-COURSES §1 — the single academic-unit tree has exactly these kinds. */
+/** The single academic-unit tree has exactly these kinds. */
 export type UnitKind = "Faculty" | "Department" | "Programme";
 
 /** Every user-facing unit string comes from this map. No model ternaries in JSX. */

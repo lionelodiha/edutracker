@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §11 — one request per page section.
+ * One request per page section.
  * Both tracking endpoints and the faculty summary return everything
  * their page needs in one response; pages never assemble from six calls.
  */

@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §4 + §5 — invitations, approval queue, resend/revoke.
+ * Invitations, approval queue, resend/revoke.
  * Placement fields are set by the inviter and read-only from the form
  * onward; the form never sends them.
  */

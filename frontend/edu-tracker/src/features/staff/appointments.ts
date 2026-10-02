@@ -1,4 +1,4 @@
-/** FACULTY-BUILD §3 — appointments (what a person does) are separate from rank (what they are). */
+/** Appointments (what a person does) are separate from rank (what they are). */
 
 export type PostCode =
   | "Dean" | "SubDean" | "FacultyOfficer" | "FacultyExamOfficer"

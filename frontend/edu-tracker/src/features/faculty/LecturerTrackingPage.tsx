@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §9 — lecturer tracking page.
+ * Lecturer tracking page.
  * Answers "what are they doing in school, right now?":
  * this session's courses first (why the page exists), then attendance,
  * posts held, then history.

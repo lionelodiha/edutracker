@@ -1,0 +1,75 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Invite link page (/invite/{token}): the portal sign-in frame with a
+   long form on the right. The intro panel stays in view on desktop
+   and collapses to a header on phones.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.dz-scope.pt-signin.iv-page { place-items: start center; }
+/* clip, not hidden: hidden would make the frame a scroll box and break the sticky intro. */
+.dz-scope.pt-signin .iv-frame { overflow: clip; min-height: 0; }
+@media (min-width: 801px) {
+  /* Two columns only on wide screens; the left column keeps the intro's colour below the sticky panel. */
+  .dz-scope.pt-signin .iv-frame { grid-template-columns: 2fr 3fr; background: linear-gradient(90deg, #130f29 40%, var(--pt-surface) 40%); }
+  .dz-scope.pt-signin .iv-intro { position: sticky; top: 0; align-self: start; min-height: min(760px, 100vh); }
+}
+.dz-scope.pt-signin .iv-intro strong { color: #fff; font-weight: 600; }
+.dz-scope.pt-signin .iv-card { align-content: start; gap: 1.25rem; }
+.dz-scope.pt-signin .iv-muted { margin: 0; color: var(--text-muted); font-size: .9rem; line-height: 1.6; }
+
+/* Progress steps */
+.dz-scope.pt-signin .iv-steps { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
+.dz-scope.pt-signin .iv-steps li { position: relative; display: flex; align-items: center; gap: .75rem; padding: .45rem 0; color: #94a3b8; font-size: .9rem; }
+.dz-scope.pt-signin .iv-steps li:not(:last-child)::after { content: ""; position: absolute; left: 13px; top: 2.1rem; width: 2px; height: .9rem; background: rgba(255, 255, 255, .12); }
+.dz-scope.pt-signin .iv-step-dot { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, .22); font-size: .75rem; font-weight: 700; }
+.dz-scope.pt-signin .iv-steps li.now { color: #fff; }
+.dz-scope.pt-signin .iv-steps li.now .iv-step-dot { border-color: var(--pt-cyan); color: var(--pt-cyan); box-shadow: 0 0 0 4px rgba(34, 211, 238, .14); }
+.dz-scope.pt-signin .iv-steps li.done { color: #e2e8f0; }
+.dz-scope.pt-signin .iv-steps li.done .iv-step-dot { border-color: transparent; background: var(--pt-violet); color: #fff; }
+
+/* Form */
+.dz-scope.pt-signin .iv-form { display: grid; gap: 1.5rem; }
+.dz-scope.pt-signin .iv-form header { display: grid; gap: .55rem; }
+.dz-scope.pt-signin .iv-form fieldset { margin: 0; padding: 1.1rem 0 0; border: 0; border-top: 1px solid var(--pt-line); display: grid; gap: .85rem; min-width: 0; }
+.dz-scope.pt-signin .iv-form legend { float: left; width: 100%; padding: 0; margin-bottom: .1rem; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--pt-cyan); }
+.dz-scope.pt-signin .iv-legend-note { font-size: .82rem; margin-top: -.45rem; }
+.dz-scope.pt-signin .iv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem 1rem; }
+.dz-scope.pt-signin .iv-field { display: grid; gap: .35rem; min-width: 0; }
+.dz-scope.pt-signin .iv-field > span { font-size: .8rem; font-weight: 600; color: #cbd5e1; }
+.dz-scope.pt-signin .iv-field small { color: var(--text-muted); font-weight: 400; }
+.dz-scope.pt-signin .iv-wide { grid-column: 1 / -1; }
+.dz-scope.pt-signin .iv-form textarea.input { min-height: 88px; padding-top: .7rem; resize: vertical; font: inherit; }
+.dz-scope.pt-signin .iv-form select.input:disabled { opacity: .55; }
+
+.dz-scope.pt-signin .iv-photo { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
+.dz-scope.pt-signin .iv-avatar { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; flex: none;
+  background: linear-gradient(135deg, rgba(139, 92, 246, .35), rgba(34, 211, 238, .25)); color: #fff; font-weight: 700; font-size: 1.1rem; border: 1px solid var(--pt-line-strong); }
+.dz-scope.pt-signin .iv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.dz-scope.pt-signin .iv-photo-btn { position: relative; cursor: pointer; }
+.dz-scope.pt-signin .iv-photo-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.dz-scope.pt-signin .iv-photo small { color: var(--text-muted); font-size: .76rem; }
+
+/* Result states: sent, approved, declined, unusable */
+.dz-scope.pt-signin .iv-result { display: grid; gap: 1rem; justify-items: start; padding: clamp(0rem, 4vh, 3rem) 0; }
+.dz-scope.pt-signin .iv-result .dz-page-title { margin: 0; }
+.dz-scope.pt-signin .iv-badge { padding: .3rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: var(--pt-cyan); background: rgba(34, 211, 238, .1); border: 1px solid rgba(34, 211, 238, .3); }
+.dz-scope.pt-signin .iv-badge-ok { color: var(--pt-green); background: rgba(74, 222, 128, .1); border-color: rgba(74, 222, 128, .3); }
+.dz-scope.pt-signin .iv-badge-warn { color: var(--pt-amber); background: rgba(251, 191, 36, .1); border-color: rgba(251, 191, 36, .3); }
+.dz-scope.pt-signin .iv-creds { width: 100%; margin: 0; display: grid; border: 1px solid var(--pt-line); border-radius: var(--pt-radius); background: var(--pt-raised); }
+.dz-scope.pt-signin .iv-creds > div { display: grid; gap: .2rem; padding: .85rem 1rem; }
+.dz-scope.pt-signin .iv-creds > div + div { border-top: 1px solid var(--pt-line); }
+.dz-scope.pt-signin .iv-creds dt { font-size: .72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.dz-scope.pt-signin .iv-creds dd { margin: 0; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; font-size: .95rem; }
+.dz-scope.pt-signin .iv-mono { font-family: "JetBrains Mono", ui-monospace, monospace; color: var(--pt-cyan); word-break: break-all; }
+.dz-scope.pt-signin .iv-copy { padding: .2rem .6rem; border-radius: 999px; border: 1px solid var(--pt-line-strong); background: transparent; color: var(--text-primary); font-size: .72rem; font-family: inherit; cursor: pointer; }
+.dz-scope.pt-signin .iv-copy:hover { border-color: var(--pt-violet-soft); }
+.dz-scope.pt-signin .iv-go { text-decoration: none; display: inline-flex; align-items: center; }
+.dz-scope.pt-signin .iv-reason { margin: 0; width: 100%; padding: .9rem 1rem; border-left: 3px solid var(--pt-amber); background: rgba(251, 191, 36, .06); border-radius: 0 10px 10px 0; color: #fde68a; }
+
+@media (max-width: 800px) {
+  .dz-scope.pt-signin .iv-steps { grid-auto-flow: column; grid-auto-columns: 1fr; gap: .4rem; }
+  .dz-scope.pt-signin .iv-steps li { flex-direction: column; align-items: flex-start; gap: .35rem; font-size: .72rem; line-height: 1.3; }
+  .dz-scope.pt-signin .iv-steps li:not(:last-child)::after { display: none; }
+}
+@media (max-width: 520px) {
+  .dz-scope.pt-signin .iv-grid { grid-template-columns: 1fr; }
+}

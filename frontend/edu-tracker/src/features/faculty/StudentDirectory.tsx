@@ -1,5 +1,5 @@
 /**
- * FACULTY-BUILD §8 — student directory.
+ * Student directory.
  * Every student in the faculty, by programme and level,
  * searchable by name and matriculation number.
  */
